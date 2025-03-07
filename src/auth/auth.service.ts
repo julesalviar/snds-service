@@ -27,6 +27,14 @@ export class AuthService {
       throw new ConflictException('Username already exists');
     }
 
+    const existingEmail = await this.userService.getUserByUserEmail(
+      userData.email,
+    );
+
+    if (existingEmail) {
+      throw new ConflictException('Email already in use');
+    }
+
     return this.userService.createUser(userData as User);
   }
 

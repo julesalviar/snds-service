@@ -9,8 +9,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signUp(@Body() userData: Partial<User>) {
-    return this.authService.signUp(userData);
+  async signUp(@Body() signupDto: SignupDto) {
+  // userData: Partial<User>) {
+    return this.authService.signUp(signupDto);
   }
 
   @HttpCode(HttpStatus.OK)

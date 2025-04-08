@@ -10,7 +10,6 @@ export class AuthController {
 
   @Post('signup')
   async signUp(@Body() signupDto: SignupDto) {
-  // userData: Partial<User>) {
     return this.authService.signUp(signupDto);
   }
 

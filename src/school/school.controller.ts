@@ -5,11 +5,11 @@ import { SchoolRegistrationDto } from 'src/common/dto/school-registration.dto';
 
 @Controller('school')
 export class SchoolController {
-  constructor(private readonly schoolService: SchoolService) {}
+//   constructor(private readonly schoolService: SchoolService) {}
 
   @Post('register')
   async registerSchool(@Body() schoolRegistrationDto: SchoolRegistrationDto) {
     // return this.schoolService.register(schoolRegistrationDto);
-    return schoolRegistrationDto;
+      return { message: "Ok", "data": schoolRegistrationDto };
   }
 }

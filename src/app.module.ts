@@ -8,6 +8,8 @@ import { TenantModule } from './tenant/tenant.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { EncryptionModule } from './encryption/encryption.module';
+import { SchoolModule } from './school/school.module';
+
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { EncryptionModule } from './encryption/encryption.module';
     UserModule,
     AuthModule,
     EncryptionModule,
+    SchoolModule,
   ],
   controllers: [AppController],
   providers: [AppService],

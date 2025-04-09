@@ -6,7 +6,6 @@ import {
   MinLength,
   Matches,
   IsIn,
-  IsNumber,
 } from 'class-validator';
 
 export class SchoolRegistrationDto {
@@ -32,7 +31,9 @@ export class SchoolRegistrationDto {
 
   @IsDefined()
   @IsNotEmpty()
-  @IsNumber()
+  @Matches(/^\d{3,}$/, {
+    message: 'School Id must be numeric with at least 3 digits (e.g., "123")',
+  })
   schoolId: string;
 
   @IsDefined()

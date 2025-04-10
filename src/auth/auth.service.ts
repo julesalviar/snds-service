@@ -9,6 +9,7 @@ import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { EncryptionService } from 'src/encryption/encryption.service';
+import { SignupDto } from 'src/common/dto/signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,23 +20,23 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
   ) {}
 
-  async signUp(userData: Partial<User>): Promise<User> {
+  async signUp(signupData: SignupDto): Promise<User> {
     const existingUser = await this.userService.getUserByUsername(
-      userData.userName,
+      signupData.userName,
     );
     if (existingUser) {
       throw new ConflictException('Username already exists');
     }
 
     const existingEmail = await this.userService.getUserByUserEmail(
-      userData.email,
+      signupData.email,
     );
 
     if (existingEmail) {
       throw new ConflictException('Email already in use');
     }
 
-    return this.userService.createUser(userData as User);
+    return this.userService.createUser(signupData as User);
   }
 
   async signIn(dto: {

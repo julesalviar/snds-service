@@ -45,7 +45,9 @@ export class TenantService {
       .findOne({ tenantCode: tenantData.tenantCode })
       .exec();
     if (existingTenant) {
-      throw new ConflictException(`Tenant with ID ${tenantData.tenantCode} already exists`);
+      throw new ConflictException(
+        `Tenant with ID ${tenantData.tenantCode} already exists`,
+      );
     }
 
     return await this.tenantModel.create(tenantData); // Use create() instead of new

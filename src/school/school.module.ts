@@ -1,24 +1,18 @@
-import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { SchoolController } from './school.controller';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { SchoolService } from './school.service';
-import { School, SchoolSchema } from './school.schema';
-import { PROVIDER } from '../common/constants/providers';
-import { Model } from 'mongoose';
+import { SchoolController } from './school.controller';
+import { TenantValidationMiddleware } from '../common/middlewares/tenant-validation/tenant-validation.middleware';
+import { TenantModels } from '../providers/tenant-models/tenant-models.provider';
+import { EncryptionModule } from 'src/encryption/encryption.module';
 
 @Module({
-  //   imports: [
-  //     MongooseModule.forFeature([
-  //         { name: School.name, schema: SchoolSchema },
-  //     ]),
-  //   ],
+  imports: [EncryptionModule],
+  providers: [SchoolService, ...Object.values(TenantModels)],
   controllers: [SchoolController],
-  providers: [SchoolService],
-  // {
-  //   provide: PROVIDER.SCHOOL_MODEL, // Custom provider for School model
-  //   useFactory: (schoolModel: Model<School>) => schoolModel, // Inject Mongoose Model here
-  //   inject: [School], // Inject the School model
-  // },
-  //   ],
+  exports: [SchoolService, ...Object.values(TenantModels)],
 })
-export class SchoolModule {}
+export class SchoolModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(TenantValidationMiddleware).forRoutes(SchoolController);
+  }
+}

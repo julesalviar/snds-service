@@ -12,7 +12,12 @@ export class EncryptionService {
 
   constructor(private readonly configService: ConfigService) {
     const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
-    if (!encryptionKey || encryptionKey.length !== 32) {
+
+    if (!encryptionKey) {
+      throw new Error('Missing encryption key');
+    }
+
+    if (encryptionKey.length !== 32) {
       throw new Error('Encryption key must be exactly 32 characters long.');
     }
     this.secretKey = Buffer.from(encryptionKey, 'utf-8');

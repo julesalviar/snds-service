@@ -9,7 +9,8 @@ export class AuthController {
 
   @Post('signup')
   async signUp(@Body() signupDto: SignupDto) {
-    return this.authService.signUp(signupDto);
+    const req = { ...signupDto };
+    return this.authService.signUp(req);
   }
 
   @HttpCode(HttpStatus.OK)

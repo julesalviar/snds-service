@@ -1,7 +1,5 @@
 import {
   ConflictException,
-  forwardRef,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,12 +8,13 @@ import { User } from 'src/user/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { SignupDto } from 'src/common/dto/signup.dto';
+import { RolePermissions } from 'src/user/constants/role-permission';
 
 @Injectable()
 export class AuthService {
   constructor(
     // @Inject(forwardRef(() => UserService)) private userService: UserService,
-    private userService: UserService,
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly encryptionService: EncryptionService,
   ) {}
@@ -57,7 +56,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user._id, username: user.userName };
+    const { role } = user;
+    const perms = RolePermissions[role] ?? [];
+
+    const payload = {
+      sub: user._id,
+      username: user.userName,
+      role,
+      perms,
+    };
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { access_token: accessToken };

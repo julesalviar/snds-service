@@ -16,6 +16,18 @@ async function bootstrap() {
     }),
   );
 
+  app.enableCors({
+    origin: [
+      'http://localhost:4200',
+      'http://tacurong.local:4200',
+      'https://gensan.mysnds.com',
+      'https://tacurong.mysnds.com',
+      'https://mysnds.com',
+    ],
+    methods: 'GET,POST,PUT,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization,tenant',
+  });
+
   await app.listen(port);
   logger.log(`Server running at: http://localhost:${port}`);
 }

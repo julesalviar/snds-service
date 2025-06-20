@@ -4,7 +4,9 @@ import {
   IsDefined,
   IsString,
   MinLength,
+  IsOptional,
 } from 'class-validator';
+import { UserRole } from 'src/user/enums/user-role.enum';
 
 export class SignupDto {
   @IsDefined()
@@ -22,11 +24,27 @@ export class SignupDto {
   @IsString()
   userName: string;
 
-  @IsDefined()
+  @IsOptional()
+  name: string;
+
+  @IsOptional()
+  address: string;
+
+  @IsOptional()
+  sector: string;
+
+  @IsOptional()
+  selectedOption: string;
+
   @IsNotEmpty()
+  @IsOptional()
   firstName: string;
 
-  @IsDefined()
+  @IsOptional()
   @IsNotEmpty()
   lastName: string;
+
+  @IsString()
+  @IsDefined()
+  role: UserRole;
 }

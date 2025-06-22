@@ -8,6 +8,7 @@ import { TenantModule } from './tenant/tenant.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { EncryptionModule } from './encryption/encryption.module';
+import { AiplModule } from './aip/aip.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EncryptionModule } from './encryption/encryption.module';
     UserModule,
     AuthModule,
     EncryptionModule,
+    AiplModule
   ],
   controllers: [AppController],
   providers: [AppService],

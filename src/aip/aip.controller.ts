@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Patch, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Patch, Body, Param, Query } from '@nestjs/common';
 
 import { AipService } from './aip.service';
 import { AipDto } from 'src/common/dto/aip.dto';
@@ -12,10 +12,16 @@ export class AipController {
         return this.aipService.createAip(aipDto);
     }
 
-    // @Delete(':id')
-    // async deleteAip(@Param('id') id: string) {
-    //     return this.aipService.deleteAip(id);
+
+    // @Get()
+    // async getAipById(@Query('id') id: string) {
+    //     return this.aipService.getAipById(id);
     // }
+
+    @Delete()
+    async deleteAip(@Query('id') id: string) {
+        return this.aipService.deleteAip(id);
+    }
 
 
     // @Post('edit')

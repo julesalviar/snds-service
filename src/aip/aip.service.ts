@@ -1,6 +1,6 @@
 import { Model, Types } from 'mongoose';
 import { PROVIDER } from '../common/constants/providers';
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { NotFoundException, BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 // import { EncryptionService } from 'src/encryption/encryption.service';
 import { AipDto } from 'src/common/dto/aip.dto';
 import { Aip } from './aip.schema';
@@ -34,26 +34,32 @@ export class AipService {
         }
     }
 
-    // async deleteAip(id: string): Promise<any> {
-    //     try {
-    //         this.logger.log(`Attempting to delete AIP with ID: ${id}`);
-    //         const objectId = new Types.ObjectId(id); 
+    async deleteAip(id: string): Promise<any> {
+        try {
+            if (!Types.ObjectId.isValid(id)) {
+                throw new BadRequestException(`Invalid ID format: ${id}`);
+            }
+            
+            const objectId = new Types.ObjectId(id); 
+            const deletedAip = await this.aipModel.findByIdAndDelete(objectId);
+            
+            this.logger.log(`Attempting to delete AIP with ID: ${id}`);
+            if (!deletedAip) {
+                this.logger.warn(`No AIP found with ID: ${objectId}`);
+                throw new NotFoundException(`AIP with ID ${objectId} not found`);
+            }
 
-    //         return objectId;
+            this.logger.log(`AIP deleted successfully with ID: ${objectId}`);
+            return { message: 'AIP deleted successfully', objectId };
+        } catch (error) {
+                if (error.name === 'CastError') {
+                    throw new BadRequestException(`Invalid ID format: ${id}`);
+                }
 
-    //         const deletedAip = await this.aipModel.findByIdAndDelete(objectId);
+                this.logger.error('Error deleting AIP', error.stack);
+                throw error;
 
-    //         if (!deletedAip) {
-    //             this.logger.warn(`No AIP found with ID: ${objectId}`);
-    //             throw new Error(`AIP with ID ${objectId} not found`);
-    //         }
-
-    //         this.logger.log(`AIP deleted successfully with ID: ${objectId}`);
-    //         return { message: 'AIP deleted successfully', objectId };
-    //     } catch (error) {
-    //         this.logger.error('Error deleting AIP', error.stack);
-    //         throw error;
-    //     }
-    // }
+        }
+    }
 
 }

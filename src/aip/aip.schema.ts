@@ -15,19 +15,18 @@ export class Aip extends Document {
 
   @Prop()
   materialsNeeded: string;
-  
+
   @Prop()
   totalBudget: string;
-  
+
   @Prop()
   budgetSource: string;
-  
+
   @Prop({ required: true })
   responsiblePerson: string;
 
-    @Prop()
+  @Prop()
   createdBy: string;
-
 }
 
 export type UserDocument = HydratedDocument<Aip>;

@@ -21,7 +21,7 @@ import { AiplModule } from './aip/aip.module';
     UserModule,
     AuthModule,
     EncryptionModule,
-    AiplModule
+    AiplModule,
   ],
   controllers: [AppController],
   providers: [AppService],

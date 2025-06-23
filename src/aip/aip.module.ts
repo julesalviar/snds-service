@@ -6,13 +6,13 @@ import { AipController } from './aip.controller';
 import { AipService } from './aip.service';
 
 @Module({
-    imports: [EncryptionModule],
-    providers: [AipService, ...Object.values(TenantModels)],
-    controllers: [AipController],
-    exports: [AipService, ...Object.values(TenantModels)],
+  imports: [EncryptionModule],
+  providers: [AipService, ...Object.values(TenantModels)],
+  controllers: [AipController],
+  exports: [AipService, ...Object.values(TenantModels)],
 })
 export class AiplModule implements NestModule {
-    configure(consumer: MiddlewareConsumer): any {
-        consumer.apply(TenantValidationMiddleware).forRoutes(AipController);
-    }
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(TenantValidationMiddleware).forRoutes(AipController);
+  }
 }

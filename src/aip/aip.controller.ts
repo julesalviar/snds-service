@@ -13,10 +13,16 @@ export class AipController {
     }
 
 
-    // @Get()
-    // async getAipById(@Query('id') id: string) {
-    //     return this.aipService.getAipById(id);
-    // }
+    @Get()
+    async getAipById(@Query('id') id: string) {
+        return this.aipService.getAipById(id);
+    }
+
+    @Get('all')
+    async getAall() {
+        return this.aipService.getAll();
+    }
+
 
     @Delete()
     async deleteAip(@Query('id') id: string) {

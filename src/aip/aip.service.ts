@@ -34,23 +34,86 @@ export class AipService {
         }
     }
 
+    async getAll() {
+        try { 
+            this.logger.log(`Attempting to retrieve all AIPs`);
+            const allAips = await this.aipModel.find().exec();
+
+            return {
+                success: true,
+                data: allAips,
+                meta: {
+                    count: allAips.length,
+                    timestamp: new Date(),
+                }
+            };
+
+        } catch (error) {
+            this.logger.error('Error getting AIPs', error.stack);
+            throw error;
+
+        }
+    }
+
+    async getAipById(id: string): Promise<any> {
+        try {
+            if (!Types.ObjectId.isValid(id)) {
+                throw new BadRequestException(`Invalid ID format: ${id}`);
+            }
+
+            const objectId = new Types.ObjectId(id);
+
+            this.logger.log(`Attempting to retrieve AIP with ID: ${id}`);
+            const retrievedAip = await this.aipModel.findById(objectId);
+            if (!retrievedAip) {
+                this.logger.warn(`No AIP found with ID: ${objectId}`);
+                throw new NotFoundException(`AIP with ID ${objectId} not found`);
+            }
+
+            this.logger.log(`AIP retrieved successfully with ID: ${objectId}`);
+
+            return {
+                success: true,
+                data: retrievedAip,
+                meta: {
+                    timestamp: new Date(),
+                }
+            };
+
+        } catch (error) {
+            if (error.name === 'CastError') {
+                throw new BadRequestException(`Invalid ID format: ${id}`);
+            }
+
+            this.logger.error('Error getting AIP by Id', error.stack);
+            throw error;
+
+        }
+    }
+
     async deleteAip(id: string): Promise<any> {
         try {
             if (!Types.ObjectId.isValid(id)) {
                 throw new BadRequestException(`Invalid ID format: ${id}`);
             }
-            
             const objectId = new Types.ObjectId(id); 
-            const deletedAip = await this.aipModel.findByIdAndDelete(objectId);
             
             this.logger.log(`Attempting to delete AIP with ID: ${id}`);
+            const deletedAip = await this.aipModel.findByIdAndDelete(objectId);
             if (!deletedAip) {
                 this.logger.warn(`No AIP found with ID: ${objectId}`);
                 throw new NotFoundException(`AIP with ID ${objectId} not found`);
             }
 
             this.logger.log(`AIP deleted successfully with ID: ${objectId}`);
-            return { message: 'AIP deleted successfully', objectId };
+
+            return {
+                success: true,
+                data: { message: 'AIP deleted successfully', objectId },
+                meta: {
+                    timestamp: new Date(),
+                }
+            };
         } catch (error) {
                 if (error.name === 'CastError') {
                     throw new BadRequestException(`Invalid ID format: ${id}`);

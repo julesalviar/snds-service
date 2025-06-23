@@ -27,6 +27,8 @@ export class Aip extends Document {
 
   @Prop()
   createdBy: string;
+  @Prop()
+  updatedBy: string;
 }
 
 export type UserDocument = HydratedDocument<Aip>;

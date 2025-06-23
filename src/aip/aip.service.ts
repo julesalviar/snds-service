@@ -123,4 +123,41 @@ export class AipService {
       throw error;
     }
   }
+
+  async updateAip(id: string, aipDto: AipDto): Promise<any> {
+    try {
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+      const objectId = new Types.ObjectId(id);
+
+      this.logger.log(`Attempting to update AIP with ID: ${id}`);
+      const updatedAip = await this.aipModel.findByIdAndUpdate(
+        objectId,
+        { $set: { ...aipDto } },
+        { new: true, runValidators: true },
+      );
+
+      if (!updatedAip) {
+        this.logger.warn(`No AIP found with ID: ${objectId}`);
+        throw new NotFoundException(`AIP with ID ${objectId} not found`);
+      }
+
+      this.logger.log(`AIP updated successfully with ID: ${objectId}`);
+      return {
+        success: true,
+        data: updatedAip,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      if (error.name === 'CastError') {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.error('Error updating AIP', error.stack);
+      throw error;
+    }
+  }
 }

@@ -36,8 +36,8 @@ export class AipController {
     return this.aipService.deleteAip(id);
   }
 
-  // @Post('edit')
-  // async editAip(@Body() aipDto: AipDto) {
-  //     return this.aipService.editAip(AipDto);
-  // }
+  @Post('edit')
+  async editAip(@Query('id') id: string, @Body() aipDto: AipDto) {
+    return this.aipService.updateAip(id, aipDto);
+  }
 }

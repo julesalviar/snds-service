@@ -40,4 +40,7 @@ export class AipDto {
 
   @IsOptional()
   createdBy: string;
+
+  @IsOptional()
+  updatedBy: string;
 }

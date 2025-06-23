@@ -5,6 +5,12 @@ import { Document, HydratedDocument } from 'mongoose';
 @Schema({ timestamps: true })
 export class Aip extends Document {
   @Prop({ required: true, unique: true })
+  apn: string;
+
+  @Prop({ required: true })
+  schoolYear: string;
+
+  @Prop({ required: true, unique: true })
   title: string;
 
   @Prop()
@@ -27,6 +33,7 @@ export class Aip extends Document {
 
   @Prop()
   createdBy: string;
+
   @Prop()
   updatedBy: string;
 }

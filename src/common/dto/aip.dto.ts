@@ -10,6 +10,16 @@ import {
 export class AipDto {
   @IsDefined()
   @IsNotEmpty()
+  @MinLength(4)
+  apn: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @MinLength(4)
+  schoolYear: string;
+
+  @IsDefined()
+  @IsNotEmpty()
   @MinLength(5)
   title: string;
 

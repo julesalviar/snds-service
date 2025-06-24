@@ -1,8 +1,4 @@
-import {
-  IsNotEmpty,
-  MinLength,
-  IsOptional,
-} from 'class-validator';
+import { IsNotEmpty, MinLength, IsOptional } from 'class-validator';
 
 export class AipDto {
   @IsNotEmpty()

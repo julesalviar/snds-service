@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 // import { EncryptionService } from 'src/encryption/encryption.service';
 import { AipDto } from 'src/aip/aip.dto';
-import { Aip } from './aip.schema';
+import { Aip, AipDocument } from './aip.schema';
 
 @Injectable()
 export class AipService {
@@ -21,7 +21,7 @@ export class AipService {
   ) {}
 
   // Create a New AIP
-  async createAip(aipDto: AipDto): Promise<any> {
+  async createAip(aipDto: AipDto): Promise<AipDocument> {
     try {
       this.logger.log(
         'Creating new AIP information with the following data:',

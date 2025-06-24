@@ -38,5 +38,5 @@ export class Aip extends Document {
   updatedBy: string;
 }
 
-export type UserDocument = HydratedDocument<Aip>;
+export type AipDocument = HydratedDocument<Aip>;
 export const AipSchema = SchemaFactory.createForClass(Aip);

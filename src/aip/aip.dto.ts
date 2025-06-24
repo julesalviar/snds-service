@@ -1,6 +1,9 @@
 import { IsNotEmpty, MinLength, IsOptional } from 'class-validator';
 
 export class AipDto {
+  @IsOptional()
+  apn: number;
+
   @IsNotEmpty()
   @MinLength(4)
   schoolYear: string;

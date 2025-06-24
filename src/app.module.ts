@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { AiplModule } from './aip/aip.module';
+import { CounterModule } from './common/counter/counter.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AiplModule } from './aip/aip.module';
     AuthModule,
     EncryptionModule,
     AiplModule,
+    CounterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

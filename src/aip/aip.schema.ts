@@ -5,7 +5,7 @@ import { Document, HydratedDocument } from 'mongoose';
 @Schema({ timestamps: true })
 export class Aip extends Document {
   @Prop({ required: true, unique: true })
-  apn: string;
+  apn: number;
 
   @Prop({ required: true })
   schoolYear: string;

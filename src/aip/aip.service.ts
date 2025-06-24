@@ -11,24 +11,28 @@ import {
 // import { EncryptionService } from 'src/encryption/encryption.service';
 import { AipDto } from 'src/aip/aip.dto';
 import { Aip, AipDocument } from './aip.schema';
+import { CounterService } from 'src/common/counter/counter.services';
 
 @Injectable()
 export class AipService {
   private readonly logger = new Logger(AipService.name);
 
   constructor(
-    @Inject(PROVIDER.AIP_MODEL) private readonly aipModel: Model<Aip>, // Inject the custom provider
+    @Inject(PROVIDER.AIP_MODEL)
+    private readonly aipModel: Model<Aip>, // Inject the custom provider
+    private counterService: CounterService,
   ) {}
 
   // Create a New AIP
-  async createAip(aipDto: AipDto): Promise<AipDocument> {
+  async createAip(aipDto: AipDto): Promise<any> {
     try {
       this.logger.log(
         'Creating new AIP information with the following data:',
         aipDto,
       );
 
-      const createdAip = new this.aipModel(aipDto);
+      const apn = await this.counterService.getNextSequenceValue('aip');
+      const createdAip = new this.aipModel({ ...aipDto, apn });
       const savedAip = await createdAip.save();
 
       this.logger.log(`AIP created successfully with ID: ${createdAip._id}`);

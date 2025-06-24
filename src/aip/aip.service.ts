@@ -24,7 +24,7 @@ export class AipService {
   ) {}
 
   // Create a New AIP
-  async createAip(aipDto: AipDto): Promise<any> {
+  async createAip(aipDto: AipDto): Promise<AipDocument> {
     try {
       this.logger.log(
         'Creating new AIP information with the following data:',

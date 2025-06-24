@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 
 import { AipService } from './aip.service';
-import { AipDto } from 'src/common/dto/aip.dto';
+import { AipDto } from 'src/aip/aip.dto';
 
 @Controller('aip')
 export class AipController {

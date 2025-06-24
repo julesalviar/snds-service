@@ -9,7 +9,7 @@ import {
   Logger,
 } from '@nestjs/common';
 // import { EncryptionService } from 'src/encryption/encryption.service';
-import { AipDto } from 'src/common/dto/aip.dto';
+import { AipDto } from 'src/aip/aip.dto';
 import { Aip } from './aip.schema';
 
 @Injectable()

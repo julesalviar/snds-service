@@ -8,29 +8,17 @@ import {
 } from 'class-validator';
 
 export class AipDto {
-  @IsDefined()
-  @IsNotEmpty()
-  @MinLength(4)
-  apn: string;
-
-  @IsDefined()
   @IsNotEmpty()
   @MinLength(4)
   schoolYear: string;
 
-  @IsDefined()
   @IsNotEmpty()
-  @MinLength(5)
   title: string;
 
-  @IsDefined()
   @IsNotEmpty()
-  @MinLength(5)
   objectives: string;
 
-  @IsDefined()
   @IsNotEmpty()
-  @IsString()
   pillars: string;
 
   @IsNotEmpty()

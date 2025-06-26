@@ -11,7 +11,7 @@ import { AipService } from './aip.service';
   controllers: [AipController],
   exports: [AipService, ...Object.values(TenantModels)],
 })
-export class AiplModule implements NestModule {
+export class AipModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer.apply(TenantValidationMiddleware).forRoutes(AipController);
   }

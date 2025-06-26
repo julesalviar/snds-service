@@ -8,7 +8,7 @@ import { TenantModule } from './tenant/tenant.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { EncryptionModule } from './encryption/encryption.module';
-import { AiplModule } from './aip/aip.module';
+import { AipModule } from './aip/aip.module';
 import { CounterModule } from './common/counter/counter.module';
 
 @Module({
@@ -22,7 +22,7 @@ import { CounterModule } from './common/counter/counter.module';
     UserModule,
     AuthModule,
     EncryptionModule,
-    AiplModule,
+    AipModule,
     CounterModule,
   ],
   controllers: [AppController],

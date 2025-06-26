@@ -6,7 +6,6 @@ import {
   Patch,
   Body,
   Param,
-  Query,
 } from '@nestjs/common';
 
 import { AipService } from './aip.service';

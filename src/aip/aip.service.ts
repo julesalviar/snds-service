@@ -3,12 +3,10 @@ import { PROVIDER } from '../common/constants/providers';
 import {
   NotFoundException,
   BadRequestException,
-  forwardRef,
   Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
-// import { EncryptionService } from 'src/encryption/encryption.service';
 import { AipDto } from 'src/aip/aip.dto';
 import { Aip, AipDocument } from './aip.schema';
 import { CounterService } from 'src/common/counter/counter.services';
@@ -30,7 +28,6 @@ export class AipService {
         'Creating new AIP information with the following data:',
         aipDto,
       );
-
       const apn = await this.counterService.getNextSequenceValue('aip');
       const createdAip = new this.aipModel({ ...aipDto, apn });
       const savedAip = await createdAip.save();

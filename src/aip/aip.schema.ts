@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument } from 'mongoose';
-// import { UserRole } from 'src/user/enums/user-role.enum';
 
 @Schema({ timestamps: true })
 export class Aip extends Document {

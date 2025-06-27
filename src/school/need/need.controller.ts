@@ -22,6 +22,12 @@ export class SchoolNeedController {
     return this.schoolNeedService.createSchoolNeed(schoolId, needDto);
   }
 
+  @Delete(':id')
+  async deleteSchoolNeed(@Param('schoolId') schoolId: string, @Param('id') id: string) {
+      return this.schoolNeedService.deleteSchoolNeed(schoolId, id);
+  }
+    
+    
   // @Get(':id')
   // async getAipById(@Param('id') id: string) {
   //     return this.aipService.getAipById(id);
@@ -32,10 +38,6 @@ export class SchoolNeedController {
   //     return this.aipService.getAll();
   // }
 
-  // @Delete(':id')
-  // async deleteAip(@Param('id') id: string) {
-  //     return this.aipService.deleteAip(id);
-  // }
 
   // @Patch(':id')
   // async editAip(@Param('id') id: string, @Body() aipDto: AipDto) {

@@ -14,7 +14,6 @@ import {
   SchoolNeedDocument,
   SchoolNeed,
 } from './need.schema';
-import { Aip } from 'src/aip/aip.schema';
 
 @Injectable()
 export class SchoolNeedService {
@@ -22,7 +21,7 @@ export class SchoolNeedService {
 
   constructor(
     @Inject(PROVIDER.AIP_MODEL)
-    private readonly aipModel: Model<Aip>,
+    private readonly SchoolNeedModel: Model<SchoolNeed>,
 
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
     private readonly schoolNeedModel: Model<SchoolNeed>,
@@ -38,13 +37,13 @@ export class SchoolNeedService {
       // AIP / Project Id validations
       if (!Types.ObjectId.isValid(projectObjId))
         throw new BadRequestException(
-          `Invalid Project / AIP Id: ${[projectObjId]}`,
+          `Invalid Project / SchoolNeed Id: ${[projectObjId]}`,
         );
 
-      const aipExists = await this.aipModel.exists({ _id: projectObjId });
-      if (!aipExists)
+      const SchoolNeedExists = await this.SchoolNeedModel.exists({ _id: projectObjId });
+      if (!SchoolNeedExists)
         throw new BadRequestException(
-          `AIP / Project with Id: ${[projectObjId]} not found`,
+          `SchoolNeed / Project with Id: ${[projectObjId]} not found`,
         );
 
       this.logger.log(
@@ -58,7 +57,7 @@ export class SchoolNeedService {
       const savedSchoolNeed = await createdSchoolNeed.save();
 
       this.logger.log(
-        `AIP created successfully with ID: ${createdSchoolNeed._id}`,
+        `SchoolNeed created successfully with ID: ${createdSchoolNeed._id}`,
       );
       return savedSchoolNeed;
     } catch (error) {
@@ -67,26 +66,63 @@ export class SchoolNeedService {
     }
   }
 
+     async deleteSchoolNeed(schoolId: string, id: string): Promise<any> {
+         try {
+             
+             // School ID validations
+             if (!Types.ObjectId.isValid(schoolId)) throw new BadRequestException(`Invalid School ID format: ${schoolId}`);
+
+             if (!Types.ObjectId.isValid(id)) throw new BadRequestException(`Invalid Need ID format: ${id}`);
+          
+          const objectId = new Types.ObjectId(id);
+          this.logger.log(`Attempting to delete School Need with ID: ${id}`);
+
+          const deletedSchoolNeed = await this.schoolNeedModel.findByIdAndDelete(objectId);
+          if (!deletedSchoolNeed) {
+              this.logger.warn(`No School Need found with ID: ${objectId}`);
+              throw new NotFoundException(`School Need with ID ${objectId} not found`);
+          }
+
+          this.logger.log(`School Need deleted successfully with ID: ${objectId}`);
+
+          return {
+              success: true,
+              data: { message: 'School Need deleted successfully', objectId },
+              meta: {
+                  timestamp: new Date(),
+              },
+          };
+      } catch (error) {
+          if (error.name === 'CastError') {
+              throw new BadRequestException(`Invalid ID format: ${id}`);
+          }
+
+          this.logger.error('Error deleting School Need', error.stack);
+          throw error;
+      }
+  }
+    
+    
   // async getAll() {
   //     try {
-  //         this.logger.log(`Attempting to retrieve all AIPs`);
-  //         const allAips = await this.aipModel.find().exec();
+  //         this.logger.log(`Attempting to retrieve all SchoolNeeds`);
+  //         const allSchoolNeeds = await this.SchoolNeedModel.find().exec();
 
   //         return {
   //             success: true,
-  //             data: allAips,
+  //             data: allSchoolNeeds,
   //             meta: {
-  //                 count: allAips.length,
+  //                 count: allSchoolNeeds.length,
   //                 timestamp: new Date(),
   //             },
   //         };
   //     } catch (error) {
-  //         this.logger.error('Error getting AIPs', error.stack);
+  //         this.logger.error('Error getting SchoolNeeds', error.stack);
   //         throw error;
   //     }
   // }
 
-  // async getAipById(id: string): Promise<any> {
+  // async getSchoolNeedById(id: string): Promise<any> {
   //     try {
   //         if (!Types.ObjectId.isValid(id)) {
   //             throw new BadRequestException(`Invalid ID format: ${id}`);
@@ -94,50 +130,17 @@ export class SchoolNeedService {
 
   //         const objectId = new Types.ObjectId(id);
 
-  //         this.logger.log(`Attempting to retrieve AIP with ID: ${id}`);
-  //         const retrievedAip = await this.aipModel.findById(objectId);
-  //         if (!retrievedAip) {
-  //             this.logger.warn(`No AIP found with ID: ${objectId}`);
-  //             throw new NotFoundException(`AIP with ID ${objectId} not found`);
+  //         this.logger.log(`Attempting to retrieve SchoolNeed with ID: ${id}`);
+  //         const retrievedSchoolNeed = await this.SchoolNeedModel.findById(objectId);
+  //         if (!retrievedSchoolNeed) {
+  //             this.logger.warn(`No SchoolNeed found with ID: ${objectId}`);
+  //             throw new NotFoundException(`SchoolNeed with ID ${objectId} not found`);
   //         }
 
-  //         this.logger.log(`AIP retrieved successfully with ID: ${objectId}`);
+  //         this.logger.log(`SchoolNeed retrieved successfully with ID: ${objectId}`);
   //         return {
   //             success: true,
-  //             data: retrievedAip,
-  //             meta: {
-  //                 timestamp: new Date(),
-  //             },
-  //         };
-  //     } catch (error) {
-  //         if (error.name === 'CastError') {
-  //             throw new BadRequestException(`Invalid ID format: ${id}`);
-  //         }
-
-  //         this.logger.error('Error getting AIP by Id', error.stack);
-  //         throw error;
-  //     }
-  // }
-
-  // async deleteAip(id: string): Promise<any> {
-  //     try {
-  //         if (!Types.ObjectId.isValid(id)) {
-  //             throw new BadRequestException(`Invalid ID format: ${id}`);
-  //         }
-  //         const objectId = new Types.ObjectId(id);
-
-  //         this.logger.log(`Attempting to delete AIP with ID: ${id}`);
-  //         const deletedAip = await this.aipModel.findByIdAndDelete(objectId);
-  //         if (!deletedAip) {
-  //             this.logger.warn(`No AIP found with ID: ${objectId}`);
-  //             throw new NotFoundException(`AIP with ID ${objectId} not found`);
-  //         }
-
-  //         this.logger.log(`AIP deleted successfully with ID: ${objectId}`);
-
-  //         return {
-  //             success: true,
-  //             data: { message: 'AIP deleted successfully', objectId },
+  //             data: retrievedSchoolNeed,
   //             meta: {
   //                 timestamp: new Date(),
   //             },
@@ -147,34 +150,36 @@ export class SchoolNeedService {
   //             throw new BadRequestException(`Invalid ID format: ${id}`);
   //         }
 
-  //         this.logger.error('Error deleting AIP', error.stack);
+  //         this.logger.error('Error getting SchoolNeed by Id', error.stack);
   //         throw error;
   //     }
   // }
 
-  // async updateAip(id: string, needDto: needDto): Promise<any> {
+ 
+
+  // async updateSchoolNeed(id: string, needDto: needDto): Promise<any> {
   //     try {
   //         if (!Types.ObjectId.isValid(id)) {
   //             throw new BadRequestException(`Invalid ID format: ${id}`);
   //         }
   //         const objectId = new Types.ObjectId(id);
 
-  //         this.logger.log(`Attempting to update AIP with ID: ${id}`);
-  //         const updatedAip = await this.aipModel.findByIdAndUpdate(
+  //         this.logger.log(`Attempting to update SchoolNeed with ID: ${id}`);
+  //         const updatedSchoolNeed = await this.SchoolNeedModel.findByIdAndUpdate(
   //             objectId,
   //             { $set: { ...needDto } },
   //             { new: true, runValidators: true },
   //         );
 
-  //         if (!updatedAip) {
-  //             this.logger.warn(`No AIP found with ID: ${objectId}`);
-  //             throw new NotFoundException(`AIP with ID ${objectId} not found`);
+  //         if (!updatedSchoolNeed) {
+  //             this.logger.warn(`No SchoolNeed found with ID: ${objectId}`);
+  //             throw new NotFoundException(`SchoolNeed with ID ${objectId} not found`);
   //         }
 
-  //         this.logger.log(`AIP updated successfully with ID: ${objectId}`);
+  //         this.logger.log(`SchoolNeed updated successfully with ID: ${objectId}`);
   //         return {
   //             success: true,
-  //             data: updatedAip,
+  //             data: updatedSchoolNeed,
   //             meta: {
   //                 timestamp: new Date(),
   //             },
@@ -184,7 +189,7 @@ export class SchoolNeedService {
   //             throw new BadRequestException(`Invalid ID format: ${id}`);
   //         }
 
-  //         this.logger.error('Error updating AIP', error.stack);
+  //         this.logger.error('Error updating SchoolNeed', error.stack);
   //         throw error;
   //     }
   // }

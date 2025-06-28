@@ -10,11 +10,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { NeedDto, UpdateNeedDto } from './school-need.dto';
-import {
-  SchoolNeedSchema,
-  SchoolNeedDocument,
-  SchoolNeed,
-} from './school-need.schema';
+import { SchoolNeedDocument, SchoolNeed } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
 
 @Injectable()

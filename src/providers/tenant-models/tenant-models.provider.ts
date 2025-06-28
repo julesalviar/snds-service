@@ -3,7 +3,10 @@ import { Connection, Model } from 'mongoose';
 import { User, UserSchema } from 'src/user/user.schema';
 import { Tenant, TenantSchema } from 'src/tenant/tenantSchema';
 import { Aip, AipSchema } from 'src/aip/aip.schema';
-import { SchoolNeedSchema, SchoolNeed } from 'src/school-needs/school-need.schema';
+import {
+  SchoolNeedSchema,
+  SchoolNeed,
+} from 'src/school-needs/school-need.schema';
 
 export const TenantModels = {
   userModel: {

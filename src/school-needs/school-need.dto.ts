@@ -1,4 +1,6 @@
-import { IsNotEmpty, MinLength, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+
 
 export class NeedDto {
   @IsOptional()
@@ -40,3 +42,5 @@ export class NeedDto {
   @IsOptional()
   updatedBy: string;
 }
+
+export class UpdateNeedDto extends PartialType(NeedDto) { }

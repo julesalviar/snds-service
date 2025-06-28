@@ -1,5 +1,6 @@
 import { Model, Types } from 'mongoose';
 import { PROVIDER } from 'src/common/constants/providers';
+import { COUNTER } from 'src/common/constants/counters';
 import { CounterService } from 'src/common/counter/counter.services';
 import {
   NotFoundException,
@@ -8,7 +9,7 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { NeedDto } from './school-need.dto';
+import { NeedDto, UpdateNeedDto } from './school-need.dto';
 import {
   SchoolNeedSchema,
   SchoolNeedDocument,
@@ -29,8 +30,7 @@ export class SchoolNeedService {
     private counterService: CounterService,
   ) {}
 
-  // Create a School Need
-  async createSchoolNeed(schoolId: String, needDto: NeedDto): Promise<any> {
+  async createSchoolNeed(schoolId: String, needDto: NeedDto): Promise<SchoolNeedDocument> {
     const { projectObjId } = needDto;
     try {
       //   @todo:  School exist validation
@@ -53,8 +53,7 @@ export class SchoolNeedService {
         'Creating new School Needs information with the following data:',
         needDto,
       );
-      const code =
-        await this.counterService.getNextSequenceValue('schoolNeedsCode');
+      const code = await this.counterService.getNextSequenceValue(COUNTER.SCH_NEED_CODE);
 
       const createdSchoolNeed = new this.schoolNeedModel({ ...needDto, code });
       const savedSchoolNeed = await createdSchoolNeed.save();
@@ -140,9 +139,9 @@ export class SchoolNeedService {
         throw new BadRequestException(`Invalid ID format: ${id}`);
       }
 
-      const objectId = new Types.ObjectId(id);
-
       this.logger.log(`Attempting to retrieve School Need with ID: ${id}`);
+
+      const objectId = new Types.ObjectId(id);
       const retrievedSchoolNeed = await this.schoolNeedModel
         .findById(objectId)
         .populate({
@@ -150,6 +149,7 @@ export class SchoolNeedService {
           select: 'title objectives schoolYear pillars',
         })
         .exec();
+
       if (!retrievedSchoolNeed) {
         this.logger.warn(`No School Need found with ID: ${objectId}`);
         throw new NotFoundException(
@@ -177,40 +177,49 @@ export class SchoolNeedService {
     }
   }
 
-  // async updateSchoolNeed(id: string, needDto: needDto): Promise<any> {
-  //     try {
-  //         if (!Types.ObjectId.isValid(id)) {
-  //             throw new BadRequestException(`Invalid ID format: ${id}`);
-  //         }
-  //         const objectId = new Types.ObjectId(id);
+  async updateSchoolNeed(id: string, needDto: UpdateNeedDto): Promise<any> {
+    try {
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
 
-  //         this.logger.log(`Attempting to update SchoolNeed with ID: ${id}`);
-  //         const updatedSchoolNeed = await this.SchoolNeedModel.findByIdAndUpdate(
-  //             objectId,
-  //             { $set: { ...needDto } },
-  //             { new: true, runValidators: true },
-  //         );
+      this.logger.log(`Attempting to update School Need with ID: ${id}`);
 
-  //         if (!updatedSchoolNeed) {
-  //             this.logger.warn(`No SchoolNeed found with ID: ${objectId}`);
-  //             throw new NotFoundException(`SchoolNeed with ID ${objectId} not found`);
-  //         }
+      const objectId = new Types.ObjectId(id);
+      const updatedSchoolNeed = await this.schoolNeedModel
+        .findByIdAndUpdate(
+          objectId,
+          { $set: { ...needDto } },
+          { new: true, runValidators: true },
+        )
+        .populate({
+          path: 'projectObjId',
+          select: 'title objectives schoolYear pillars',
+        })
+        .exec();
 
-  //         this.logger.log(`SchoolNeed updated successfully with ID: ${objectId}`);
-  //         return {
-  //             success: true,
-  //             data: updatedSchoolNeed,
-  //             meta: {
-  //                 timestamp: new Date(),
-  //             },
-  //         };
-  //     } catch (error) {
-  //         if (error.name === 'CastError') {
-  //             throw new BadRequestException(`Invalid ID format: ${id}`);
-  //         }
+      if (!updatedSchoolNeed) {
+        this.logger.warn(`No School Need found with ID: ${objectId}`);
+        throw new NotFoundException(
+          `School Need with ID ${objectId} not found`,
+        );
+      }
 
-  //         this.logger.error('Error updating SchoolNeed', error.stack);
-  //         throw error;
-  //     }
-  // }
+      this.logger.log(`School Need updated successfully with ID: ${objectId}`);
+      return {
+        success: true,
+        data: updatedSchoolNeed,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      if (error.name === 'CastError') {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.error('Error updating SchoolNeed', error.stack);
+      throw error;
+    }
+  }
 }

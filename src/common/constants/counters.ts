@@ -1,0 +1,4 @@
+export const COUNTER = {
+    AIP_NUMBER: 'AIP_NUMBER',
+    SCH_NEED_CODE: 'SCH_NEED_CODE',
+};

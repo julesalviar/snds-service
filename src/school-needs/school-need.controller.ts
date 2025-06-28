@@ -7,7 +7,7 @@ import {
   Body,
   Param,
 } from '@nestjs/common';
-import { NeedDto } from './school-need.dto';
+import { NeedDto, UpdateNeedDto } from './school-need.dto';
 import { SchoolNeedService } from './school-need.service';
 
 @Controller('school-needs/:schoolId')
@@ -40,8 +40,8 @@ export class SchoolNeedController {
     return this.schoolNeedService.getAll();
   }
 
-  // @Patch(':id')
-  // async editAip(@Param('id') id: string, @Body() aipDto: AipDto) {
-  //     return this.aipService.updateAip(id, aipDto);
-  // }
+  @Patch(':id')
+  async editAip(@Param('id') id: string, @Body() updateNeedDto: UpdateNeedDto) {
+    return this.schoolNeedService.updateSchoolNeed(id, updateNeedDto);
+  }
 }

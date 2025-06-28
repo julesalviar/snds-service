@@ -7,10 +7,10 @@ import {
   Body,
   Param,
 } from '@nestjs/common';
-import { NeedDto } from './need.dto';
-import { SchoolNeedService } from './need.service';
+import { NeedDto } from './school-need.dto';
+import { SchoolNeedService } from './school-need.service';
 
-@Controller('schools/:schoolId/needs')
+@Controller('school-needs/:schoolId')
 export class SchoolNeedController {
   constructor(private readonly schoolNeedService: SchoolNeedService) {}
 

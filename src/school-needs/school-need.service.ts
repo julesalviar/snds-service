@@ -8,12 +8,12 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { NeedDto } from './need.dto';
+import { NeedDto } from './school-need.dto';
 import {
   SchoolNeedSchema,
   SchoolNeedDocument,
   SchoolNeed,
-} from './need.schema';
+} from './school-need.schema';
 
 @Injectable()
 export class SchoolNeedService {

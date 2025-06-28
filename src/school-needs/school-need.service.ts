@@ -30,7 +30,10 @@ export class SchoolNeedService {
     private counterService: CounterService,
   ) {}
 
-  async createSchoolNeed(schoolId: String, needDto: NeedDto): Promise<SchoolNeedDocument> {
+  async createSchoolNeed(
+    schoolId: String,
+    needDto: NeedDto,
+  ): Promise<SchoolNeedDocument> {
     const { projectObjId } = needDto;
     try {
       //   @todo:  School exist validation
@@ -53,7 +56,9 @@ export class SchoolNeedService {
         'Creating new School Needs information with the following data:',
         needDto,
       );
-      const code = await this.counterService.getNextSequenceValue(COUNTER.SCH_NEED_CODE);
+      const code = await this.counterService.getNextSequenceValue(
+        COUNTER.SCH_NEED_CODE,
+      );
 
       const createdSchoolNeed = new this.schoolNeedModel({ ...needDto, code });
       const savedSchoolNeed = await createdSchoolNeed.save();

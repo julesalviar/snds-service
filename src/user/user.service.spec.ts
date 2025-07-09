@@ -1,7 +1,7 @@
 import { TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { Model } from 'mongoose';
-import { User } from './user.schema';
+import { User } from './schemas/user.schema';
 import { Tenant } from 'src/tenant/tenantSchema';
 import { PROVIDER } from 'src/common/constants/providers';
 import {

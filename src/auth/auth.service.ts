@@ -4,10 +4,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
-import { User } from 'src/user/user.schema';
+import { User } from 'src/user/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { EncryptionService } from 'src/encryption/encryption.service';
-import { SignupDto } from 'src/common/dto/signup.dto';
+import { CreateUserDto } from 'src/common/dtos/create-user.dto';
 import { RolePermissions } from 'src/user/constants/role-permission';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
   ) {}
 
-  async signUp(signupData: SignupDto): Promise<User> {
+  async signUp(signupData: CreateUserDto): Promise<User> {
     const existingUser = await this.userService.getUserByUsername(
       signupData.userName,
     );

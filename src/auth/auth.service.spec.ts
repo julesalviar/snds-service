@@ -4,7 +4,7 @@ import { UserService } from '../user/user.service'; // Import UserService
 import { createTestingModule, createMockModel } from '../../test/test-utils';
 import { PROVIDER } from '../common/constants/providers';
 import { Model } from 'mongoose';
-import { User } from '../user/user.schema';
+import { User } from '../user/schemas/user.schema';
 import { Tenant } from '../tenant/tenantSchema';
 
 describe('AuthService', () => {

@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PROVIDER } from '../common/constants/providers';
 import { Model } from 'mongoose';
-import { User } from './user.schema';
+import { User } from './schemas/user.schema';
 import { Tenant } from '../tenant/tenantSchema';
 import { Logger } from '@nestjs/common';
 // import { AuthService } from 'src/auth/auth.service';

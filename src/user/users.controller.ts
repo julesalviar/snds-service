@@ -1,5 +1,5 @@
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
-import { User } from './user.schema';
+import { User } from './schemas/user.schema';
 import { UserService } from './user.service';
 
 @Controller('users')

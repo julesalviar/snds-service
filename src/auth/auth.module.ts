@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { TenantValidationMiddleware } from 'src/common/middlewares/tenant-validation/tenant-validation.middleware';
+import { DivisionRegionMatchConstraint } from 'src/common/validators/division-region-match-constraint.validator';
 
 @Module({
   imports: [
@@ -17,12 +18,12 @@ import { TenantValidationMiddleware } from 'src/common/middlewares/tenant-valida
       useFactory: (configService: ConfigService) => ({
         global: true,
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '60s' },
+        signOptions: { expiresIn: '12h' },
       }),
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, EncryptionService],
+  providers: [AuthService, EncryptionService, DivisionRegionMatchConstraint],
   exports: [AuthService],
 })
 export class AuthModule implements NestModule {

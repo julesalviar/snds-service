@@ -1,6 +1,6 @@
 import { PROVIDER } from 'src/common/constants/providers';
 import { Connection, Model } from 'mongoose';
-import { User, UserSchema } from 'src/user/user.schema';
+import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { Tenant, TenantSchema } from 'src/tenant/tenantSchema';
 import { Aip, AipSchema } from 'src/aip/aip.schema';
 import {

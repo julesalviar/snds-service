@@ -5,10 +5,11 @@ import {
   IsString,
   MinLength,
   IsOptional,
+  IsEnum,
 } from 'class-validator';
 import { UserRole } from 'src/user/enums/user-role.enum';
 
-export class SignupDto {
+export class CreateUserDto {
   @IsDefined()
   @IsEmail()
   email: string;
@@ -46,5 +47,6 @@ export class SignupDto {
 
   @IsString()
   @IsDefined()
+  @IsEnum(UserRole)
   role: UserRole;
 }

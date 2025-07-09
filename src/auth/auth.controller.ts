@@ -1,16 +1,20 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
-import { SignupDto } from 'src/common/dto/signup.dto';
-import { LoginDto } from 'src/common/dto/login.dto';
+import { LoginDto } from 'src/common/dtos/login.dto';
+import { CreateUserDto } from 'src/common/dtos/create-user.dto';
+import { CreateSchoolAdminDto } from 'src/common/dtos/create-school-admin.dto';
+import { RoleValidationPipe } from 'src/auth/role.validation.pipe';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signUp(@Body() signupDto: SignupDto) {
-    const req = { ...signupDto };
-    return this.authService.signUp(req);
+  async signUp(
+    @Body(new RoleValidationPipe())
+    payload: CreateUserDto | CreateSchoolAdminDto,
+  ) {
+    return this.authService.signUp(payload);
   }
 
   @HttpCode(HttpStatus.OK)

@@ -6,6 +6,21 @@ export class SchoolNeed extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Aip', required: true })
   projectObjId: Types.ObjectId;
 
+  @Prop()
+  projectDescription: string;
+
+  @Prop()
+  projectPillars: string;
+
+  @Prop()
+  projectContributionType: string;
+
+  @Prop()
+  projectSpecificContribution: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'School', required: true })
+  schoolObjId: Types.ObjectId;
+
   @Prop({ required: true, unique: true })
   code: number;
 
@@ -34,7 +49,7 @@ export class SchoolNeed extends Document {
   uploadedPhotos: [{ type: String }];
 
   @Prop({ required: true })
-  descriptionOrInfo: string;
+  needDescriptionOrInfo: string;
 
   @Prop()
   statusOfImplementation: string;

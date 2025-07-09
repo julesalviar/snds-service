@@ -12,6 +12,8 @@ import {
 import { NeedDto, UpdateNeedDto } from './school-need.dto';
 import { SchoolNeedDocument, SchoolNeed } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
+import { School } from './school.schema';
+import { SchoolNeedStatus } from './school-need.enums';
 
 @Injectable()
 export class SchoolNeedService {
@@ -21,18 +23,20 @@ export class SchoolNeedService {
     @Inject(PROVIDER.AIP_MODEL)
     private readonly aipModel: Model<Aip>,
 
+    @Inject(PROVIDER.SCHOOL_MODEL)
+    private readonly schoolModel: Model<School>,
+
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
     private readonly schoolNeedModel: Model<SchoolNeed>,
     private counterService: CounterService,
   ) {}
 
-  async createSchoolNeed(
-    schoolId: String,
-    needDto: NeedDto,
-  ): Promise<SchoolNeedDocument> {
-    const { projectObjId } = needDto;
+  async createSchoolNeed(needDto: NeedDto): Promise<SchoolNeedDocument> {
+    const { projectObjId, schoolObjId } = needDto;
     try {
-      //   @todo:  School exist validation
+      // School validation
+      if (!Types.ObjectId.isValid(schoolObjId))
+        throw new BadRequestException(`Invalid School Id: ${[schoolObjId]}`);
 
       // AIP / Project Id validations
       if (!Types.ObjectId.isValid(projectObjId))
@@ -43,6 +47,7 @@ export class SchoolNeedService {
       const aipExists = await this.aipModel.exists({
         _id: projectObjId,
       });
+
       if (!aipExists)
         throw new BadRequestException(
           `SchoolNeed / Project with Id: ${[projectObjId]} not found`,
@@ -52,11 +57,17 @@ export class SchoolNeedService {
         'Creating new School Needs information with the following data:',
         needDto,
       );
+
+      const statusOfImplementation = SchoolNeedStatus.LOOKING_FOR_PARTNERS;
       const code = await this.counterService.getNextSequenceValue(
-        COUNTER.SCH_NEED_CODE,
+        COUNTER.SCHOOL_NEED_CODE,
       );
 
-      const createdSchoolNeed = new this.schoolNeedModel({ ...needDto, code });
+      const createdSchoolNeed = new this.schoolNeedModel({
+        ...needDto,
+        code,
+        statusOfImplementation,
+      });
       const savedSchoolNeed = await createdSchoolNeed.save();
 
       this.logger.log(
@@ -69,12 +80,8 @@ export class SchoolNeedService {
     }
   }
 
-  async deleteSchoolNeed(schoolId: string, id: string): Promise<any> {
+  async deleteSchoolNeed(id: string): Promise<any> {
     try {
-      // School ID validations
-      if (!Types.ObjectId.isValid(schoolId))
-        throw new BadRequestException(`Invalid School ID format: ${schoolId}`);
-
       if (!Types.ObjectId.isValid(id))
         throw new BadRequestException(`Invalid Need ID format: ${id}`);
 
@@ -118,6 +125,11 @@ export class SchoolNeedService {
           path: 'projectObjId',
           select: 'title objectives schoolYear pillars',
         })
+        .populate({
+          path: 'schoolObjId',
+          select:
+            'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
+        })
         .exec();
 
       return {
@@ -148,6 +160,11 @@ export class SchoolNeedService {
         .populate({
           path: 'projectObjId',
           select: 'title objectives schoolYear pillars',
+        })
+        .populate({
+          path: 'schoolObjId',
+          select:
+            'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
         })
         .exec();
 
@@ -185,6 +202,55 @@ export class SchoolNeedService {
       }
 
       this.logger.log(`Attempting to update School Need with ID: ${id}`);
+
+      const objectId = new Types.ObjectId(id);
+      const updatedSchoolNeed = await this.schoolNeedModel
+        .findByIdAndUpdate(
+          objectId,
+          { $set: { ...needDto } },
+          { new: true, runValidators: true },
+        )
+        .populate({
+          path: 'projectObjId',
+          select: 'title objectives schoolYear pillars',
+        })
+        .exec();
+
+      if (!updatedSchoolNeed) {
+        this.logger.warn(`No School Need found with ID: ${objectId}`);
+        throw new NotFoundException(
+          `School Need with ID ${objectId} not found`,
+        );
+      }
+
+      this.logger.log(`School Need updated successfully with ID: ${objectId}`);
+      return {
+        success: true,
+        data: updatedSchoolNeed,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      if (error.name === 'CastError') {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.error('Error updating SchoolNeed', error.stack);
+      throw error;
+    }
+  }
+
+  async updateSchoolNeedStatus(
+    id: string,
+    needDto: UpdateNeedDto,
+  ): Promise<any> {
+    try {
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.log(`Attempting to update School Need status with ID: ${id}`);
 
       const objectId = new Types.ObjectId(id);
       const updatedSchoolNeed = await this.schoolNeedModel

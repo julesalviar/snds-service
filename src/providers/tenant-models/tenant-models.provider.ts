@@ -7,6 +7,7 @@ import {
   SchoolNeedSchema,
   SchoolNeed,
 } from 'src/school-needs/school-need.schema';
+import { School, SchoolSchema } from 'src/school-needs/school.schema';
 
 export const TenantModels = {
   userModel: {
@@ -31,6 +32,16 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<SchoolNeed>> => {
       return tenantConnection.model(SchoolNeed.name, SchoolNeedSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  schoolModel: {
+    provide: PROVIDER.SCHOOL_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<School>> => {
+      return tenantConnection.model(School.name, SchoolSchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

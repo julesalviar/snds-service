@@ -1,33 +1,32 @@
 import {
   Controller,
   Post,
+  Put,
   Get,
   Delete,
   Patch,
   Body,
   Param,
 } from '@nestjs/common';
-import { NeedDto, UpdateNeedDto } from './school-need.dto';
+import {
+  NeedDto,
+  UpdateNeedDto,
+  UpdateSchoolNeedStatusDto,
+} from './school-need.dto';
 import { SchoolNeedService } from './school-need.service';
 
-@Controller('school-needs/:schoolId')
+@Controller('school-needs')
 export class SchoolNeedController {
   constructor(private readonly schoolNeedService: SchoolNeedService) {}
 
   @Post()
-  async createNeed(
-    @Param('schoolId') schoolId: string,
-    @Body() needDto: NeedDto,
-  ) {
-    return this.schoolNeedService.createSchoolNeed(schoolId, needDto);
+  async createNeed(@Body() needDto: NeedDto) {
+    return this.schoolNeedService.createSchoolNeed(needDto);
   }
 
   @Delete(':id')
-  async deleteSchoolNeed(
-    @Param('schoolId') schoolId: string,
-    @Param('id') id: string,
-  ) {
-    return this.schoolNeedService.deleteSchoolNeed(schoolId, id);
+  async deleteSchoolNeed(@Param('id') id: string) {
+    return this.schoolNeedService.deleteSchoolNeed(id);
   }
 
   @Get(':id')
@@ -40,8 +39,22 @@ export class SchoolNeedController {
     return this.schoolNeedService.getAll();
   }
 
-  @Patch(':id')
-  async editAip(@Param('id') id: string, @Body() updateNeedDto: UpdateNeedDto) {
+  @Put(':id')
+  async editSchoolNeed(
+    @Param('id') id: string,
+    @Body() updateNeedDto: UpdateNeedDto,
+  ) {
     return this.schoolNeedService.updateSchoolNeed(id, updateNeedDto);
+  }
+
+  @Patch(':id/status')
+  async updateSchoolNeedStatus(
+    @Param('id') id: string,
+    @Body() updateNeedStatusDto: UpdateSchoolNeedStatusDto,
+  ) {
+    return this.schoolNeedService.updateSchoolNeedStatus(
+      id,
+      updateNeedStatusDto,
+    );
   }
 }

@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { TenantValidationMiddleware } from 'src/common/middlewares/tenant-validation/tenant-validation.middleware';
 import { DivisionRegionMatchConstraint } from 'src/common/validators/division-region-match-constraint.validator';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -23,7 +24,12 @@ import { DivisionRegionMatchConstraint } from 'src/common/validators/division-re
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, EncryptionService, DivisionRegionMatchConstraint],
+  providers: [
+    AuthService,
+    EncryptionService,
+    DivisionRegionMatchConstraint,
+    JwtStrategy,
+  ],
   exports: [AuthService],
 })
 export class AuthModule implements NestModule {

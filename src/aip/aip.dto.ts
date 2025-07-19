@@ -1,4 +1,5 @@
 import { IsNotEmpty, MinLength, IsOptional } from 'class-validator';
+import { AipStatus } from 'src/aip/aip-status.enum';
 
 export class AipDto {
   @IsOptional()
@@ -30,7 +31,7 @@ export class AipDto {
   budgetSource: string;
 
   @IsOptional()
-  status: string;
+  status: AipStatus;
 
   @IsOptional()
   createdBy: string;

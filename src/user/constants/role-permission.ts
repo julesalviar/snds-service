@@ -1,6 +1,6 @@
 import { PermissionsEnum } from '../enums/user-permission.enum';
 export const RolePermissions = {
-  StakeHolder: [PermissionsEnum.VIEW_REPORTS, PermissionsEnum.REQUEST_ACCESS],
+  Stakeholder: [PermissionsEnum.VIEW_REPORTS, PermissionsEnum.REQUEST_ACCESS],
   SuperAdmin: [
     PermissionsEnum.MANAGE_USERS,
     PermissionsEnum.CONFIGURE_SYSTEM,

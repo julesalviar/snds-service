@@ -9,7 +9,7 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { NeedDto, UpdateNeedDto } from './school-need.dto';
+import { SchoolNeedDto, UpdateNeedDto } from './school-need.dto';
 import { SchoolNeedDocument, SchoolNeed } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
 import { School } from './school.schema';
@@ -28,10 +28,10 @@ export class SchoolNeedService {
 
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
     private readonly schoolNeedModel: Model<SchoolNeed>,
-    private counterService: CounterService,
+    private readonly counterService: CounterService,
   ) {}
 
-  async createSchoolNeed(needDto: NeedDto): Promise<SchoolNeedDocument> {
+  async createSchoolNeed(needDto: SchoolNeedDto): Promise<SchoolNeedDocument> {
     const { projectObjId, schoolObjId } = needDto;
     try {
       // School validation

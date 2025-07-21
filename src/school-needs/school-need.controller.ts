@@ -9,7 +9,7 @@ import {
   Param,
 } from '@nestjs/common';
 import {
-  NeedDto,
+  SchoolNeedDto,
   UpdateNeedDto,
   UpdateSchoolNeedStatusDto,
 } from './school-need.dto';
@@ -20,7 +20,7 @@ export class SchoolNeedController {
   constructor(private readonly schoolNeedService: SchoolNeedService) {}
 
   @Post()
-  async createNeed(@Body() needDto: NeedDto) {
+  async createNeed(@Body() needDto: SchoolNeedDto) {
     return this.schoolNeedService.createSchoolNeed(needDto);
   }
 

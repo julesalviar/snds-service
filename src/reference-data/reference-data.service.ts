@@ -11,18 +11,19 @@ import { ReferenceStatus } from 'src/reference-data/reference-status.enum';
 export class ReferenceDataService {
   constructor(
     @InjectModel(ReferenceData.name)
-    private referenceDataModel: Model<ReferenceDataDocument>,
+    private readonly referenceDataModel: Model<ReferenceDataDocument>,
   ) {}
 
   async getByStatus(
     status: ReferenceStatus = 'active',
   ): Promise<Record<string, any>> {
-    const filter: Record<string, any> =
-      status === 'active'
-        ? { active: true }
-        : status === 'inactive'
-          ? { active: false }
-          : {};
+    const filter: Record<string, any> = {};
+
+    if (status === 'active') {
+      filter.active = true;
+    } else if (status === 'inactive') {
+      filter.active = false;
+    }
 
     const entries = await this.referenceDataModel.find(filter).lean();
     return entries.reduce((acc, item) => {

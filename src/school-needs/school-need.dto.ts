@@ -2,7 +2,7 @@ import { IsDateString, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 import { SchoolNeedStatus } from './school-need.enums';
 
-export class NeedDto {
+export class SchoolNeedDto {
   @IsOptional()
   code: number;
 
@@ -50,7 +50,7 @@ export class NeedDto {
   needDescriptionOrInfo: string;
 
   @IsOptional()
-  uploadedPhotos: [{ type: String }];
+  uploadedPhotos: [{ type: string }];
 
   @IsOptional()
   @IsEnum(SchoolNeedStatus, {
@@ -62,7 +62,7 @@ export class NeedDto {
   updatedBy: string;
 }
 
-export class UpdateNeedDto extends PartialType(NeedDto) {}
+export class UpdateNeedDto extends PartialType(SchoolNeedDto) {}
 
 export class UpdateSchoolNeedStatusDto {
   @IsNotEmpty()

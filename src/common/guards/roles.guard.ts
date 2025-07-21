@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { UserRole as UserRoleEnums } from 'src/user/enums/user-role.enum';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -15,7 +16,7 @@ export class RolesGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
     if (!user) throw new ForbiddenException('User not found in request');
 
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+    const requiredRoles = this.reflector.getAllAndOverride<UserRoleEnums[]>(
       ROLES_KEY,
       [context.getHandler(), context.getClass()],
     );

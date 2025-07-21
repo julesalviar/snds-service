@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
+import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -15,7 +16,7 @@ export class PermissionsGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
     if (!user) throw new ForbiddenException('User not found in request');
 
-    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
+    const requiredPermissions = this.reflector.getAllAndOverride<PermissionsEnum[]>(
       PERMISSIONS_KEY,
       [context.getHandler(), context.getClass()],
     );

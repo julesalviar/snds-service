@@ -8,8 +8,6 @@ export enum PermissionsEnum {
   CONFIGURE_SYSTEM = 'configureSystem',
 
   // SchoolAdmin
-  MANAGE_STUDENTS = 'manageStudents',
-  MANAGE_TEACHERS = 'manageTeachers',
   VIEW_SCHOOL_REPORTS = 'viewSchoolReports',
 
   // DivisionAdmin

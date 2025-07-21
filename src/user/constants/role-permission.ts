@@ -7,8 +7,6 @@ export const RolePermissions = {
     PermissionsEnum.VIEW_REPORTS,
   ],
   SchoolAdmin: [
-    PermissionsEnum.MANAGE_STUDENTS,
-    PermissionsEnum.MANAGE_TEACHERS,
     PermissionsEnum.VIEW_SCHOOL_REPORTS,
   ],
   DivisionAdmin: [

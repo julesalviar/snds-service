@@ -18,7 +18,7 @@ export class AipService {
   constructor(
     @Inject(PROVIDER.AIP_MODEL)
     private readonly aipModel: Model<Aip>, // Inject the custom provider
-    private counterService: CounterService,
+    private readonly counterService: CounterService,
   ) {}
 
   // Create a New AIP
@@ -32,7 +32,7 @@ export class AipService {
       const createdAip = new this.aipModel({ ...aipDto, apn });
       const savedAip = await createdAip.save();
 
-      this.logger.log(`AIP created successfully with ID: ${createdAip._id}`);
+      this.logger.log(`AIP created successfully with ID: ${createdAip?.apn}`);
       return savedAip;
     } catch (error) {
       this.logger.error('Error creating AIP', error.stack);
@@ -40,16 +40,26 @@ export class AipService {
     }
   }
 
-  async getAll() {
+  async getAll(page = 1, limit = 10) {
     try {
-      this.logger.log(`Attempting to retrieve all AIPs`);
-      const allAips = await this.aipModel.find().exec();
+      this.logger.log(
+        `Attempting to retrieve paginated AIPs: page = ${page}, limit = ${limit}`,
+      );
+
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.aipModel.find().sort({ apn: -1 }).skip(skip).limit(limit).exec(),
+        this.aipModel.countDocuments(),
+      ]);
 
       return {
         success: true,
-        data: allAips,
+        data,
         meta: {
-          count: allAips.length,
+          count: data.length,
+          totalItems: total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
           timestamp: new Date(),
         },
       };

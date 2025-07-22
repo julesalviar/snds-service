@@ -1,10 +1,9 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PROVIDER } from '../common/constants/providers';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { Tenant } from '../tenant/tenantSchema';
-import { Logger } from '@nestjs/common';
-// import { AuthService } from 'src/auth/auth.service';
+
 import { EncryptionService } from 'src/encryption/encryption.service';
 
 @Injectable()
@@ -12,9 +11,8 @@ export class UserService {
   logger: Logger;
 
   constructor(
-    @Inject(PROVIDER.USER_MODEL) private userModel: Model<User>,
-    @Inject(PROVIDER.TENANT_MODEL) private tenantModel: Model<Tenant>,
-    // @Inject(forwardRef(() => AuthService)) private AuthService: AuthService,
+    @Inject(PROVIDER.USER_MODEL) private readonly userModel: Model<User>,
+    @Inject(PROVIDER.TENANT_MODEL) private readonly tenantModel: Model<Tenant>,
     private readonly encryptionService: EncryptionService, // Inject EncryptionService
   ) {
     this.logger = new Logger(UserService.name);

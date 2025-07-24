@@ -1,4 +1,4 @@
-import { IsNotEmpty, MinLength, IsOptional } from 'class-validator';
+import { IsNotEmpty, MinLength, IsOptional, MaxLength } from 'class-validator';
 import { AipStatus } from 'src/aip/aip-status.enum';
 
 export class AipDto {
@@ -6,7 +6,8 @@ export class AipDto {
   apn: number;
 
   @IsNotEmpty()
-  @MinLength(4)
+  @MinLength(9)
+  @MaxLength(9)
   schoolYear: string;
 
   @IsNotEmpty()

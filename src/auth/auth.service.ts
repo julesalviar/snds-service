@@ -8,12 +8,11 @@ import { User } from 'src/user/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
-import { RolePermissions } from 'src/user/constants/role-permission';
+import { RolePermissions } from 'src/common/constants/role-permission';
 
 @Injectable()
 export class AuthService {
   constructor(
-    // @Inject(forwardRef(() => UserService)) private userService: UserService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly encryptionService: EncryptionService,

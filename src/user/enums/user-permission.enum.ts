@@ -1,17 +1,17 @@
 export enum PermissionsEnum {
-  // Stakeholder
-  VIEW_REPORTS = 'viewReports',
-  REQUEST_ACCESS = 'requestAccess',
+  // Projects (AIP)
+  PROJECT_VIEW = 'project.view',
+  PROJECT_MANAGE = 'project.manage',
 
-  // SuperAdmin
-  MANAGE_USERS = 'manageUsers',
-  CONFIGURE_SYSTEM = 'configureSystem',
+  // School Needs
+  SCHOOL_NEED_VIEW = 'schoolNeed.view',
+  SCHOOL_NEED_MANAGE = 'schoolNeed.manage',
 
-  // SchoolAdmin
-  VIEW_SCHOOL_REPORTS = 'viewSchoolReports',
+  // School Profile
+  SCHOOL_PROFILE_MANAGE = 'schoolProfile.manage',
 
-  // DivisionAdmin
-  MANAGE_SCHOOLS = 'manageSchools',
-  ASSIGN_SCHOOL_ADMINS = 'assignSchoolAdmins',
-  VIEW_DIVISION_REPORTS = 'viewDivisionReports',
+  // Users
+  USER_VIEW = 'user.view',
+  USER_MANAGE = 'user.manage',
+  USER_ASSIGN_ROLE = 'user.assignRole',
 }

@@ -32,25 +32,25 @@ export class SchoolNeedService {
   ) {}
 
   async createSchoolNeed(needDto: SchoolNeedDto): Promise<SchoolNeedDocument> {
-    const { projectObjId, schoolObjId } = needDto;
+    const { projectId, schoolId } = needDto;
     try {
       // School validation
-      if (!Types.ObjectId.isValid(schoolObjId))
-        throw new BadRequestException(`Invalid School Id: ${[schoolObjId]}`);
+      if (!Types.ObjectId.isValid(schoolId))
+        throw new BadRequestException(`Invalid School Id: ${[schoolId]}`);
 
       // AIP / Project Id validations
-      if (!Types.ObjectId.isValid(projectObjId))
+      if (!Types.ObjectId.isValid(projectId))
         throw new BadRequestException(
-          `Invalid Project / SchoolNeed Id: ${[projectObjId]}`,
+          `Invalid Project / SchoolNeed Id: ${[projectId]}`,
         );
 
       const aipExists = await this.aipModel.exists({
-        _id: projectObjId,
+        _id: projectId,
       });
 
       if (!aipExists)
         throw new BadRequestException(
-          `SchoolNeed / Project with Id: ${[projectObjId]} not found`,
+          `SchoolNeed / Project with Id: ${[projectId]} not found`,
         );
 
       this.logger.log(
@@ -130,11 +130,11 @@ export class SchoolNeedService {
           .skip(skip)
           .limit(limit)
           .populate({
-            path: 'projectObjId',
+            path: 'projectId',
             select: 'title objectives schoolYear pillars',
           })
           .populate({
-            path: 'schoolObjId',
+            path: 'schoolId',
             select:
               'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
           })
@@ -170,11 +170,11 @@ export class SchoolNeedService {
       const retrievedSchoolNeed = await this.schoolNeedModel
         .findById(objectId)
         .populate({
-          path: 'projectObjId',
+          path: 'projectId',
           select: 'title objectives schoolYear pillars',
         })
         .populate({
-          path: 'schoolObjId',
+          path: 'schoolId',
           select:
             'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
         })
@@ -223,7 +223,7 @@ export class SchoolNeedService {
           { new: true, runValidators: true },
         )
         .populate({
-          path: 'projectObjId',
+          path: 'projectId',
           select: 'title objectives schoolYear pillars',
         })
         .exec();
@@ -272,7 +272,7 @@ export class SchoolNeedService {
           { new: true, runValidators: true },
         )
         .populate({
-          path: 'projectObjId',
+          path: 'projectId',
           select: 'title objectives schoolYear pillars',
         })
         .exec();

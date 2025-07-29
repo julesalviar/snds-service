@@ -4,7 +4,7 @@ import { Document, Types, HydratedDocument } from 'mongoose';
 @Schema({ timestamps: true })
 export class SchoolNeed extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Aip', required: true })
-  projectObjId: Types.ObjectId;
+  projectId: Types.ObjectId;
 
   @Prop()
   projectDescription: string;
@@ -19,7 +19,7 @@ export class SchoolNeed extends Document {
   projectSpecificContribution: string;
 
   @Prop({ type: Types.ObjectId, ref: 'School', required: true })
-  schoolObjId: Types.ObjectId;
+  schoolId: Types.ObjectId;
 
   @Prop({ required: true, unique: true })
   code: number;

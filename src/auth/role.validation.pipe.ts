@@ -13,10 +13,10 @@ import { plainToInstance } from 'class-transformer';
 export class RoleValidationPipe implements PipeTransform {
   async transform(value: CreateUserDto | CreateSchoolAdminDto) {
     switch (value.role) {
-      case UserRole.Stakeholder:
+      case UserRole.STAKEHOLDER:
         await validateOrReject(plainToInstance(CreateUserDto, value));
         break;
-      case UserRole.SchoolAdmin:
+      case UserRole.SCHOOL_ADMIN:
         await validateOrReject(plainToInstance(CreateSchoolAdminDto, value));
         break;
       default:

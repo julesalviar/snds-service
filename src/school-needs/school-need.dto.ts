@@ -7,10 +7,10 @@ export class SchoolNeedDto {
   code: number;
 
   @IsNotEmpty()
-  schoolObjId: string;
+  schoolId: string;
 
   @IsNotEmpty()
-  projectObjId: string;
+  projectId: string;
 
   @IsNotEmpty()
   projectDescription: string;

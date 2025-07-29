@@ -32,25 +32,25 @@ export class SchoolNeedService {
   ) {}
 
   async createSchoolNeed(needDto: SchoolNeedDto): Promise<SchoolNeedDocument> {
-    const { projectObjId, schoolObjId } = needDto;
+    const { projectId, schoolId } = needDto;
     try {
       // School validation
-      if (!Types.ObjectId.isValid(schoolObjId))
-        throw new BadRequestException(`Invalid School Id: ${[schoolObjId]}`);
+      if (!Types.ObjectId.isValid(schoolId))
+        throw new BadRequestException(`Invalid School Id: ${[schoolId]}`);
 
       // AIP / Project Id validations
-      if (!Types.ObjectId.isValid(projectObjId))
+      if (!Types.ObjectId.isValid(projectId))
         throw new BadRequestException(
-          `Invalid Project / SchoolNeed Id: ${[projectObjId]}`,
+          `Invalid Project / SchoolNeed Id: ${[projectId]}`,
         );
 
       const aipExists = await this.aipModel.exists({
-        _id: projectObjId,
+        _id: projectId,
       });
 
       if (!aipExists)
         throw new BadRequestException(
-          `SchoolNeed / Project with Id: ${[projectObjId]} not found`,
+          `SchoolNeed / Project with Id: ${[projectId]} not found`,
         );
 
       this.logger.log(
@@ -116,27 +116,39 @@ export class SchoolNeedService {
     }
   }
 
-  async getAll() {
+  async getAll(page: number, limit: number) {
     try {
-      this.logger.log(`Attempting to retrieve all school Needs`);
-      const allSchoolNeeds = await this.schoolNeedModel
-        .find()
-        .populate({
-          path: 'projectObjId',
-          select: 'title objectives schoolYear pillars',
-        })
-        .populate({
-          path: 'schoolObjId',
-          select:
-            'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
-        })
-        .exec();
+      this.logger.log(
+        `Attempting to retrieve all paginated school Needs: page = ${page}, limit = ${limit}`,
+      );
 
+      const skip = (page - 1) * limit;
+      const [schoolNeeds, total] = await Promise.all([
+        this.schoolNeedModel
+          .find()
+          .sort({ code: -1 })
+          .skip(skip)
+          .limit(limit)
+          .populate({
+            path: 'projectId',
+            select: 'title objectives schoolYear pillars',
+          })
+          .populate({
+            path: 'schoolId',
+            select:
+              'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
+          })
+          .exec(),
+        this.schoolNeedModel.countDocuments(),
+      ]);
       return {
         success: true,
-        data: allSchoolNeeds,
+        data: schoolNeeds,
         meta: {
-          count: allSchoolNeeds.length,
+          count: schoolNeeds.length,
+          totalItems: total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
           timestamp: new Date(),
         },
       };
@@ -158,11 +170,11 @@ export class SchoolNeedService {
       const retrievedSchoolNeed = await this.schoolNeedModel
         .findById(objectId)
         .populate({
-          path: 'projectObjId',
+          path: 'projectId',
           select: 'title objectives schoolYear pillars',
         })
         .populate({
-          path: 'schoolObjId',
+          path: 'schoolId',
           select:
             'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
         })
@@ -211,7 +223,7 @@ export class SchoolNeedService {
           { new: true, runValidators: true },
         )
         .populate({
-          path: 'projectObjId',
+          path: 'projectId',
           select: 'title objectives schoolYear pillars',
         })
         .exec();
@@ -260,7 +272,7 @@ export class SchoolNeedService {
           { new: true, runValidators: true },
         )
         .populate({
-          path: 'projectObjId',
+          path: 'projectId',
           select: 'title objectives schoolYear pillars',
         })
         .exec();

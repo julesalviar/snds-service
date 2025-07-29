@@ -116,27 +116,39 @@ export class SchoolNeedService {
     }
   }
 
-  async getAll() {
+  async getAll(page: number, limit: number) {
     try {
-      this.logger.log(`Attempting to retrieve all school Needs`);
-      const allSchoolNeeds = await this.schoolNeedModel
-        .find()
-        .populate({
-          path: 'projectObjId',
-          select: 'title objectives schoolYear pillars',
-        })
-        .populate({
-          path: 'schoolObjId',
-          select:
-            'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
-        })
-        .exec();
+      this.logger.log(
+        `Attempting to retrieve all paginated school Needs: page = ${page}, limit = ${limit}`,
+      );
 
+      const skip = (page - 1) * limit;
+      const [schoolNeeds, total] = await Promise.all([
+        this.schoolNeedModel
+          .find()
+          .sort({ code: -1 })
+          .skip(skip)
+          .limit(limit)
+          .populate({
+            path: 'projectObjId',
+            select: 'title objectives schoolYear pillars',
+          })
+          .populate({
+            path: 'schoolObjId',
+            select:
+              'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
+          })
+          .exec(),
+        this.schoolNeedModel.countDocuments(),
+      ]);
       return {
         success: true,
-        data: allSchoolNeeds,
+        data: schoolNeeds,
         meta: {
-          count: allSchoolNeeds.length,
+          count: schoolNeeds.length,
+          totalItems: total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
           timestamp: new Date(),
         },
       };

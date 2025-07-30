@@ -12,7 +12,7 @@ import {
 import { SchoolNeedDto, UpdateNeedDto } from './school-need.dto';
 import { SchoolNeedDocument, SchoolNeed } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
-import { School } from './school.schema';
+import { School } from 'src/schools/school.schema';
 import { SchoolNeedStatus } from './school-need.enums';
 
 @Injectable()

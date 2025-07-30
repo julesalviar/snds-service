@@ -63,7 +63,6 @@ export class SchoolNeedDto {
 }
 
 export class UpdateNeedDto extends PartialType(SchoolNeedDto) {}
-
 export class UpdateSchoolNeedStatusDto {
   @IsNotEmpty()
   @IsEnum(SchoolNeedStatus, {

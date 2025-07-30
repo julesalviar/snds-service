@@ -9,7 +9,7 @@ export class School extends Document {
   @Prop()
   createdByUserId: string;
 
-  @Prop()
+  @Prop({ required: true, unique: true })
   schoolName: string;
 
   @Prop()
@@ -32,9 +32,6 @@ export class School extends Document {
 
   @Prop({ required: true, unique: true })
   officialEmailAddress: string;
-
-  @Prop()
-  password: string;
 }
 
 export type SchoolDocument = HydratedDocument<School>;

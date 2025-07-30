@@ -12,6 +12,7 @@ import { AipModule } from './aip/aip.module';
 import { CounterModule } from './common/counter/counter.module';
 import { SchoolNeedModule } from './school-needs/school-need.module';
 import { ReferenceDataModule } from 'src/reference-data/reference-data.module';
+import { SchoolModule } from './schools/school.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ReferenceDataModule } from 'src/reference-data/reference-data.module';
     AipModule,
     CounterModule,
     SchoolNeedModule,
+    SchoolModule,
     ReferenceDataModule,
   ],
   controllers: [AppController],

@@ -7,7 +7,7 @@ import {
   SchoolNeedSchema,
   SchoolNeed,
 } from 'src/school-needs/school-need.schema';
-import { School, SchoolSchema } from 'src/school-needs/school.schema';
+import { School, SchoolSchema } from 'src/schools/school.schema';
 
 export const TenantModels = {
   userModel: {

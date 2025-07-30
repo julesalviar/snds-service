@@ -25,4 +25,16 @@ export class SchoolController {
   async getAll(@Query('page') page = 1, @Query('limit') limit = 10) {
     return this.schoolService.getAll(Number(page), Number(limit));
   }
+
+  @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)
+  @Get(':id')
+  async getSchoolById(@Param('id') id: string) {
+    return this.schoolService.getSchoolById(id);
+  }
+
+  @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)
+  @Get('by-school-id/:schoolId')
+  async getSchoolBySchoolId(@Param('schoolId') schoolId: string) {
+    return this.schoolService.getSchoolBySchoolId(schoolId);
+  }
 }

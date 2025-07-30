@@ -1,9 +1,9 @@
 // import { SchoolDto } from 'src/common/dto/school.dto';
 import { SchoolDto } from './school.dto';
-import { Model } from 'mongoose';
+import { Model , Types} from 'mongoose';
 import { School, SchoolDocument } from './school.schema';
 import { PROVIDER } from '../common/constants/providers';
-import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { NotFoundException, BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
@@ -71,6 +71,71 @@ export class SchoolService {
       };
     } catch (error) {
       this.logger.error('Error getting schools', error.stack);
+      throw error;
+    }
+  }
+  async getSchoolById(id: string ) : Promise <any>
+  {
+    try { 
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.log(`Attempting to retrieve School with ID: ${id}`);
+      const objectId = new Types.ObjectId(id);
+      const retrievedSchool = await this.schoolModel
+        .findById(objectId)
+        .exec();
+
+      if (!retrievedSchool) {
+        this.logger.warn(`No School found with ID: ${objectId}`);
+        throw new NotFoundException(
+          `School with ID ${objectId} not found`,
+        );
+      }
+
+      return {
+        success: true,
+      data: retrievedSchool,
+      meta: {
+        timestamp: new Date(),
+      },
+    };
+  }
+    catch (error) {
+      if (error.name === 'CastError') {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.error('Error getting School by Id', error.stack);
+      throw error;
+    }
+  }
+
+  async getSchoolBySchoolId(schoolId: string): Promise<any> {
+    try {
+      this.logger.log(`Attempting to retrieve School with School ID: ${schoolId}`);
+      const retrievedSchool = await this.schoolModel
+        .findOne({schoolId})
+        .exec();
+
+      if (!retrievedSchool) {
+        this.logger.warn(`No School found with ID: ${schoolId}`);
+        throw new NotFoundException(
+          `School with ID ${schoolId} not found`,
+        );
+      }
+
+      return {
+        success: true,
+        data: retrievedSchool,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    }
+    catch (error) {
+      this.logger.error('Error getting School by Id', error.stack);
       throw error;
     }
   }

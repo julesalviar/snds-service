@@ -1,13 +1,22 @@
-import { Controller, Post, Body, Param, Get, Query, UseGuards, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Put,
+  Body,
+  Param,
+  Get,
+  Query,
+  UseGuards,
+  Delete,
+} from '@nestjs/common';
 import { SchoolService } from './school.service';
-import { SchoolDto } from './school.dto';
+import { SchoolDto, UpdateSchoolDto } from './school.dto';
 
 import { AuthGuard } from '@nestjs/passport';
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
-
 
 @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
 @Controller('schools')
@@ -24,6 +33,15 @@ export class SchoolController {
   @Delete(':id')
   async deleteSchool(@Param('id') id: string) {
     return this.schoolService.deleteSchool(id);
+  }
+
+  @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)
+  @Put(':id')
+  async updateSchool(
+    @Param('id') id: string,
+    @Body() updateSchoolDto: UpdateSchoolDto,
+  ) {
+    return this.schoolService.updateSchool(id, updateSchoolDto);
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)

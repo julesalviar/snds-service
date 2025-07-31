@@ -1,8 +1,15 @@
-import { SchoolDto } from './school.dto';
-import { Model , Types} from 'mongoose';
+import { SchoolDto, UpdateSchoolDto } from './school.dto';
+import { Model, Types } from 'mongoose';
 import { School, SchoolDocument } from './school.schema';
 import { PROVIDER } from '../common/constants/providers';
-import { NotFoundException, BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 
 @Injectable()
 export class SchoolService {
@@ -48,13 +55,10 @@ export class SchoolService {
       const objectId = new Types.ObjectId(id);
       this.logger.log(`Attempting to delete school with ID: ${id}`);
 
-      const deletedSchoolNeed =
-        await this.schoolModel.findByIdAndDelete(objectId);
-      if (!deletedSchoolNeed) {
+      const deletedSchool = await this.schoolModel.findByIdAndDelete(objectId);
+      if (!deletedSchool) {
         this.logger.warn(`No school found with ID: ${objectId}`);
-        throw new NotFoundException(
-          `School with ID ${objectId} not found`,
-        );
+        throw new NotFoundException(`School with ID ${objectId} not found`);
       }
 
       this.logger.log(`School deleted successfully with ID: ${objectId}`);
@@ -72,6 +76,49 @@ export class SchoolService {
       }
 
       this.logger.error('Error deleting School', error.stack);
+      throw error;
+    }
+  }
+
+  async updateSchool(
+    id: string,
+    schoolUpdateDto: UpdateSchoolDto,
+  ): Promise<any> {
+    try {
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.log(`Attempting to update School with ID: ${id}`);
+
+      const objectId = new Types.ObjectId(id);
+      const updatedSchool = await this.schoolModel
+        .findByIdAndUpdate(
+          objectId,
+          { $set: { ...schoolUpdateDto } },
+          { new: true, runValidators: true },
+        )
+        .exec();
+
+      if (!updatedSchool) {
+        this.logger.warn(`No School found with ID: ${objectId}`);
+        throw new NotFoundException(`School with ID ${objectId} not found`);
+      }
+
+      this.logger.log(`School updated successfully with ID: ${objectId}`);
+      return {
+        success: true,
+        data: updatedSchool,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      if (error.name === 'CastError') {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.error('Error updating School', error.stack);
       throw error;
     }
   }
@@ -110,35 +157,29 @@ export class SchoolService {
   }
 
   // Get school by record/document Id (uuid)
-  async getSchoolById(id: string ) : Promise <any>
-  {
-    try { 
+  async getSchoolById(id: string): Promise<any> {
+    try {
       if (!Types.ObjectId.isValid(id)) {
         throw new BadRequestException(`Invalid ID format: ${id}`);
       }
 
       this.logger.log(`Attempting to retrieve School with ID: ${id}`);
       const objectId = new Types.ObjectId(id);
-      const retrievedSchool = await this.schoolModel
-        .findById(objectId)
-        .exec();
+      const retrievedSchool = await this.schoolModel.findById(objectId).exec();
 
       if (!retrievedSchool) {
         this.logger.warn(`No School found with ID: ${objectId}`);
-        throw new NotFoundException(
-          `School with ID ${objectId} not found`,
-        );
+        throw new NotFoundException(`School with ID ${objectId} not found`);
       }
 
       return {
         success: true,
-      data: retrievedSchool,
-      meta: {
-        timestamp: new Date(),
-      },
-    };
-  }
-    catch (error) {
+        data: retrievedSchool,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
       if (error.name === 'CastError') {
         throw new BadRequestException(`Invalid ID format: ${id}`);
       }
@@ -151,16 +192,16 @@ export class SchoolService {
   // Get school by assigned school Id (numeric)
   async getSchoolBySchoolId(schoolId: string): Promise<any> {
     try {
-      this.logger.log(`Attempting to retrieve School with School ID: ${schoolId}`);
+      this.logger.log(
+        `Attempting to retrieve School with School ID: ${schoolId}`,
+      );
       const retrievedSchool = await this.schoolModel
-        .findOne({schoolId})
+        .findOne({ schoolId })
         .exec();
 
       if (!retrievedSchool) {
         this.logger.warn(`No School found with ID: ${schoolId}`);
-        throw new NotFoundException(
-          `School with ID ${schoolId} not found`,
-        );
+        throw new NotFoundException(`School with ID ${schoolId} not found`);
       }
 
       return {
@@ -170,8 +211,7 @@ export class SchoolService {
           timestamp: new Date(),
         },
       };
-    }
-    catch (error) {
+    } catch (error) {
       this.logger.error('Error getting School by Id', error.stack);
       throw error;
     }

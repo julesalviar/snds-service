@@ -226,6 +226,11 @@ export class SchoolNeedService {
           path: 'projectId',
           select: 'title objectives schoolYear pillars',
         })
+        .populate({
+          path: 'schoolId',
+          select:
+            'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
+        })
         .exec();
 
       if (!updatedSchoolNeed) {

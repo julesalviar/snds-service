@@ -1,3 +1,4 @@
+import { PartialType } from '@nestjs/mapped-types';
 import {
   IsEmail,
   IsNotEmpty,
@@ -66,3 +67,5 @@ export class SchoolDto {
   @IsEmail()
   officialEmailAddress: string;
 }
+
+export class UpdateSchoolDto extends PartialType(SchoolDto) {}

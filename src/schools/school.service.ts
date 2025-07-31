@@ -1,21 +1,19 @@
-// import { SchoolDto } from 'src/common/dto/school.dto';
 import { SchoolDto } from './school.dto';
 import { Model , Types} from 'mongoose';
 import { School, SchoolDocument } from './school.schema';
 import { PROVIDER } from '../common/constants/providers';
 import { NotFoundException, BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { EncryptionService } from 'src/encryption/encryption.service';
-import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Injectable()
 export class SchoolService {
   private readonly logger = new Logger(SchoolService.name);
 
   constructor(
-    @Inject(PROVIDER.SCHOOL_MODEL) private readonly schoolModel: Model<School>, // Inject the custom provider
+    @Inject(PROVIDER.SCHOOL_MODEL)
+    private readonly schoolModel: Model<School>,
   ) {}
 
-  // Register school
+  // Create school
   async create(schoolCreateDto: SchoolDto): Promise<SchoolDocument> {
     try {
       this.logger.log(
@@ -38,6 +36,42 @@ export class SchoolService {
           `Duplicate entry for field(s): ${duplicateField}`,
         );
       }
+      throw error;
+    }
+  }
+
+  async deleteSchool(id: string): Promise<any> {
+    try {
+      if (!Types.ObjectId.isValid(id))
+        throw new BadRequestException(`Invalid school ID format: ${id}`);
+
+      const objectId = new Types.ObjectId(id);
+      this.logger.log(`Attempting to delete school with ID: ${id}`);
+
+      const deletedSchoolNeed =
+        await this.schoolModel.findByIdAndDelete(objectId);
+      if (!deletedSchoolNeed) {
+        this.logger.warn(`No school found with ID: ${objectId}`);
+        throw new NotFoundException(
+          `School with ID ${objectId} not found`,
+        );
+      }
+
+      this.logger.log(`School deleted successfully with ID: ${objectId}`);
+
+      return {
+        success: true,
+        data: { message: 'School  deleted successfully', objectId },
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      if (error.name === 'CastError') {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.error('Error deleting School', error.stack);
       throw error;
     }
   }
@@ -74,6 +108,8 @@ export class SchoolService {
       throw error;
     }
   }
+
+  // Get school by record/document Id (uuid)
   async getSchoolById(id: string ) : Promise <any>
   {
     try { 
@@ -112,6 +148,7 @@ export class SchoolService {
     }
   }
 
+  // Get school by assigned school Id (numeric)
   async getSchoolBySchoolId(schoolId: string): Promise<any> {
     try {
       this.logger.log(`Attempting to retrieve School with School ID: ${schoolId}`);

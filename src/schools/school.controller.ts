@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Query, UseGuards, Delete } from '@nestjs/common';
 import { SchoolService } from './school.service';
 import { SchoolDto } from './school.dto';
 
@@ -18,6 +18,12 @@ export class SchoolController {
   @Post()
   async createSchool(@Body() schoolRegistrationDto: SchoolDto) {
     return this.schoolService.create(schoolRegistrationDto);
+  }
+
+  @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)
+  @Delete(':id')
+  async deleteSchool(@Param('id') id: string) {
+    return this.schoolService.deleteSchool(id);
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)

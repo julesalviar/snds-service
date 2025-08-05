@@ -3,19 +3,16 @@ import {
   Post,
   Put,
   Get,
-  Query,
   Delete,
   Patch,
   Body,
   Param,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  SchoolNeedDto,
-  UpdateNeedDto,
-  UpdateSchoolNeedStatusDto,
-} from './school-need.dto';
+import { SchoolNeedDto, UpdateNeedDto } from './school-need.dto';
 import { SchoolNeedService } from './school-need.service';
+import { User } from 'src/user/user.decorator';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -40,15 +37,25 @@ export class SchoolNeedController {
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_VIEW)
-  @Get(':id')
-  async getSchoolNeedById(@Param('id') id: string) {
-    return this.schoolNeedService.getSchoolNeedById(id);
+  @Get(':param')
+  async getSchoolNeed(@Param('param') param: string) {
+    return this.schoolNeedService.getSchoolNeed(param);
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_VIEW)
   @Get()
-  async getAll(@Query('page') page = 1, @Query('limit') limit = 10) {
-    return this.schoolNeedService.getAll(Number(page), Number(limit));
+  async getAll(
+    @User('schoolId') schoolId: string,
+    @User('role') role: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    const effectiveSchoolId = role === 'schoolAdmin' ? schoolId : undefined;
+    return this.schoolNeedService.getAll(
+      effectiveSchoolId,
+      Number(page),
+      Number(limit),
+    );
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_MANAGE)
@@ -64,7 +71,7 @@ export class SchoolNeedController {
   @Patch(':id/status')
   async updateSchoolNeedStatus(
     @Param('id') id: string,
-    @Body() updateNeedStatusDto: UpdateSchoolNeedStatusDto,
+    @Body() updateNeedStatusDto: UpdateNeedDto,
   ) {
     return this.schoolNeedService.updateSchoolNeedStatus(
       id,

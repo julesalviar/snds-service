@@ -3,60 +3,54 @@ import { PartialType } from '@nestjs/mapped-types';
 import { SchoolNeedStatus } from './school-need.enums';
 
 export class SchoolNeedDto {
-  @IsOptional()
-  code: number;
-
-  @IsNotEmpty()
-  schoolId: string;
-
   @IsNotEmpty()
   projectId: string;
 
   @IsNotEmpty()
-  projectDescription: string;
-
-  @IsNotEmpty()
-  projectPillars: string;
-
-  @IsNotEmpty()
-  projectContributionType: string;
-
-  @IsNotEmpty()
-  projectSpecificContribution: string;
+  schoolId: string;
 
   @IsOptional()
-  createdByUserId: string;
-
-  @IsOptional()
-  quantityNeeded: number;
+  code: number;
 
   @IsNotEmpty()
-  unitMeasure: string;
+  description: string;
+
+  @IsNotEmpty()
+  contributionType: string;
+
+  @IsNotEmpty()
+  specificContribution: string;
+
+  @IsOptional()
+  quantity: number;
+
+  @IsNotEmpty()
+  unit: string;
 
   @IsNotEmpty()
   estimatedCost: number;
 
   @IsNotEmpty()
-  numberOfBeneficiaryStudents: number;
+  studentBeneficiaries: number;
 
   @IsNotEmpty()
-  numberOfBeneficiaryPersonnel: number;
+  personnelBeneficiaries: number;
 
   @IsOptional()
   @IsDateString()
-  targetImplementationDate: string;
-
-  @IsNotEmpty()
-  needDescriptionOrInfo: string;
+  implementationDate: string;
 
   @IsOptional()
-  uploadedPhotos: [{ type: string }];
+  images: [{ type: string }];
 
   @IsOptional()
   @IsEnum(SchoolNeedStatus, {
-    message: 'statusOfImplementation must be a valid SchoolNeedStatus value',
+    message: 'implementationStatus must be a valid SchoolNeedStatus value',
   })
-  statusOfImplementation: string;
+  implementationStatus: string;
+
+  @IsOptional()
+  createdBy: string;
 
   @IsOptional()
   updatedBy: string;

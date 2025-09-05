@@ -50,6 +50,12 @@ export class SchoolNeed extends Document {
 
   @Prop()
   updatedBy: string;
+
+  @Prop({
+    type: String,
+    match: /^\d{4}-\d{4}$/, // Optional: basic format validation
+  })
+  schoolYear?: string;
 }
 
 export type SchoolNeedDocument = HydratedDocument<SchoolNeed>;

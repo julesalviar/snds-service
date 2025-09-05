@@ -10,7 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { AipModule } from './aip/aip.module';
 import { CounterModule } from './common/counter/counter.module';
-import { SchoolNeedModule } from './school-needs/school-need.module';
+import { SchoolNeedModule } from 'src/school-need/school-need.module';
 import { ReferenceDataModule } from 'src/reference-data/reference-data.module';
 
 @Module({

@@ -1,4 +1,4 @@
-import { PermissionsEnum } from '../../user/enums/user-permission.enum';
+import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 
 const PERMISSION_HIERARCHY: Record<PermissionsEnum, PermissionsEnum[]> = {
   [PermissionsEnum.PROJECT_MANAGE]: [PermissionsEnum.PROJECT_VIEW],

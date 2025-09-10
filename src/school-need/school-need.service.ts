@@ -71,7 +71,7 @@ export class SchoolNeedService {
       const savedSchoolNeed = await createdSchoolNeed.save();
 
       this.logger.log(
-        `SchoolNeed created successfully with ID: ${createdSchoolNeed._id}`,
+        `SchoolNeed created successfully with ID: ${createdSchoolNeed._id.toString()}`,
       );
       return savedSchoolNeed;
     } catch (error) {
@@ -116,19 +116,16 @@ export class SchoolNeedService {
     }
   }
 
-  async getAll(page: number, limit: number) {
+  async getAll(schoolId?: string, page = 1, limit = 10) {
     try {
-      this.logger.log(
-        `Attempting to retrieve all paginated school Needs: page = ${page}, limit = ${limit}`,
-      );
+      this.logger.log(`Attempting to retrieve all school Needs`);
 
       const skip = (page - 1) * limit;
-      const [schoolNeeds, total] = await Promise.all([
+      const queryFilter = schoolId ? { schoolId } : {};
+
+      const [needs, total, school] = await Promise.all([
         this.schoolNeedModel
-          .find()
-          .sort({ code: -1 })
-          .skip(skip)
-          .limit(limit)
+          .find(queryFilter)
           .populate({
             path: 'projectId',
             select: 'title objectives schoolYear pillars',
@@ -138,37 +135,60 @@ export class SchoolNeedService {
             select:
               'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
           })
+          .sort({ apn: -1 })
+          .skip(skip)
+          .limit(limit)
           .exec(),
-        this.schoolNeedModel.countDocuments(),
+        this.schoolNeedModel.countDocuments(queryFilter),
+        schoolId
+          ? this.schoolModel
+              .findById(schoolId)
+              .select(
+                'schoolName division districtOrCluster schoolOffering officialEmailAddress',
+              )
+              .lean()
+          : null,
       ]);
-      return {
+
+      const response: any = {
         success: true,
-        data: schoolNeeds,
-        meta: {
-          count: schoolNeeds.length,
-          totalItems: total,
-          currentPage: page,
-          totalPages: Math.ceil(total / limit),
-          timestamp: new Date(),
-        },
       };
+
+      if (schoolId) {
+        response.school = school || {};
+      }
+
+      response.data = needs;
+
+      response.meta = {
+        count: needs.length,
+        totalItems: total,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        timestamp: new Date(),
+      };
+
+      return response;
     } catch (error) {
       this.logger.error('Error getting school needs', error.stack);
       throw error;
     }
   }
 
-  async getSchoolNeedById(id: string): Promise<any> {
+  async getSchoolNeed(param: string): Promise<any> {
     try {
-      if (!Types.ObjectId.isValid(id)) {
-        throw new BadRequestException(`Invalid ID format: ${id}`);
-      }
+      const isObjectId = Types.ObjectId.isValid(param);
+      const query = isObjectId
+        ? { _id: new Types.ObjectId(param) }
+        : { code: param };
+      const identifierType = isObjectId ? 'ID' : 'code';
 
-      this.logger.log(`Attempting to retrieve School Need with ID: ${id}`);
+      this.logger.log(
+        `Attempting to retrieve School Need with ${identifierType}: ${param}`,
+      );
 
-      const objectId = new Types.ObjectId(id);
       const retrievedSchoolNeed = await this.schoolNeedModel
-        .findById(objectId)
+        .findOne(query)
         .populate({
           path: 'projectId',
           select: 'title objectives schoolYear pillars',
@@ -181,14 +201,16 @@ export class SchoolNeedService {
         .exec();
 
       if (!retrievedSchoolNeed) {
-        this.logger.warn(`No School Need found with ID: ${objectId}`);
+        this.logger.warn(
+          `No School Need found with ${identifierType}: ${param}`,
+        );
         throw new NotFoundException(
-          `School Need with ID ${objectId} not found`,
+          `School Need with ${identifierType} ${param} not found`,
         );
       }
 
       this.logger.log(
-        `School Need retrieved successfully with ID: ${objectId}`,
+        `School Need retrieved successfully with ${identifierType}: ${param}`,
       );
       return {
         success: true,
@@ -198,11 +220,10 @@ export class SchoolNeedService {
         },
       };
     } catch (error) {
-      if (error.name === 'CastError') {
-        throw new BadRequestException(`Invalid ID format: ${id}`);
-      }
-
-      this.logger.error('Error getting School Need by Id', error.stack);
+      this.logger.error(
+        `Error getting School Need by ${Types.ObjectId.isValid(param) ? 'ID' : 'code'}`,
+        error.stack,
+      );
       throw error;
     }
   }

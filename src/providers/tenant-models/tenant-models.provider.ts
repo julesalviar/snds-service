@@ -6,8 +6,8 @@ import { Aip, AipSchema } from 'src/aip/aip.schema';
 import {
   SchoolNeedSchema,
   SchoolNeed,
-} from 'src/school-needs/school-need.schema';
-import { School, SchoolSchema } from 'src/schools/school.schema';
+} from 'src/school-need/school-need.schema';
+import { School, SchoolSchema } from 'src/school-need/school.schema';
 
 export const TenantModels = {
   userModel: {

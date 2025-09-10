@@ -33,6 +33,9 @@ export class User extends Document {
 
   @Prop({ required: true, enum: UserRole })
   role: UserRole;
+
+  @Prop()
+  schoolId?: string;
 }
 
 export type UserDocument = HydratedDocument<User>;

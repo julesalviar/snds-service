@@ -13,7 +13,7 @@ export class UsersController {
     } catch (error) {
       throw new HttpException(
         error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        error.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

@@ -33,25 +33,26 @@ export class SchoolNeedService {
 
   async createSchoolNeed(needDto: SchoolNeedDto): Promise<SchoolNeedDocument> {
     const { projectId, schoolId } = needDto;
+
     try {
       // School validation
-      if (!Types.ObjectId.isValid(schoolId))
-        throw new BadRequestException(`Invalid School Id: ${[schoolId]}`);
+      if (!Types.ObjectId.isValid(schoolId)) {
+        throw new BadRequestException(`Invalid School Id: ${schoolId}`);
+      }
 
-      // AIP / Project Id validations
-      if (!Types.ObjectId.isValid(projectId))
+      // Project validation
+      if (!Types.ObjectId.isValid(projectId)) {
+        throw new BadRequestException(`Invalid Project Id: ${projectId}`);
+      }
+
+      const project = await this.aipModel
+        .findById(projectId)
+        .select('schoolYear');
+      if (!project) {
         throw new BadRequestException(
-          `Invalid Project / SchoolNeed Id: ${[projectId]}`,
+          `Project with Id: ${projectId} not found`,
         );
-
-      const aipExists = await this.aipModel.exists({
-        _id: projectId,
-      });
-
-      if (!aipExists)
-        throw new BadRequestException(
-          `SchoolNeed / Project with Id: ${[projectId]} not found`,
-        );
+      }
 
       this.logger.log(
         'Creating new School Needs information with the following data:',
@@ -67,7 +68,9 @@ export class SchoolNeedService {
         ...needDto,
         code,
         statusOfImplementation,
+        schoolYear: project.schoolYear,
       });
+
       const savedSchoolNeed = await createdSchoolNeed.save();
 
       this.logger.log(
@@ -116,12 +119,18 @@ export class SchoolNeedService {
     }
   }
 
-  async getAll(schoolId?: string, page = 1, limit = 10) {
+  async getAll(schoolId?: string, page = 1, limit = 10, schoolYear?: string) {
     try {
       this.logger.log(`Attempting to retrieve all school Needs`);
 
       const skip = (page - 1) * limit;
-      const queryFilter = schoolId ? { schoolId } : {};
+
+      const queryFilter: any = {};
+      if (schoolId) queryFilter.schoolId = schoolId;
+
+      if (/^\d{4}-\d{4}$/.test(schoolYear || '')) {
+        queryFilter.schoolYear = schoolYear;
+      }
 
       const [needs, total, school] = await Promise.all([
         this.schoolNeedModel
@@ -152,21 +161,19 @@ export class SchoolNeedService {
 
       const response: any = {
         success: true,
+        data: needs,
+        meta: {
+          count: needs.length,
+          totalItems: total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+          timestamp: new Date(),
+        },
       };
 
       if (schoolId) {
         response.school = school || {};
       }
-
-      response.data = needs;
-
-      response.meta = {
-        count: needs.length,
-        totalItems: total,
-        currentPage: page,
-        totalPages: Math.ceil(total / limit),
-        timestamp: new Date(),
-      };
 
       return response;
     } catch (error) {

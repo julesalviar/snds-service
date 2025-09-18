@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types, HydratedDocument } from 'mongoose';
+import { Document, HydratedDocument } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class School extends Document {
@@ -28,7 +28,7 @@ export class School extends Document {
   designation: string;
 
   @Prop()
-  contactNumber: String;
+  contactNumber: string;
 
   @Prop({ required: true, unique: true })
   officialEmailAddress: string;

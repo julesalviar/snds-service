@@ -7,7 +7,7 @@ import {
   SchoolNeedSchema,
   SchoolNeed,
 } from 'src/school-need/school-need.schema';
-import { School, SchoolSchema } from 'src/school-need/school.schema';
+import { School, SchoolSchema } from 'src/schools/school.schema';
 import {
   ImageUpload,
   ImageUploadSchema,

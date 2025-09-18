@@ -6,6 +6,7 @@ export const RolePermissions = {
     PermissionsEnum.PROJECT_MANAGE,
     PermissionsEnum.SCHOOL_NEED_MANAGE,
     PermissionsEnum.SCHOOL_PROFILE_MANAGE,
+    PermissionsEnum.SCHOOL_PROFILE_VIEW,
     PermissionsEnum.USER_MANAGE,
     PermissionsEnum.USER_ASSIGN_ROLE,
   ],
@@ -19,6 +20,7 @@ export const RolePermissions = {
     PermissionsEnum.PROJECT_MANAGE,
     PermissionsEnum.SCHOOL_NEED_MANAGE,
     PermissionsEnum.SCHOOL_PROFILE_MANAGE,
+    PermissionsEnum.SCHOOL_PROFILE_VIEW,
   ],
   [UserRole.SCHOOL_STAFF]: [
     PermissionsEnum.PROJECT_MANAGE,
@@ -33,10 +35,12 @@ export const RolePermissions = {
   [UserRole.DIVISION_ADMIN]: [
     PermissionsEnum.PROJECT_MANAGE,
     PermissionsEnum.SCHOOL_PROFILE_MANAGE,
+    PermissionsEnum.SCHOOL_PROFILE_VIEW,
   ],
   [UserRole.DIVISION_STAFF]: [
     PermissionsEnum.PROJECT_MANAGE,
     PermissionsEnum.SCHOOL_PROFILE_MANAGE,
+    PermissionsEnum.SCHOOL_PROFILE_VIEW,
   ],
   [UserRole.DIVISION_GUEST]: [
     PermissionsEnum.PROJECT_VIEW,

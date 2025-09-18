@@ -12,6 +12,7 @@ import { AipModule } from './aip/aip.module';
 import { CounterModule } from './common/counter/counter.module';
 import { SchoolNeedModule } from 'src/school-need/school-need.module';
 import { ReferenceDataModule } from 'src/reference-data/reference-data.module';
+import { SchoolModule } from './schools/school.module';
 import { UploadModule } from './upload/upload.module';
 import { ImageModule } from './image/image.module';
 import { StorageModule } from './storage/storage.module';
@@ -30,6 +31,7 @@ import { StorageModule } from './storage/storage.module';
     AipModule,
     CounterModule,
     SchoolNeedModule,
+    SchoolModule,
     ReferenceDataModule,
     UploadModule,
     ImageModule,

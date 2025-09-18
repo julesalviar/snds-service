@@ -9,6 +9,7 @@ export enum PermissionsEnum {
 
   // School Profile
   SCHOOL_PROFILE_MANAGE = 'schoolProfile.manage',
+  SCHOOL_PROFILE_VIEW = 'schoolProfile.view',
 
   // Users
   USER_VIEW = 'user.view',

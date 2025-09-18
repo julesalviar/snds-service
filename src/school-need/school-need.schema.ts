@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, HydratedDocument } from 'mongoose';
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'school_needs' })
 export class SchoolNeed extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Aip', required: true })
   projectId: Types.ObjectId;
@@ -50,6 +50,12 @@ export class SchoolNeed extends Document {
 
   @Prop()
   updatedBy: string;
+
+  @Prop({
+    type: String,
+    match: /^\d{4}-\d{4}$/, // Optional: basic format validation
+  })
+  schoolYear?: string;
 }
 
 export type SchoolNeedDocument = HydratedDocument<SchoolNeed>;

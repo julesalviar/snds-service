@@ -16,6 +16,7 @@ export class SchoolNeedDto {
   description: string;
 
   @IsNotEmpty()
+  @IsOptional()
   contributionType: string;
 
   @IsNotEmpty()
@@ -41,7 +42,7 @@ export class SchoolNeedDto {
   implementationDate: string;
 
   @IsOptional()
-  images: [{ type: string }];
+  images?: string[];
 
   @IsOptional()
   @IsEnum(SchoolNeedStatus, {

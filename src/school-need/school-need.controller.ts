@@ -49,12 +49,18 @@ export class SchoolNeedController {
     @User('role') role: string,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
+    @Query('schoolYear') schoolYear?: string,
   ) {
     const effectiveSchoolId = role === 'schoolAdmin' ? schoolId : undefined;
+
+    const isValidFormat = /^\d{4}-\d{4}$/.test(schoolYear || '');
+    const finalSchoolYear = isValidFormat ? schoolYear : undefined;
+
     return this.schoolNeedService.getAll(
       effectiveSchoolId,
       Number(page),
       Number(limit),
+      finalSchoolYear,
     );
   }
 

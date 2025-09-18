@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, HydratedDocument } from 'mongoose';
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'school_needs' })
 export class SchoolNeed extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Aip', required: true })
   projectId: Types.ObjectId;

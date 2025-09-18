@@ -12,6 +12,9 @@ import { AipModule } from './aip/aip.module';
 import { CounterModule } from './common/counter/counter.module';
 import { SchoolNeedModule } from 'src/school-need/school-need.module';
 import { ReferenceDataModule } from 'src/reference-data/reference-data.module';
+import { UploadModule } from './upload/upload.module';
+import { ImageModule } from './image/image.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -28,6 +31,9 @@ import { ReferenceDataModule } from 'src/reference-data/reference-data.module';
     CounterModule,
     SchoolNeedModule,
     ReferenceDataModule,
+    UploadModule,
+    ImageModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

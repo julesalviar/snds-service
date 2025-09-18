@@ -8,6 +8,10 @@ import {
   SchoolNeed,
 } from 'src/school-need/school-need.schema';
 import { School, SchoolSchema } from 'src/school-need/school.schema';
+import {
+  ImageUpload,
+  ImageUploadSchema,
+} from 'src/upload/schemas/image-upload.schema';
 
 export const TenantModels = {
   userModel: {
@@ -42,6 +46,16 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<School>> => {
       return tenantConnection.model(School.name, SchoolSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  imageUploadModel: {
+    provide: PROVIDER.IMAGE_UPLOAD_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<ImageUpload>> => {
+      return tenantConnection.model(ImageUpload.name, ImageUploadSchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

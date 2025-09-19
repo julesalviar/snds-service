@@ -15,10 +15,10 @@ export class TenantValidationMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
-      this.logger.log('Tenant validation middleware called', { 
-        url: req.url, 
+      this.logger.log('Tenant validation middleware called', {
+        url: req.url,
         method: req.method,
-        headers: req.headers 
+        headers: req.headers,
       });
 
       const tenantHeader = req.headers['tenant'];

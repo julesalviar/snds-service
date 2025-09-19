@@ -18,6 +18,7 @@ import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { StakeHolderEngageDto } from 'src/stakeholder-engage/stakeholder-engage.dto';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
 @Controller('school-needs')
@@ -83,5 +84,14 @@ export class SchoolNeedController {
       id,
       updateNeedStatusDto,
     );
+  }
+
+  @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_MANAGE)
+  @Patch(':id/engage')
+  async engageSchoolNeed(
+    @Param('id') id: string,
+    @Body() stakeHolderEngageDto: StakeHolderEngageDto,
+  ) {
+    return this.schoolNeedService.engageSchoolNeeds(id, stakeHolderEngageDto);
   }
 }

@@ -14,6 +14,7 @@ import { SchoolNeedDocument, SchoolNeed } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
 import { School } from 'src/schools/school.schema';
 import { SchoolNeedStatus } from './school-need.enums';
+import { StakeHolderEngageDto } from 'src/stakeholder-engage/stakeholder-engage.dto';
 
 @Injectable()
 export class SchoolNeedService {
@@ -331,6 +332,53 @@ export class SchoolNeedService {
       }
 
       this.logger.error('Error updating SchoolNeed', error.stack);
+      throw error;
+    }
+  }
+
+  async engageSchoolNeeds(
+    param: string,
+    stakeHolderEngageDto: StakeHolderEngageDto,
+  ): Promise<any> {
+    try {
+      const isObjectId = Types.ObjectId.isValid(param);
+      const query = isObjectId
+        ? { _id: new Types.ObjectId(param) }
+        : { code: param };
+      const identifierType = isObjectId ? 'ID' : 'code';
+      const retrievedSchoolNeed = await this.schoolNeedModel
+        .findOne(query)
+        .select('_id code description')
+         .exec();
+
+      if (!retrievedSchoolNeed) {
+        this.logger.warn(
+          `No School Need found with ${identifierType}: ${param}`,
+        );
+        throw new NotFoundException(
+          `School Need with ${identifierType} ${param} not found`,
+        );
+      }
+
+      // Create the stakeholder engagement record 
+
+      this.logger.log(
+        `School Need engaged successfully with ${identifierType}: ${param}`,
+      );
+
+      return {
+        success: 'testing',
+        data: stakeHolderEngageDto,
+        test: retrievedSchoolNeed,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error engaging SchoolNeed with ${Types.ObjectId.isValid(param) ? 'ID' : 'code'}`,
+        error.stack,
+      );
       throw error;
     }
   }

@@ -87,7 +87,7 @@ export class SchoolNeedController {
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_MANAGE)
-  @Patch(':id/engage')
+  @Post(':id/engage')
   async engageSchoolNeed(
     @Param('id') id: string,
     @Body() stakeHolderEngageDto: StakeHolderEngageDto,

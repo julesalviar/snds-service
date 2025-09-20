@@ -37,7 +37,7 @@ import { StakeholderEngageModule } from './stakeholder-engage/stakeholder-engage
     UploadModule,
     ImageModule,
     StorageModule,
-    // StakeholderEngageModule,
+    StakeholderEngageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -15,7 +15,8 @@ import { Aip } from 'src/aip/aip.schema';
 import { School } from 'src/schools/school.schema';
 import { SchoolNeedStatus } from './school-need.enums';
 import { StakeHolderEngageDto } from 'src/stakeholder-engage/stakeholder-engage.dto';
-
+import { StakeholderEngageService } from 'src/stakeholder-engage/stakeholder-engage.service';
+import { StakeholderEngage } from 'src/stakeholder-engage/stakeholder-engage.schema';
 @Injectable()
 export class SchoolNeedService {
   private readonly logger = new Logger(SchoolNeedService.name);
@@ -27,9 +28,13 @@ export class SchoolNeedService {
     @Inject(PROVIDER.SCHOOL_MODEL)
     private readonly schoolModel: Model<School>,
 
+    @Inject(PROVIDER.STAKEHOLDER_ENGAGE_MODEL)
+    private readonly stakeholderEngageModel: Model<StakeholderEngage>,
+
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
     private readonly schoolNeedModel: Model<SchoolNeed>,
     private readonly counterService: CounterService,
+    private readonly stakeholderEngageService: StakeholderEngageService,
   ) {}
 
   async createSchoolNeed(needDto: SchoolNeedDto): Promise<SchoolNeedDocument> {
@@ -220,9 +225,18 @@ export class SchoolNeedService {
       this.logger.log(
         `School Need retrieved successfully with ${identifierType}: ${param}`,
       );
+
+      const stakeholderEngagements = await this.stakeholderEngageModel
+        .find({ code: retrievedSchoolNeed.code })
+        .select('-schoolNeedId -updatedBy -__v')
+        .exec();
+
+      const schoolNeedObj = retrievedSchoolNeed.toObject();
+      const data = { ...schoolNeedObj, stakeholderEngagements };
+
       return {
         success: true,
-        data: retrievedSchoolNeed,
+        data,
         meta: {
           timestamp: new Date(),
         },
@@ -349,7 +363,7 @@ export class SchoolNeedService {
       const retrievedSchoolNeed = await this.schoolNeedModel
         .findOne(query)
         .select('_id code description')
-         .exec();
+        .exec();
 
       if (!retrievedSchoolNeed) {
         this.logger.warn(
@@ -360,16 +374,24 @@ export class SchoolNeedService {
         );
       }
 
-      // Create the stakeholder engagement record 
+      // Create the stakeholder engagement record
+      const stakeHolderEngageDtoWithNeed = {
+        ...stakeHolderEngageDto,
+        code: retrievedSchoolNeed.code,
+        schoolNeedId: retrievedSchoolNeed._id.toString(),
+      };
+
+      const result =
+        await this.stakeholderEngageService.createStakeholderEngagementDetail(
+          stakeHolderEngageDtoWithNeed,
+        );
 
       this.logger.log(
         `School Need engaged successfully with ${identifierType}: ${param}`,
       );
-
       return {
-        success: 'testing',
-        data: stakeHolderEngageDto,
-        test: retrievedSchoolNeed,
+        success: true,
+        data: result,
         meta: {
           timestamp: new Date(),
         },

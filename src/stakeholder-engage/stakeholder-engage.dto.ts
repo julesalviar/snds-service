@@ -4,6 +4,9 @@ export class StakeHolderEngageDto {
   @IsOptional()
   code: number;
 
+  @IsOptional()
+  schoolNeedId: string;
+
   @IsNotEmpty()
   donatedAmount: number;
 
@@ -29,8 +32,8 @@ export class StakeHolderEngageDto {
   endDate: string;
 
   @IsOptional()
-  createdBy: string;
+  createdAt?: Date;
 
   @IsOptional()
-  updatedBy: string;
+  updatedAt?: Date;
 }

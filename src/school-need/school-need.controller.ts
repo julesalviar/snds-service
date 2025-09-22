@@ -47,12 +47,12 @@ export class SchoolNeedController {
   @Get()
   async getAll(
     @User('schoolId') schoolId: string,
-    @User('role') role: string,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('schoolYear') schoolYear?: string,
   ) {
-    const effectiveSchoolId = role === 'schoolAdmin' ? schoolId : undefined;
+    console.log('School ID from principal:', schoolId);
+    const effectiveSchoolId = schoolId;
 
     const isValidFormat = /^\d{4}-\d{4}$/.test(schoolYear || '');
     const finalSchoolYear = isValidFormat ? schoolYear : undefined;

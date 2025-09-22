@@ -14,7 +14,7 @@ import { SchoolNeedDocument, SchoolNeed } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
 import { School } from 'src/schools/school.schema';
 import { SchoolNeedStatus } from './school-need.enums';
-
+import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 @Injectable()
 export class SchoolNeedService {
   private readonly logger = new Logger(SchoolNeedService.name);
@@ -219,6 +219,7 @@ export class SchoolNeedService {
       this.logger.log(
         `School Need retrieved successfully with ${identifierType}: ${param}`,
       );
+
       return {
         success: true,
         data: retrievedSchoolNeed,
@@ -291,16 +292,16 @@ export class SchoolNeedService {
     needDto: UpdateNeedDto,
   ): Promise<any> {
     try {
-      if (!Types.ObjectId.isValid(id)) {
-        throw new BadRequestException(`Invalid ID format: ${id}`);
-      }
+      const isObjectId = Types.ObjectId.isValid(id);
+      const query = isObjectId ? { _id: new Types.ObjectId(id) } : { code: id };
+      const identifierType = isObjectId ? 'ID' : 'code';
+      this.logger.log(
+        `Attempting to update School Need status with ${identifierType}: ${id}`,
+      );
 
-      this.logger.log(`Attempting to update School Need status with ID: ${id}`);
-
-      const objectId = new Types.ObjectId(id);
       const updatedSchoolNeed = await this.schoolNeedModel
-        .findByIdAndUpdate(
-          objectId,
+        .findOneAndUpdate(
+          query,
           { $set: { ...needDto } },
           { new: true, runValidators: true },
         )
@@ -311,13 +312,15 @@ export class SchoolNeedService {
         .exec();
 
       if (!updatedSchoolNeed) {
-        this.logger.warn(`No School Need found with ID: ${objectId}`);
+        this.logger.warn(`No School Need found with ${identifierType}: ${id}`);
         throw new NotFoundException(
-          `School Need with ID ${objectId} not found`,
+          `School Need with ${identifierType}:  ? 'ID' : 'code' : ${id} not found`,
         );
       }
 
-      this.logger.log(`School Need updated successfully with ID: ${objectId}`);
+      this.logger.log(
+        `School Need updated successfully with ${identifierType}: ${id}`,
+      );
       return {
         success: true,
         data: updatedSchoolNeed,
@@ -331,6 +334,57 @@ export class SchoolNeedService {
       }
 
       this.logger.error('Error updating SchoolNeed', error.stack);
+      throw error;
+    }
+  }
+
+  async engageSchoolNeeds(
+    param: string,
+    stakeHolderEngageDto: StakeHolderEngageDto,
+  ): Promise<any> {
+    try {
+      const isObjectId = Types.ObjectId.isValid(param);
+      const query = isObjectId
+        ? { _id: new Types.ObjectId(param) }
+        : { code: param };
+
+      const identifierType = isObjectId ? 'ID' : 'code';
+      const retrievedSchoolNeed = await this.schoolNeedModel
+        .findOne(query)
+        .exec();
+
+      if (!retrievedSchoolNeed) {
+        this.logger.warn(
+          `No School Need found with ${identifierType}: ${param}`,
+        );
+        throw new NotFoundException(
+          `School Need with ${identifierType} ${param} not found`,
+        );
+      }
+
+      if (!retrievedSchoolNeed.engagement) {
+        retrievedSchoolNeed.engagement = [];
+      }
+
+      retrievedSchoolNeed.engagement.push(stakeHolderEngageDto);
+      retrievedSchoolNeed.markModified('engagement');
+      await retrievedSchoolNeed.save();
+
+      this.logger.log(
+        `School Need engaged successfully with ${identifierType}: ${param}`,
+      );
+      return {
+        success: true,
+        data: retrievedSchoolNeed,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error engaging SchoolNeed with ${Types.ObjectId.isValid(param) ? 'ID' : 'code'}`,
+        error.stack,
+      );
       throw error;
     }
   }

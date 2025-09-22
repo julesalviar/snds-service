@@ -1,6 +1,7 @@
 import { IsDateString, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 import { SchoolNeedStatus } from './school-need.enums';
+import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 
 export class SchoolNeedDto {
   @IsNotEmpty()
@@ -39,7 +40,7 @@ export class SchoolNeedDto {
 
   @IsOptional()
   @IsDateString()
-  implementationDate: string;
+  targetDate: string;
 
   @IsOptional()
   images?: string[];
@@ -49,6 +50,9 @@ export class SchoolNeedDto {
     message: 'implementationStatus must be a valid SchoolNeedStatus value',
   })
   implementationStatus: string;
+
+  @IsOptional()
+  engagement: [StakeHolderEngageDto];
 
   @IsOptional()
   createdBy: string;
@@ -61,7 +65,7 @@ export class UpdateNeedDto extends PartialType(SchoolNeedDto) {}
 export class UpdateSchoolNeedStatusDto {
   @IsNotEmpty()
   @IsEnum(SchoolNeedStatus, {
-    message: 'statusOfImplementation must be a valid SchoolNeedStatus value',
+    message: 'implementationStatus must be a valid SchoolNeedStatus value',
   })
   statusOfImplementation: SchoolNeedStatus;
 }

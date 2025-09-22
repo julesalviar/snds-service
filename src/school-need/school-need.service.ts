@@ -14,9 +14,7 @@ import { SchoolNeedDocument, SchoolNeed } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
 import { School } from 'src/schools/school.schema';
 import { SchoolNeedStatus } from './school-need.enums';
-import { StakeHolderEngageDto } from 'src/stakeholder-engage/stakeholder-engage.dto';
-import { StakeholderEngageService } from 'src/stakeholder-engage/stakeholder-engage.service';
-import { StakeholderEngage } from 'src/stakeholder-engage/stakeholder-engage.schema';
+import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 @Injectable()
 export class SchoolNeedService {
   private readonly logger = new Logger(SchoolNeedService.name);
@@ -28,13 +26,9 @@ export class SchoolNeedService {
     @Inject(PROVIDER.SCHOOL_MODEL)
     private readonly schoolModel: Model<School>,
 
-    @Inject(PROVIDER.STAKEHOLDER_ENGAGE_MODEL)
-    private readonly stakeholderEngageModel: Model<StakeholderEngage>,
-
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
     private readonly schoolNeedModel: Model<SchoolNeed>,
     private readonly counterService: CounterService,
-    private readonly stakeholderEngageService: StakeholderEngageService,
   ) {}
 
   async createSchoolNeed(needDto: SchoolNeedDto): Promise<SchoolNeedDocument> {
@@ -226,17 +220,9 @@ export class SchoolNeedService {
         `School Need retrieved successfully with ${identifierType}: ${param}`,
       );
 
-      const stakeholderEngagements = await this.stakeholderEngageModel
-        .find({ code: retrievedSchoolNeed.code })
-        .select('-schoolNeedId -updatedBy -__v')
-        .exec();
-
-      const schoolNeedObj = retrievedSchoolNeed.toObject();
-      const data = { ...schoolNeedObj, stakeholderEngagements };
-
       return {
         success: true,
-        data,
+        data: retrievedSchoolNeed,
         meta: {
           timestamp: new Date(),
         },
@@ -306,16 +292,16 @@ export class SchoolNeedService {
     needDto: UpdateNeedDto,
   ): Promise<any> {
     try {
-      if (!Types.ObjectId.isValid(id)) {
-        throw new BadRequestException(`Invalid ID format: ${id}`);
-      }
+      const isObjectId = Types.ObjectId.isValid(id);
+      const query = isObjectId ? { _id: new Types.ObjectId(id) } : { code: id };
+      const identifierType = isObjectId ? 'ID' : 'code';
+      this.logger.log(
+        `Attempting to update School Need status with ${identifierType}: ${id}`,
+      );
 
-      this.logger.log(`Attempting to update School Need status with ID: ${id}`);
-
-      const objectId = new Types.ObjectId(id);
       const updatedSchoolNeed = await this.schoolNeedModel
-        .findByIdAndUpdate(
-          objectId,
+        .findOneAndUpdate(
+          query,
           { $set: { ...needDto } },
           { new: true, runValidators: true },
         )
@@ -326,13 +312,15 @@ export class SchoolNeedService {
         .exec();
 
       if (!updatedSchoolNeed) {
-        this.logger.warn(`No School Need found with ID: ${objectId}`);
+        this.logger.warn(`No School Need found with ${identifierType}: ${id}`);
         throw new NotFoundException(
-          `School Need with ID ${objectId} not found`,
+          `School Need with ${identifierType}:  ? 'ID' : 'code' : ${id} not found`,
         );
       }
 
-      this.logger.log(`School Need updated successfully with ID: ${objectId}`);
+      this.logger.log(
+        `School Need updated successfully with ${identifierType}: ${id}`,
+      );
       return {
         success: true,
         data: updatedSchoolNeed,
@@ -362,7 +350,6 @@ export class SchoolNeedService {
       const identifierType = isObjectId ? 'ID' : 'code';
       const retrievedSchoolNeed = await this.schoolNeedModel
         .findOne(query)
-        .select('_id code description')
         .exec();
 
       if (!retrievedSchoolNeed) {
@@ -374,24 +361,20 @@ export class SchoolNeedService {
         );
       }
 
-      // Create the stakeholder engagement record
-      const stakeHolderEngageDtoWithNeed = {
-        ...stakeHolderEngageDto,
-        code: retrievedSchoolNeed.code,
-        schoolNeedId: retrievedSchoolNeed._id.toString(),
-      };
+      if (!retrievedSchoolNeed.engagement) {
+        retrievedSchoolNeed.engagement = [];
+      }
 
-      const result =
-        await this.stakeholderEngageService.createStakeholderEngagementDetail(
-          stakeHolderEngageDtoWithNeed,
-        );
+      retrievedSchoolNeed.engagement.push(stakeHolderEngageDto);
+      retrievedSchoolNeed.markModified('engagement');
+      await retrievedSchoolNeed.save();
 
       this.logger.log(
         `School Need engaged successfully with ${identifierType}: ${param}`,
       );
       return {
         success: true,
-        data: result,
+        data: retrievedSchoolNeed,
         meta: {
           timestamp: new Date(),
         },

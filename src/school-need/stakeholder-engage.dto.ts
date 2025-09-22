@@ -1,27 +1,29 @@
-import { IsDateString, IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsMongoId,
+} from 'class-validator';
 
 export class StakeHolderEngageDto {
-  @IsOptional()
-  code: number;
-
-  @IsOptional()
-  schoolNeedId: string;
-
   @IsNotEmpty()
   donatedAmount: number;
 
   @IsNotEmpty()
-  typeOfStakeholder: string;
+  @IsMongoId({
+    message: `stakeholderId must be a valid stakeholder id.`,
+  })
+  stakeholderId: string;
 
   @IsNotEmpty()
-  amountContributionOrAppraisedValue: number;
+  value: number;
 
   @IsNotEmpty()
   unitMeasure: string;
 
   @IsNotEmpty()
   @IsDateString()
-  moaSigningDate: string;
+  signingDate: string;
 
   @IsOptional()
   @IsDateString()

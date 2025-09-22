@@ -7,10 +7,6 @@ import {
   SchoolNeedSchema,
   SchoolNeed,
 } from 'src/school-need/school-need.schema';
-import {
-  StakeholderEngage,
-  StakeholderEngageSchema,
-} from 'src/stakeholder-engage/stakeholder-engage.schema';
 import { School, SchoolSchema } from 'src/schools/school.schema';
 import {
   ImageUpload,
@@ -40,19 +36,6 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<SchoolNeed>> => {
       return tenantConnection.model(SchoolNeed.name, SchoolNeedSchema);
-    },
-    inject: [PROVIDER.TENANT_CONNECTION],
-  },
-
-  stakeholderEngageModel: {
-    provide: PROVIDER.STAKEHOLDER_ENGAGE_MODEL,
-    useFactory: async (
-      tenantConnection: Connection,
-    ): Promise<Model<StakeholderEngage>> => {
-      return tenantConnection.model(
-        StakeholderEngage.name,
-        StakeholderEngageSchema,
-      );
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

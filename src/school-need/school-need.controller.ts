@@ -18,7 +18,7 @@ import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { AuthGuard } from '@nestjs/passport';
-import { StakeHolderEngageDto } from 'src/stakeholder-engage/stakeholder-engage.dto';
+import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
 @Controller('school-needs')

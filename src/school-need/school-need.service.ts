@@ -347,6 +347,7 @@ export class SchoolNeedService {
       const query = isObjectId
         ? { _id: new Types.ObjectId(param) }
         : { code: param };
+
       const identifierType = isObjectId ? 'ID' : 'code';
       const retrievedSchoolNeed = await this.schoolNeedModel
         .findOne(query)

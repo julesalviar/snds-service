@@ -412,4 +412,76 @@ export class SchoolNeedService {
       throw error;
     }
   }
+  async getStakeholderContributions(
+    stakeholderId: string,
+    page = 1,
+    limit = 10,
+  ): Promise<any> {
+    try {
+      const skip = (page - 1) * limit;
+      const [stakeholderContributions, total] = await Promise.all([
+        this.schoolNeedModel
+          .find({
+            'engagement.stakeholderId': stakeholderId,
+          })
+          .select('_id code description schoolId engagement')
+          .populate({
+            path: 'schoolId',
+            select: 'schoolName division schoolName districtOrCluster  ',
+          })
+          .sort({ code: 1 })
+          .skip(skip)
+          .limit(limit)
+          .exec(),
+        this.schoolNeedModel.countDocuments({
+          'engagement.stakeholderId': stakeholderId,
+        }),
+      ]);
+
+      const _stakeholderId = stakeholderId;
+      const formattedContributions = stakeholderContributions.map((needDoc) => {
+        const need = needDoc.toObject();
+        const myEngagements = need.engagement.filter((e) => {
+          return e.stakeholderId == _stakeholderId;
+        });
+
+        return {
+          _id: need._id,
+          schoolId: need.schoolId,
+          code: need.code,
+          description: need.description,
+          myEngagements,
+        };
+      });
+
+      const totalDonatedAmt = formattedContributions
+        .flatMap((n) => n.myEngagements)
+        .reduce((sum, e) => {
+          return sum + (Number(e.donatedAmount) || 0);
+        }, 0);
+
+      const numberOfSchools = new Set(
+        formattedContributions.map((n) => {
+          return n.schoolId?._id?.toString() || n.schoolId;
+        }),
+      ).size;
+
+      const summary = { totalDonatedAmt, numberOfSchools };
+
+      return {
+        success: true,
+        data: formattedContributions,
+        meta: {
+          summary,
+          count: stakeholderContributions.length,
+          totalItems: total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      this.logger.error('Error getting school needs', error.stack);
+      throw error;
+    }
+  }
 }

@@ -8,6 +8,7 @@ import { User } from 'src/user/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
+import { CreateSchoolAdminDto } from 'src/common/dtos/create-school-admin.dto';
 import { RolePermissions } from 'src/common/constants/role-permission';
 
 @Injectable()
@@ -18,7 +19,7 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
   ) {}
 
-  async signUp(signupData: CreateUserDto): Promise<User> {
+  async signUp(signupData: CreateUserDto | CreateSchoolAdminDto): Promise<User> {
     const existingUser = await this.userService.getUserByUsername(
       signupData.userName,
     );
@@ -34,7 +35,7 @@ export class AuthService {
       throw new ConflictException('Email already in use');
     }
 
-    return this.userService.createUser(signupData as User);
+    return this.userService.createUser(signupData);
   }
 
   async signIn(dto: {

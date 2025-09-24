@@ -388,18 +388,32 @@ export class SchoolNeedService {
       throw error;
     }
   }
-  async getStakeholderContributions(stakeholderId: string): Promise<any> {
+  async getStakeholderContributions(
+    stakeholderId: string,
+    page = 1,
+    limit = 10,
+  ): Promise<any> {
     try {
-      const stakeholderContributions = await this.schoolNeedModel
-        .find({
+      const skip = (page - 1) * limit;
+      const [stakeholderContributions, total] = await Promise.all([
+        this.schoolNeedModel
+          .find({
+            'engagement.stakeholderId': stakeholderId,
+          })
+          .select('_id code description schoolId engagement')
+          .populate({
+            path: 'schoolId',
+            select: 'schoolName division schoolName districtOrCluster  ',
+          })
+          .sort({ code: 1 })
+          .skip(skip)
+          .limit(limit)
+          .exec(),
+        this.schoolNeedModel.countDocuments({
           'engagement.stakeholderId': stakeholderId,
-        })
-        .select('_id code description schoolId engagement')
-        .populate({
-          path: 'schoolId',
-          select: 'schoolName division schoolName districtOrCluster  ',
-        })
-        .exec();
+        }),
+      ]);
+
       const _stakeholderId = stakeholderId;
       const formattedContributions = stakeholderContributions.map((needDoc) => {
         const need = needDoc.toObject();
@@ -433,9 +447,12 @@ export class SchoolNeedService {
       return {
         success: true,
         data: formattedContributions,
-        summary,
         meta: {
-          timestamp: new Date(),
+          summary,
+          count: stakeholderContributions.length,
+          totalItems: total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
         },
       };
     } catch (error) {

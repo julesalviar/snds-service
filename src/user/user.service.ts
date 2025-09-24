@@ -26,8 +26,16 @@ export class UserService {
       .exec();
   }
 
-  async getMyContributions(userId: string): Promise<any> {
-    return await this.schoolNeedService.getStakeholderContributions(userId);
+  async getMyContributions(
+    userId: string,
+    page: number,
+    limit: number,
+  ): Promise<any> {
+    return await this.schoolNeedService.getStakeholderContributions(
+      userId,
+      page,
+      limit,
+    );
   }
 
   async getUserByUserEmail(email: string): Promise<User | null> {

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Param,
+  Query,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
@@ -24,9 +25,17 @@ export class UsersController {
   }
 
   @Get(':id/my-contributions')
-  async myContributions(@Param('id') id: string): Promise<any> {
+  async myContributions(
+    @Param('id') id: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ): Promise<any> {
     try {
-      return await this.userService.getMyContributions(id);
+      return await this.userService.getMyContributions(
+        id,
+        Number(page),
+        Number(limit),
+      );
     } catch (error) {
       throw new HttpException(
         error.message,

@@ -84,10 +84,33 @@ export class SchoolCreateNeedDto extends OmitType(SchoolNeedDto, [
 
 export class SchoolUpdateNeedDto extends PartialType(SchoolNeedDto) {}
 
+export class SecureSchoolUpdateNeedDto extends PartialType(SchoolNeedDto) {
+  // Allow MongoDB fields to be received but they will be filtered out by service
+  @IsOptional()
+  _id?: string;
+
+  @IsOptional()
+  createdAt?: string;
+
+  @IsOptional()
+  updatedAt?: string;
+}
+
 export class SchoolNeedResponseDto extends OmitType(SchoolNeedDto, [
   'projectId',
   'schoolId',
-]) {}
+  'createdAt',
+  'updatedAt',
+]) {
+  @IsOptional()
+  _id?: string;
+
+  @IsOptional()
+  createdAt?: string;
+
+  @IsOptional()
+  updatedAt?: string;
+}
 
 export class UpdateSchoolNeedStatusDto {
   @IsNotEmpty()

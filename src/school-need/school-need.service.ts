@@ -14,7 +14,7 @@ import {
   SchoolNeedResponseDto,
   SchoolUpdateNeedDto,
 } from './school-need.dto';
-import { SchoolNeed, SchoolNeedDocument } from './school-need.schema';
+import { SchoolNeed } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
 import { School } from 'src/schools/school.schema';
 import { SchoolNeedStatus } from './school-need.enums';
@@ -55,7 +55,7 @@ export class SchoolNeedService {
     private readonly counterService: CounterService,
   ) {}
 
-  async createSchoolNeed(needDto: SchoolNeedDto): Promise<SchoolNeedDocument> {
+  async createSchoolNeed(needDto: SchoolNeedDto): Promise<any> {
     const { projectId, schoolId } = needDto;
 
     try {
@@ -100,7 +100,21 @@ export class SchoolNeedService {
       this.logger.log(
         `SchoolNeed created successfully with ID: ${createdSchoolNeed._id.toString()}`,
       );
-      return savedSchoolNeed;
+
+      const responseDto: SchoolNeedResponseDto = {
+        ...savedSchoolNeed.toObject({ versionKey: false }),
+        _id: savedSchoolNeed._id.toString(),
+        createdAt: savedSchoolNeed.createdAt,
+        updatedAt: savedSchoolNeed.updatedAt,
+      };
+
+      return {
+        success: true,
+        data: responseDto,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
     } catch (error) {
       this.logger.error('Error creating School Need', error.stack);
       throw error;
@@ -186,9 +200,16 @@ export class SchoolNeedService {
           : null,
       ]);
 
+      const transformedNeeds = needs.map((need) => ({
+        ...need.toObject({ versionKey: false }),
+        _id: need._id.toString(),
+        createdAt: need.createdAt,
+        updatedAt: need.updatedAt,
+      }));
+
       const response: any = {
         success: true,
-        data: needs,
+        data: transformedNeeds,
         meta: {
           count: needs.length,
           totalItems: total,
@@ -249,6 +270,9 @@ export class SchoolNeedService {
 
       const responseDto: SchoolNeedResponseDto = {
         ...retrievedSchoolNeed.toObject({ versionKey: false }),
+        _id: retrievedSchoolNeed._id.toString(),
+        createdAt: retrievedSchoolNeed.createdAt,
+        updatedAt: retrievedSchoolNeed.updatedAt,
       };
 
       return {
@@ -278,11 +302,15 @@ export class SchoolNeedService {
 
       this.logger.log(`Attempting to update School Need with ID: ${id}`);
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { createdAt, updatedAt, code, ...secureUpdateData } =
+        needDto as any;
+
       const objectId = new Types.ObjectId(id);
       const updatedSchoolNeed = await this.schoolNeedModel
         .findByIdAndUpdate(
           objectId,
-          { $set: { ...needDto } },
+          { $set: secureUpdateData },
           { new: true, runValidators: true },
         )
         .populate({
@@ -304,9 +332,17 @@ export class SchoolNeedService {
       }
 
       this.logger.log(`School Need updated successfully with ID: ${objectId}`);
+
+      const responseDto: SchoolNeedResponseDto = {
+        ...updatedSchoolNeed.toObject({ versionKey: false }),
+        _id: updatedSchoolNeed._id.toString(),
+        createdAt: updatedSchoolNeed.createdAt,
+        updatedAt: updatedSchoolNeed.updatedAt,
+      };
+
       return {
         success: true,
-        data: updatedSchoolNeed,
+        data: responseDto,
         meta: {
           timestamp: new Date(),
         },
@@ -333,10 +369,14 @@ export class SchoolNeedService {
         `Attempting to update School Need status with ${identifierType}: ${id}`,
       );
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { createdAt, updatedAt, code, ...secureUpdateData } =
+        needDto as any;
+
       const updatedSchoolNeed = await this.schoolNeedModel
         .findOneAndUpdate(
           query,
-          { $set: { ...needDto } },
+          { $set: secureUpdateData },
           { new: true, runValidators: true },
         )
         .populate({
@@ -355,9 +395,17 @@ export class SchoolNeedService {
       this.logger.log(
         `School Need updated successfully with ${identifierType}: ${id}`,
       );
+
+      const responseDto: SchoolNeedResponseDto = {
+        ...updatedSchoolNeed.toObject({ versionKey: false }),
+        _id: updatedSchoolNeed._id.toString(),
+        createdAt: updatedSchoolNeed.createdAt,
+        updatedAt: updatedSchoolNeed.updatedAt,
+      };
+
       return {
         success: true,
-        data: updatedSchoolNeed,
+        data: responseDto,
         meta: {
           timestamp: new Date(),
         },
@@ -407,9 +455,17 @@ export class SchoolNeedService {
       this.logger.log(
         `School Need engaged successfully with ${identifierType}: ${param}`,
       );
+
+      const responseDto: SchoolNeedResponseDto = {
+        ...retrievedSchoolNeed.toObject({ versionKey: false }),
+        _id: retrievedSchoolNeed._id.toString(),
+        createdAt: retrievedSchoolNeed.createdAt,
+        updatedAt: retrievedSchoolNeed.updatedAt,
+      };
+
       return {
         success: true,
-        data: retrievedSchoolNeed,
+        data: responseDto,
         meta: {
           timestamp: new Date(),
         },

@@ -10,7 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { SchoolNeedDto, SchoolUpdateNeedDto } from './school-need.dto';
+import { SchoolNeedDto, SchoolUpdateNeedDto, SecureSchoolUpdateNeedDto } from './school-need.dto';
 import { SchoolNeedService } from './school-need.service';
 import { User } from 'src/user/user.decorator';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
@@ -70,7 +70,7 @@ export class SchoolNeedController {
   @Put(':id')
   async editSchoolNeed(
     @Param('id') id: string,
-    @Body() updateNeedDto: SchoolUpdateNeedDto,
+    @Body() updateNeedDto: SecureSchoolUpdateNeedDto,
   ) {
     return this.schoolNeedService.updateSchoolNeed(id, updateNeedDto);
   }
@@ -79,7 +79,7 @@ export class SchoolNeedController {
   @Patch(':id/status')
   async updateSchoolNeedStatus(
     @Param('id') id: string,
-    @Body() updateNeedStatusDto: SchoolUpdateNeedDto,
+    @Body() updateNeedStatusDto: SecureSchoolUpdateNeedDto,
   ) {
     return this.schoolNeedService.updateSchoolNeedStatus(
       id,

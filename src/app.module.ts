@@ -16,6 +16,9 @@ import { SchoolModule } from './schools/school.module';
 import { UploadModule } from './upload/upload.module';
 import { ImageModule } from './image/image.module';
 import { StorageModule } from './storage/storage.module';
+import { ShsImmersionController } from './shs-immersion/shs-immersion.controller';
+import { ShsImmersionService } from './shs-immersion/shs-immersion.service';
+import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
 
 @Module({
   imports: [
@@ -36,8 +39,9 @@ import { StorageModule } from './storage/storage.module';
     UploadModule,
     ImageModule,
     StorageModule,
+    ShsImmersionModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, ShsImmersionController],
+  providers: [AppService, ShsImmersionService],
 })
 export class AppModule {}

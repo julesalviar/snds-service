@@ -21,6 +21,7 @@ export const RolePermissions = {
     PermissionsEnum.SCHOOL_NEED_MANAGE,
     PermissionsEnum.SCHOOL_PROFILE_MANAGE,
     PermissionsEnum.SCHOOL_PROFILE_VIEW,
+    PermissionsEnum.SHS_IMMERSION_MANAGE,
   ],
   [UserRole.SCHOOL_STAFF]: [
     PermissionsEnum.PROJECT_MANAGE,

@@ -10,17 +10,18 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { SchoolNeedDto, UpdateNeedDto } from './school-need.dto';
+import { SchoolNeedDto, SchoolUpdateNeedDto } from './school-need.dto';
 import { SchoolNeedService } from './school-need.service';
 import { User } from 'src/user/user.decorator';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
-import { AuthGuard } from '@nestjs/passport';
 import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
+import { Public } from 'src/common/decorators/public.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
-@UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('school-needs')
 export class SchoolNeedController {
   constructor(private readonly schoolNeedService: SchoolNeedService) {}
@@ -43,7 +44,7 @@ export class SchoolNeedController {
     return this.schoolNeedService.getSchoolNeed(param);
   }
 
-  @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_VIEW)
+  @Public()
   @Get()
   async getAll(
     @User('schoolId') schoolId: string,
@@ -69,7 +70,7 @@ export class SchoolNeedController {
   @Put(':id')
   async editSchoolNeed(
     @Param('id') id: string,
-    @Body() updateNeedDto: UpdateNeedDto,
+    @Body() updateNeedDto: SchoolUpdateNeedDto,
   ) {
     return this.schoolNeedService.updateSchoolNeed(id, updateNeedDto);
   }
@@ -78,7 +79,7 @@ export class SchoolNeedController {
   @Patch(':id/status')
   async updateSchoolNeedStatus(
     @Param('id') id: string,
-    @Body() updateNeedStatusDto: UpdateNeedDto,
+    @Body() updateNeedStatusDto: SchoolUpdateNeedDto,
   ) {
     return this.schoolNeedService.updateSchoolNeedStatus(
       id,

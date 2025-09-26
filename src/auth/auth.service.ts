@@ -19,7 +19,9 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
   ) {}
 
-  async signUp(signupData: CreateUserDto | CreateSchoolAdminDto): Promise<User> {
+  async signUp(
+    signupData: CreateUserDto | CreateSchoolAdminDto,
+  ): Promise<User> {
     const existingUser = await this.userService.getUserByUsername(
       signupData.userName,
     );

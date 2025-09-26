@@ -3,18 +3,23 @@ import { PROVIDER } from 'src/common/constants/providers';
 import { COUNTER } from 'src/common/constants/counters';
 import { CounterService } from 'src/common/counter/counter.services';
 import {
-  NotFoundException,
   BadRequestException,
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
-import { SchoolNeedDto, UpdateNeedDto } from './school-need.dto';
-import { SchoolNeedDocument, SchoolNeed } from './school-need.schema';
+import {
+  SchoolNeedDto,
+  SchoolNeedResponseDto,
+  SchoolUpdateNeedDto,
+} from './school-need.dto';
+import { SchoolNeed, SchoolNeedDocument } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
 import { School } from 'src/schools/school.schema';
 import { SchoolNeedStatus } from './school-need.enums';
 import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
+
 @Injectable()
 export class SchoolNeedService {
   private readonly logger = new Logger(SchoolNeedService.name);
@@ -31,10 +36,8 @@ export class SchoolNeedService {
 
     // Determine the base school year
     // If current month is May (4) or later, we're in the school year that started last calendar year
-    const baseYear = currentMonth >= 4 ? currentYear : currentYear - 1;
-
     // Calculate the school year range
-    const startYear = baseYear;
+    const startYear = currentMonth >= 4 ? currentYear : currentYear - 1;
     const endYear = startYear + 1;
 
     return `${startYear}-${endYear}`;
@@ -244,9 +247,13 @@ export class SchoolNeedService {
         `School Need retrieved successfully with ${identifierType}: ${param}`,
       );
 
+      const responseDto: SchoolNeedResponseDto = {
+        ...retrievedSchoolNeed.toObject({ versionKey: false }),
+      };
+
       return {
         success: true,
-        data: retrievedSchoolNeed,
+        data: responseDto,
         meta: {
           timestamp: new Date(),
         },
@@ -260,7 +267,10 @@ export class SchoolNeedService {
     }
   }
 
-  async updateSchoolNeed(id: string, needDto: UpdateNeedDto): Promise<any> {
+  async updateSchoolNeed(
+    id: string,
+    needDto: SchoolUpdateNeedDto,
+  ): Promise<any> {
     try {
       if (!Types.ObjectId.isValid(id)) {
         throw new BadRequestException(`Invalid ID format: ${id}`);
@@ -313,7 +323,7 @@ export class SchoolNeedService {
 
   async updateSchoolNeedStatus(
     id: string,
-    needDto: UpdateNeedDto,
+    needDto: SchoolUpdateNeedDto,
   ): Promise<any> {
     try {
       const isObjectId = Types.ObjectId.isValid(id);

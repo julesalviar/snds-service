@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PROVIDER } from '../common/constants/providers';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
+import { UserRole } from './enums/user-role.enum';
 import { Tenant } from '../tenant/tenantSchema';
 import { SchoolNeedService } from 'src/school-need/school-need.service';
 import { EncryptionService } from 'src/encryption/encryption.service';
@@ -48,6 +49,20 @@ export class UserService {
 
   async getUsers(): Promise<User[]> {
     return await this.userModel.find().exec();
+  }
+
+  async getUsersByRole(role: UserRole, searchTerm?: string): Promise<User[]> {
+    const query: any = { role };
+
+    if (searchTerm) {
+      query.$or = [
+        { name: { $regex: searchTerm, $options: 'i' } },
+        { firstName: { $regex: searchTerm, $options: 'i' } },
+        { lastName: { $regex: searchTerm, $options: 'i' } },
+      ];
+    }
+
+    return await this.userModel.find(query).exec();
   }
 
   async createUser(
@@ -109,7 +124,9 @@ export class UserService {
     // Update the school with the user ID if a new school was created
     if (schoolId && isNewSchoolCreated) {
       await this.schoolModel
-        .findByIdAndUpdate(schoolId, { createdByUserId: savedUser._id.toString() })
+        .findByIdAndUpdate(schoolId, {
+          createdByUserId: savedUser._id.toString(),
+        })
         .exec();
     }
 

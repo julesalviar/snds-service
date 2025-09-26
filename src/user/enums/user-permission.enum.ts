@@ -11,6 +11,10 @@ export enum PermissionsEnum {
   SCHOOL_PROFILE_MANAGE = 'schoolProfile.manage',
   SCHOOL_PROFILE_VIEW = 'schoolProfile.view',
 
+  // Cluster
+  CLUSTER_VIEW = 'cluster.view',
+  CLUSTER_MANAGE = 'cluster.manage',
+
   // Users
   USER_VIEW = 'user.view',
   USER_MANAGE = 'user.manage',

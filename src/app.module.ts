@@ -16,6 +16,7 @@ import { SchoolModule } from './schools/school.module';
 import { UploadModule } from './upload/upload.module';
 import { ImageModule } from './image/image.module';
 import { StorageModule } from './storage/storage.module';
+import { ClusterModule } from './cluster/cluster.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { StorageModule } from './storage/storage.module';
     UploadModule,
     ImageModule,
     StorageModule,
+    ClusterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

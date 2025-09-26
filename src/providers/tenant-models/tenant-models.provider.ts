@@ -12,6 +12,7 @@ import {
   ImageUpload,
   ImageUploadSchema,
 } from 'src/upload/schemas/image-upload.schema';
+import { Cluster, ClusterSchema } from 'src/cluster/cluster.schema';
 
 export const TenantModels = {
   userModel: {
@@ -64,6 +65,16 @@ export const TenantModels = {
     provide: PROVIDER.TENANT_MODEL,
     useFactory: async (tenantConnection: Connection) => {
       return tenantConnection.model(Tenant.name, TenantSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  clusterModel: {
+    provide: PROVIDER.CLUSTER_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<Cluster>> => {
+      return tenantConnection.model(Cluster.name, ClusterSchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

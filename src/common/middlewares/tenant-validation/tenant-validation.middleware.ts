@@ -15,7 +15,7 @@ export class TenantValidationMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
-      this.logger.log('Tenant validation middleware called', {
+      this.logger.debug('Tenant validation middleware called', {
         url: req.url,
         method: req.method,
         headers: req.headers,

@@ -200,12 +200,17 @@ export class SchoolNeedService {
           : null,
       ]);
 
-      const transformedNeeds = needs.map((need) => ({
-        ...need.toObject({ versionKey: false }),
-        _id: need._id.toString(),
-        createdAt: need.createdAt,
-        updatedAt: need.updatedAt,
-      }));
+      const transformedNeeds = needs.map((need) => {
+        const needObj = need.toObject({ versionKey: false });
+        const { schoolId, ...restNeedObj } = needObj;
+        return {
+          ...restNeedObj,
+          _id: need._id.toString(),
+          createdAt: need.createdAt,
+          updatedAt: need.updatedAt,
+          school: schoolId, // Rename schoolId to school
+        };
+      });
 
       const response: any = {
         success: true,
@@ -268,11 +273,14 @@ export class SchoolNeedService {
         `School Need retrieved successfully with ${identifierType}: ${param}`,
       );
 
+      const needObj = retrievedSchoolNeed.toObject({ versionKey: false });
+      const { schoolId, ...restNeedObj } = needObj;
       const responseDto: SchoolNeedResponseDto = {
-        ...retrievedSchoolNeed.toObject({ versionKey: false }),
+        ...restNeedObj,
         _id: retrievedSchoolNeed._id.toString(),
         createdAt: retrievedSchoolNeed.createdAt,
         updatedAt: retrievedSchoolNeed.updatedAt,
+        school: schoolId, // Rename schoolId to school
       };
 
       return {
@@ -333,11 +341,14 @@ export class SchoolNeedService {
 
       this.logger.log(`School Need updated successfully with ID: ${objectId}`);
 
+      const needObj = updatedSchoolNeed.toObject({ versionKey: false });
+      const { schoolId, ...restNeedObj } = needObj;
       const responseDto: SchoolNeedResponseDto = {
-        ...updatedSchoolNeed.toObject({ versionKey: false }),
+        ...restNeedObj,
         _id: updatedSchoolNeed._id.toString(),
         createdAt: updatedSchoolNeed.createdAt,
         updatedAt: updatedSchoolNeed.updatedAt,
+        school: schoolId, // Rename schoolId to school
       };
 
       return {
@@ -396,11 +407,14 @@ export class SchoolNeedService {
         `School Need updated successfully with ${identifierType}: ${id}`,
       );
 
+      const needObj = updatedSchoolNeed.toObject({ versionKey: false });
+      const { schoolId, ...restNeedObj } = needObj;
       const responseDto: SchoolNeedResponseDto = {
-        ...updatedSchoolNeed.toObject({ versionKey: false }),
+        ...restNeedObj,
         _id: updatedSchoolNeed._id.toString(),
         createdAt: updatedSchoolNeed.createdAt,
         updatedAt: updatedSchoolNeed.updatedAt,
+        school: schoolId, // Rename schoolId to school
       };
 
       return {
@@ -456,11 +470,14 @@ export class SchoolNeedService {
         `School Need engaged successfully with ${identifierType}: ${param}`,
       );
 
+      const needObj = retrievedSchoolNeed.toObject({ versionKey: false });
+      const { schoolId, ...restNeedObj } = needObj;
       const responseDto: SchoolNeedResponseDto = {
-        ...retrievedSchoolNeed.toObject({ versionKey: false }),
+        ...restNeedObj,
         _id: retrievedSchoolNeed._id.toString(),
         createdAt: retrievedSchoolNeed.createdAt,
         updatedAt: retrievedSchoolNeed.updatedAt,
+        school: schoolId, // Rename schoolId to school
       };
 
       return {

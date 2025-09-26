@@ -10,9 +10,8 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { SchoolNeedDto, SchoolUpdateNeedDto, SecureSchoolUpdateNeedDto } from './school-need.dto';
+import { SchoolNeedDto, SecureSchoolUpdateNeedDto } from './school-need.dto';
 import { SchoolNeedService } from './school-need.service';
-import { User } from 'src/user/user.decorator';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -20,6 +19,7 @@ import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { User } from 'src/user/user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('school-needs')
@@ -53,7 +53,7 @@ export class SchoolNeedController {
     @Query('schoolYear') schoolYear?: string,
   ) {
     console.log('School ID from principal:', schoolId);
-    const effectiveSchoolId = schoolId;
+    const effectiveSchoolId = schoolId || undefined;
 
     const isValidFormat = /^\d{4}-\d{4}$/.test(schoolYear || '');
     const finalSchoolYear = isValidFormat ? schoolYear : undefined;

@@ -110,6 +110,12 @@ export class SchoolNeedResponseDto extends OmitType(SchoolNeedDto, [
 
   @IsOptional()
   updatedAt?: string;
+
+  @IsOptional()
+  school?: any;
+
+  @IsOptional()
+  project?: any;
 }
 
 export class UpdateSchoolNeedStatusDto {

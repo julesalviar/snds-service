@@ -13,7 +13,7 @@ import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 import { Type } from 'class-transformer';
 
 export class SchoolNeedDto {
-  @IsNotEmpty()
+  @IsOptional()
   schoolYear?: string;
 
   @IsNotEmpty()
@@ -88,6 +88,9 @@ export class SecureSchoolUpdateNeedDto extends PartialType(SchoolNeedDto) {
   // Allow MongoDB fields to be received but they will be filtered out by service
   @IsOptional()
   _id?: string;
+
+  @IsOptional()
+  school: any;
 
   @IsOptional()
   createdAt?: string;

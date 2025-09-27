@@ -30,14 +30,16 @@ export class ImmersionInfoDto {
   strand: string;
 
   @IsNotEmpty()
-  contactPerson: number;
+  contactPerson: string;
 
   @IsNotEmpty()
-  contactNumber: number;
+  contactNumber: string;
 
   @IsOptional()
   createdBy: string;
+
   @IsOptional()
+  @IsDateString()
   createdAt: string;
   @IsOptional()
   updatedBy: string;

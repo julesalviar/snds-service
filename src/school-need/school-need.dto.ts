@@ -11,7 +11,6 @@ import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { SchoolNeedStatus } from './school-need.enums';
 import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 import { Type } from 'class-transformer';
-import { Optional } from '@nestjs/common';
 
 export class SchoolNeedDto {
   @IsNotEmpty()
@@ -76,12 +75,6 @@ export class SchoolNeedDto {
 
   @IsOptional()
   updatedAt: string;
-
-  @IsOptional()
-  school;
-
-  @IsOptional()
-  project;
 }
 
 export class SchoolCreateNeedDto extends OmitType(SchoolNeedDto, [

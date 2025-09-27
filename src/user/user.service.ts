@@ -51,7 +51,7 @@ export class UserService {
     return await this.userModel.find().exec();
   }
 
-  async getUsersByRole(role: UserRole, searchTerm?: string): Promise<User[]> {
+  async getUsersByRole(role: UserRole, searchTerm?: string, limit: number = 50): Promise<User[]> {
     const query: any = { role };
 
     if (searchTerm) {
@@ -62,7 +62,7 @@ export class UserService {
       ];
     }
 
-    return await this.userModel.find(query).exec();
+    return await this.userModel.find(query).limit(limit).exec();
   }
 
   async createUser(

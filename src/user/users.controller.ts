@@ -29,9 +29,11 @@ export class UsersController {
   async getUsersByRole(
     @Param('role') role: UserRole,
     @Query('search') search?: string,
+    @Query('limit') limit?: number,
   ): Promise<User[]> {
     try {
-      return await this.userService.getUsersByRole(role, search);
+      const maxLimit = Math.min(limit || 50, 100); // Cap at 100, default to 50
+      return await this.userService.getUsersByRole(role, search, maxLimit);
     } catch (error) {
       throw new HttpException(
         error.message,

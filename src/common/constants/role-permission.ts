@@ -13,6 +13,7 @@ export const RolePermissions = {
   [UserRole.STAKEHOLDER]: [
     PermissionsEnum.PROJECT_VIEW,
     PermissionsEnum.SCHOOL_NEED_VIEW,
+    PermissionsEnum.SCHOOL_PROFILE_VIEW,
   ],
 
   // School level

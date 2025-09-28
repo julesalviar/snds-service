@@ -44,10 +44,14 @@ export class SchoolController {
     return this.schoolService.updateSchool(id, updateSchoolDto);
   }
 
-  @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)
+  @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_VIEW)
   @Get()
-  async getAll(@Query('page') page = 1, @Query('limit') limit = 10) {
-    return this.schoolService.getAll(Number(page), Number(limit));
+  async getAll(
+    @Query('page') page = 1, 
+    @Query('limit') limit = 10,
+    @Query('district') district?: string
+  ) {
+    return this.schoolService.getAll(Number(page), Number(limit), district);
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)

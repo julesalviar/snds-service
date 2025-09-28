@@ -25,12 +25,12 @@ export class ImmersionInfo extends Document {
   @Prop({ required: true })
   contactNumber: string;
 
-  @Prop({ required: true, type : Number, set: (value: any) => Number(value),    })
+  @Prop({ required: true, type: Number, set: (value: any) => Number(value) })
   requiredHours: number;
 
   @Prop({
     type: Number,
-    set: (value: any) => Number(value),  
+    set: (value: any) => Number(value),
   })
   totalMaleBeneficiary: number;
   @Prop({

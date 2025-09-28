@@ -123,21 +123,27 @@ export class SchoolService {
     }
   }
 
-  async getAll(page: number, limit: number) {
+  async getAll(page: number, limit: number, district?: string) {
     try {
       this.logger.log(
-        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}`,
+        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}, district = ${district || 'all'}`,
       );
 
       const skip = (page - 1) * limit;
+
+      const filter: any = {};
+      if (district) {
+        filter.districtOrCluster = { $regex: new RegExp(`^${district}$`, 'i') };
+      }
+
       const [schools, total] = await Promise.all([
         this.schoolModel
-          .find()
+          .find(filter)
           .sort({ schoolId: -1 })
           .skip(skip)
           .limit(limit)
           .exec(),
-        this.schoolModel.countDocuments(),
+        this.schoolModel.countDocuments(filter),
       ]);
       return {
         success: true,
@@ -147,6 +153,7 @@ export class SchoolService {
           totalItems: total,
           currentPage: page,
           totalPages: Math.ceil(total / limit),
+          district: district || 'all',
           timestamp: new Date(),
         },
       };
@@ -156,7 +163,6 @@ export class SchoolService {
     }
   }
 
-  // Get school by record/document Id (uuid)
   async getSchoolById(id: string): Promise<any> {
     try {
       if (!Types.ObjectId.isValid(id)) {
@@ -189,7 +195,6 @@ export class SchoolService {
     }
   }
 
-  // Get school by assigned school Id (numeric)
   async getSchoolBySchoolId(schoolId: string): Promise<any> {
     try {
       this.logger.log(

@@ -157,7 +157,13 @@ export class SchoolNeedService {
     }
   }
 
-  async getAll(schoolId?: string, page = 1, limit = 10, schoolYear?: string) {
+  async getAll(
+    schoolId?: string,
+    page = 1,
+    limit = 10,
+    schoolYear?: string,
+    specificContribution?: string,
+  ) {
     try {
       this.logger.log(`Attempting to retrieve all school Needs`);
 
@@ -173,7 +179,14 @@ export class SchoolNeedService {
         queryFilter.schoolYear = this.getCurrentSchoolYear();
       }
 
-      const [needs, total, school] = await Promise.all([
+      if (specificContribution) {
+        queryFilter.specificContribution = {
+          $regex: specificContribution,
+          $options: 'i',
+        };
+      }
+
+      const [needs, total, totalBySchool, school] = await Promise.all([
         this.schoolNeedModel
           .find(queryFilter)
           .populate({
@@ -190,6 +203,11 @@ export class SchoolNeedService {
           .limit(limit)
           .exec(),
         this.schoolNeedModel.countDocuments(queryFilter),
+        this.schoolNeedModel.aggregate([
+          { $match: queryFilter },
+          { $group: { _id: '$schoolId' } },
+          { $count: 'totalBySchool' }
+        ]).exec(),
         schoolId
           ? this.schoolModel
               .findById(schoolId)
@@ -212,12 +230,16 @@ export class SchoolNeedService {
         };
       });
 
+      // Extract totalBySchool from aggregation result (counts distinct schools from entire filtered dataset)
+      const totalBySchoolCount = totalBySchool.length > 0 ? totalBySchool[0].totalBySchool : 0;
+
       const response: any = {
         success: true,
         data: transformedNeeds,
         meta: {
           count: needs.length,
           totalItems: total,
+          totalBySchool: totalBySchoolCount,
           currentPage: page,
           totalPages: Math.ceil(total / limit),
           timestamp: new Date(),

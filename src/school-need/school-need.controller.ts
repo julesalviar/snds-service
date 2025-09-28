@@ -51,8 +51,8 @@ export class SchoolNeedController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('schoolYear') schoolYear?: string,
+    @Query('specificContribution') specificContribution?: string,
   ) {
-    console.log('School ID from principal:', schoolId);
     const effectiveSchoolId = schoolId || undefined;
 
     const isValidFormat = /^\d{4}-\d{4}$/.test(schoolYear || '');
@@ -63,6 +63,7 @@ export class SchoolNeedController {
       Number(page),
       Number(limit),
       finalSchoolYear,
+      specificContribution,
     );
   }
 

@@ -24,13 +24,13 @@ import { ImmersionInfoDto, ImmersionVenueDto } from './shs-immersion.dto';
 export class ShsImmersionController {
   constructor(private readonly shsImmersionService: ShsImmersionService) {}
 
-  //   @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
+  @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
   @Post()
   async createImmersionInfo(@Body() immersionDto: ImmersionInfoDto) {
     return this.shsImmersionService.createShsImmersionInfo(immersionDto);
   }
 
-  // @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
+  @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
   @Get()
   async getAll(
     @Query('schoolId') schoolId: string,
@@ -44,7 +44,7 @@ export class ShsImmersionController {
     );
   }
 
-  //   @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
+  @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
   @Patch(':param/venue')
   async addImmersionVenue(
     @Param('param') param: string,

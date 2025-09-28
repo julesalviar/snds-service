@@ -9,15 +9,15 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { AipService } from './aip.service';
 import { AipDto } from 'src/aip/aip.dto';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
-@UseGuards(AuthGuard('jwt'), PermissionsGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
 @Controller('aips')
 export class AipController {
   constructor(private readonly aipService: AipService) {}

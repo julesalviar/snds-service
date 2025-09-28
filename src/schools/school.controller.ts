@@ -12,13 +12,14 @@ import {
 import { SchoolService } from './school.service';
 import { SchoolDto, UpdateSchoolDto } from './school.dto';
 
-import { AuthGuard } from '@nestjs/passport';
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Public } from 'src/common/decorators/public.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
-@UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('schools')
 export class SchoolController {
   constructor(private readonly schoolService: SchoolService) {}
@@ -44,14 +45,22 @@ export class SchoolController {
     return this.schoolService.updateSchool(id, updateSchoolDto);
   }
 
-  @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_VIEW)
+  @Public()
   @Get()
   async getAll(
-    @Query('page') page = 1, 
+    @Query('page') page = 1,
     @Query('limit') limit = 10,
-    @Query('district') district?: string
+    @Query('district') district?: string,
+    @Query('search') search?: string,
+    @Query('withNeedCount') withNeedCount?: string,
   ) {
-    return this.schoolService.getAll(Number(page), Number(limit), district);
+    return this.schoolService.getAll(
+      Number(page),
+      Number(limit),
+      district,
+      search,
+      withNeedCount === 'true'
+    );
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)

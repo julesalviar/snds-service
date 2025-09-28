@@ -15,9 +15,9 @@ import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator'
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
-@UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('clusters')
 export class ClusterController {
   constructor(private readonly clusterService: ClusterService) {}

@@ -1,4 +1,5 @@
-import { IsDateString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class ImmersionInfoDto {
   @IsOptional()
@@ -61,9 +62,13 @@ export class ImmersionVenueDto {
   deploymentSection: string;
 
   @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
   deployedMale: number;
 
   @IsNotEmpty()
+  @Type(() => Number)  
+  @IsNumber()
   deployedFmale: number;
 
   @IsNotEmpty()

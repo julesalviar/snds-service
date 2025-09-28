@@ -1,11 +1,11 @@
 export enum Region12Divisions {
-  Gensan = 'Gensan',
-  Tacurong = 'Tacurong',
-  Koronadal = 'Koronadal',
-  Kidapawan = 'Kidapawan',
+  Gensan = 'General Santos City',
+  Tacurong = 'Tacurong City',
+  Koronadal = 'Koronadal City',
+  Kidapawan = 'Kidapawan City',
 
-  SouthCotabato = 'SouthCotabato',
+  SouthCotabato = 'South Cotabato',
   Sarangani = 'Sarangani',
   Cotabato = 'Cotabato',
-  SultanKudarat = 'SultanKudarat',
+  SultanKudarat = 'Sultan Kudarat',
 }

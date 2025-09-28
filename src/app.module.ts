@@ -16,6 +16,7 @@ import { SchoolModule } from './schools/school.module';
 import { UploadModule } from './upload/upload.module';
 import { ImageModule } from './image/image.module';
 import { StorageModule } from './storage/storage.module';
+import { ClusterModule } from './cluster/cluster.module';
 import { ShsImmersionController } from './shs-immersion/shs-immersion.controller';
 import { ShsImmersionService } from './shs-immersion/shs-immersion.service';
 import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
@@ -40,6 +41,7 @@ import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
     ImageModule,
     StorageModule,
     ShsImmersionModule,
+    ClusterModule,
   ],
   controllers: [AppController, ShsImmersionController],
   providers: [AppService, ShsImmersionService],

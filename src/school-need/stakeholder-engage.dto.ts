@@ -16,9 +16,6 @@ export class StakeHolderEngageDto {
   stakeholderId: string;
 
   @IsNotEmpty()
-  value: number;
-
-  @IsNotEmpty()
   unitMeasure: string;
 
   @IsNotEmpty()

@@ -7,14 +7,26 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { UserRole as UserRoleEnums } from 'src/user/enums/user-role.enum';
+import { IS_PUBLIC_KEY } from 'src/common/constants/metadata';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const isPublic = this.reflector.get<boolean>(
+      IS_PUBLIC_KEY,
+      context.getHandler(),
+    );
+
+    if (isPublic) {
+      return true;
+    }
     const { user } = context.switchToHttp().getRequest();
-    if (!user) throw new ForbiddenException('User not found in request');
+    if (!user) {
+      console.warn('Access denied: No user in request');
+      throw new ForbiddenException('User not found in request');
+    }
 
     const requiredRoles = this.reflector.getAllAndOverride<UserRoleEnums[]>(
       ROLES_KEY,

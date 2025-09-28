@@ -2,6 +2,20 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, HydratedDocument } from 'mongoose';
 import { StakeHolderEngageDto as stakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 
+export class Image {
+  @Prop({ required: true })
+  id: string;
+
+  @Prop({ required: true })
+  category: string;
+
+  @Prop({ required: true })
+  originalUrl: string;
+
+  @Prop({ required: true })
+  thumbnailUrl: string;
+}
+
 @Schema({ timestamps: true, collection: 'school_needs' })
 export class SchoolNeed extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Aip', required: true })
@@ -40,8 +54,8 @@ export class SchoolNeed extends Document {
   @Prop()
   targetDate: string;
 
-  @Prop()
-  images: [{ type: string }];
+  @Prop({ type: [Image], default: [] })
+  images: Image[];
 
   @Prop()
   engagement: stakeHolderEngageDto[];
@@ -50,10 +64,10 @@ export class SchoolNeed extends Document {
   implementationStatus: string;
 
   @Prop()
-  createdBy: string;
+  createdAt: string;
 
   @Prop()
-  updatedBy: string;
+  updatedAt: string;
 
   @Prop({
     type: String,

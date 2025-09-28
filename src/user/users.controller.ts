@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { User } from './schemas/user.schema';
 import { UserService } from './user.service';
+import { UserRole } from './enums/user-role.enum';
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UserService) {}
@@ -16,6 +17,23 @@ export class UsersController {
   async getUsers(): Promise<User[]> {
     try {
       return await this.userService.getUsers();
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('by-role/:role')
+  async getUsersByRole(
+    @Param('role') role: UserRole,
+    @Query('search') search?: string,
+    @Query('limit') limit?: number,
+  ): Promise<User[]> {
+    try {
+      const maxLimit = Math.min(limit || 50, 100); // Cap at 100, default to 50
+      return await this.userService.getUsersByRole(role, search, maxLimit);
     } catch (error) {
       throw new HttpException(
         error.message,

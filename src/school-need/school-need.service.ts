@@ -203,11 +203,13 @@ export class SchoolNeedService {
           .limit(limit)
           .exec(),
         this.schoolNeedModel.countDocuments(queryFilter),
-        this.schoolNeedModel.aggregate([
-          { $match: queryFilter },
-          { $group: { _id: '$schoolId' } },
-          { $count: 'totalBySchool' }
-        ]).exec(),
+        this.schoolNeedModel
+          .aggregate([
+            { $match: queryFilter },
+            { $group: { _id: '$schoolId' } },
+            { $count: 'totalBySchool' },
+          ])
+          .exec(),
         schoolId
           ? this.schoolModel
               .findById(schoolId)
@@ -231,7 +233,8 @@ export class SchoolNeedService {
       });
 
       // Extract totalBySchool from aggregation result (counts distinct schools from entire filtered dataset)
-      const totalBySchoolCount = totalBySchool.length > 0 ? totalBySchool[0].totalBySchool : 0;
+      const totalBySchoolCount =
+        totalBySchool.length > 0 ? totalBySchool[0].totalBySchool : 0;
 
       const response: any = {
         success: true,

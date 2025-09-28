@@ -30,7 +30,7 @@ export class ShsImmersionController {
     return this.shsImmersionService.createShsImmersionInfo(immersionDto);
   }
 
-  //   @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
+  // @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
   @Get()
   async getAll(
     @Query('schoolId') schoolId: string,

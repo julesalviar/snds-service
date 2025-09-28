@@ -16,4 +16,3 @@ export class ClusterModule implements NestModule {
     consumer.apply(TenantValidationMiddleware).forRoutes(ClusterController);
   }
 }
-

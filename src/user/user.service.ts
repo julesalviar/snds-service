@@ -51,7 +51,11 @@ export class UserService {
     return await this.userModel.find().exec();
   }
 
-  async getUsersByRole(role: UserRole, searchTerm?: string, limit: number = 50): Promise<User[]> {
+  async getUsersByRole(
+    role: UserRole,
+    searchTerm?: string,
+    limit: number = 50,
+  ): Promise<User[]> {
     const query: any = { role };
 
     if (searchTerm) {

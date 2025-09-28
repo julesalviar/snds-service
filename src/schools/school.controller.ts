@@ -47,9 +47,9 @@ export class SchoolController {
   @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_VIEW)
   @Get()
   async getAll(
-    @Query('page') page = 1, 
+    @Query('page') page = 1,
     @Query('limit') limit = 10,
-    @Query('district') district?: string
+    @Query('district') district?: string,
   ) {
     return this.schoolService.getAll(Number(page), Number(limit), district);
   }

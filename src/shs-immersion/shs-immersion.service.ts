@@ -108,6 +108,53 @@ export class ShsImmersionService {
     param: string,
     immersionVenueDto: ImmersionVenueDto,
   ): Promise<any> {
-    return { param: param, immersionVenueDto };
+    try {
+      const isObjectId = Types.ObjectId.isValid(param);
+      const query = isObjectId
+        ? { _id: new Types.ObjectId(param) }
+        : { immersionCode: param };
+
+      const identifierType = isObjectId ? 'ID' : 'code';
+      const retrievedImmersion = await this.immersionInfoModel
+        .findOne(query)
+        .exec();
+
+      if (!retrievedImmersion) {
+        this.logger.warn(
+          `No immersion info found with ${identifierType}: ${param}`,
+        );
+        throw new NotFoundException(
+          `Immersion Info with ${identifierType} ${param} not found`,
+        );
+      }
+
+      if (!retrievedImmersion.venues) {
+        retrievedImmersion.venues = [];
+      }
+
+      retrievedImmersion.venues.push(immersionVenueDto);
+      retrievedImmersion.markModified('venues');
+      await retrievedImmersion.save();
+
+      this.logger.log(
+        `Immersion venue added successfully with ${identifierType}: ${param}`,
+      );
+
+      const immersionObj = retrievedImmersion.toObject({ versionKey: false });
+
+      return {
+        success: true,
+        data: immersionObj,
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error adding immersion venue with ${Types.ObjectId.isValid(param) ? 'ID' : 'code'}`,
+        error.stack,
+      );
+      throw error;
+    }
   }
 }

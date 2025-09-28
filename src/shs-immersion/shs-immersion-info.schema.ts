@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, HydratedDocument } from 'mongoose';
+import { ImmersionVenueDto as immersionVenue } from './shs-immersion.dto';
 
 @Schema({ timestamps: true, collection: 'immersion_info' })
 export class ImmersionInfo extends Document {
@@ -32,6 +33,9 @@ export class ImmersionInfo extends Document {
 
   @Prop()
   totalFMaleBeneficiary: number;
+
+  @Prop()
+  venues: immersionVenue[];
 
   @Prop()
   createdBy: string;

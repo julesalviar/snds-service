@@ -1,5 +1,4 @@
-import { IsDateString, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { IsDateString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class ImmersionInfoDto {
   @IsOptional()
@@ -36,6 +35,9 @@ export class ImmersionInfoDto {
   contactNumber: string;
 
   @IsOptional()
+  venues: [ImmersionVenueDto];
+
+  @IsOptional()
   createdBy: string;
 
   @IsOptional()
@@ -45,7 +47,6 @@ export class ImmersionInfoDto {
   updatedBy: string;
 }
 
-// export class UpdateNeedDto extends PartialType(SchoolNeedDto) { }
 export class ImmersionVenueDto {
   @IsNotEmpty()
   companyName: string;

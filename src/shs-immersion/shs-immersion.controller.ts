@@ -31,6 +31,20 @@ export class ShsImmersionController {
   }
 
   //   @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
+  @Get()
+  async getAll(
+    @Query('schoolId') schoolId: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return this.shsImmersionService.getAll(
+      schoolId,
+      Number(page),
+      Number(limit),
+    );
+  }
+
+  //   @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
   @Patch(':param/venue')
   async addImmersionVenue(
     @Param('param') param: string,

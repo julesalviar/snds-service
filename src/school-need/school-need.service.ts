@@ -186,7 +186,7 @@ export class SchoolNeedService {
         };
       }
 
-      const [needs, total, totalBySchool, school] = await Promise.all([
+      const [needs, total, totalBySchool, school, totalQuantityResult] = await Promise.all([
         this.schoolNeedModel
           .find(queryFilter)
           .populate({
@@ -218,6 +218,32 @@ export class SchoolNeedService {
               )
               .lean()
           : null,
+        specificContribution
+          ? this.schoolNeedModel.aggregate([
+              { $match: queryFilter },
+              { $addFields: { 
+                  quantityAsNumber: { 
+                    $cond: [
+                      { $and: [
+                        { $ne: ['$quantity', null] },
+                        { $ne: ['$quantity', ''] },
+                        { $or: [
+                          { $eq: [{ $type: '$quantity' }, 'number'] },
+                          { $eq: [{ $type: '$quantity' }, 'int'] },
+                          { $eq: [{ $type: '$quantity' }, 'long'] },
+                          { $eq: [{ $type: '$quantity' }, 'double'] },
+                          { $eq: [{ $type: '$quantity' }, 'decimal'] }
+                        ]}
+                      ]},
+                      { $toDouble: '$quantity' },
+                      0
+                    ]
+                  }
+                }
+              },
+              { $group: { _id: null, totalQuantity: { $sum: '$quantityAsNumber' } } }
+            ]).exec()
+          : null,
       ]);
 
       const transformedNeeds = needs.map((need) => {
@@ -236,6 +262,11 @@ export class SchoolNeedService {
       const totalBySchoolCount =
         totalBySchool.length > 0 ? totalBySchool[0].totalBySchool : 0;
 
+      // Extract totalQuantity from aggregation result when specificContribution is provided
+      const totalQuantity = specificContribution && totalQuantityResult && totalQuantityResult.length > 0 
+        ? totalQuantityResult[0].totalQuantity || 0 
+        : undefined;
+
       const response: any = {
         success: true,
         data: transformedNeeds,
@@ -248,6 +279,11 @@ export class SchoolNeedService {
           timestamp: new Date(),
         },
       };
+
+      // Add totalQuantity to meta if specificContribution is provided
+      if (totalQuantity !== undefined) {
+        response.meta.totalQuantity = totalQuantity;
+      }
 
       if (schoolId) {
         response.school = school || {};

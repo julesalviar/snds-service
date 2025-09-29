@@ -52,8 +52,9 @@ export class SchoolNeedController {
     @Query('limit') limit = 10,
     @Query('schoolYear') schoolYear?: string,
     @Query('specificContribution') specificContribution?: string,
+    @Query('schoolId') querySchoolId?: string,
   ) {
-    const effectiveSchoolId = schoolId || undefined;
+    const effectiveSchoolId = querySchoolId || schoolId || undefined;
 
     const isValidFormat = /^\d{4}-\d{4}$/.test(schoolYear || '');
     const finalSchoolYear = isValidFormat ? schoolYear : undefined;

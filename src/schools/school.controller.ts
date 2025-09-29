@@ -59,7 +59,7 @@ export class SchoolController {
       Number(limit),
       district,
       search,
-      withNeedCount === 'true'
+      withNeedCount === 'true',
     );
   }
 

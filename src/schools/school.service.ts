@@ -1,11 +1,11 @@
 import { SchoolDto, UpdateSchoolDto } from './school.dto';
 import { Model, Types } from 'mongoose';
 import { School, SchoolDocument } from './school.schema';
+import { SchoolNeed } from '../school-need/school-need.schema';
 import { PROVIDER } from '../common/constants/providers';
 import {
   NotFoundException,
   BadRequestException,
-  forwardRef,
   Inject,
   Injectable,
   Logger,
@@ -18,6 +18,8 @@ export class SchoolService {
   constructor(
     @Inject(PROVIDER.SCHOOL_MODEL)
     private readonly schoolModel: Model<School>,
+    @Inject(PROVIDER.SCHOOL_NEED_MODEL)
+    private readonly schoolNeedModel: Model<SchoolNeed>,
   ) {}
 
   // Create school
@@ -123,17 +125,42 @@ export class SchoolService {
     }
   }
 
-  async getAll(page: number, limit: number, district?: string) {
+  async getAll(
+    page: number,
+    limit: number,
+    district?: string,
+    search?: string,
+    withNeedCount: boolean = false,
+  ) {
     try {
       this.logger.log(
-        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}, district = ${district || 'all'}`,
+        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}, district = ${district || 'all'}, search = ${search || 'none'}, withNeedCount = ${withNeedCount}`,
       );
 
       const skip = (page - 1) * limit;
 
       const filter: any = {};
+
+      // District filter
       if (district) {
         filter.districtOrCluster = { $regex: new RegExp(`^${district}$`, 'i') };
+      }
+
+      // Search filter - searches across multiple fields
+      if (search) {
+        const searchRegex = { $regex: search, $options: 'i' };
+        const searchConditions: any[] = [
+          { schoolName: searchRegex },
+          { accountablePerson: searchRegex },
+        ];
+
+        // Only search schoolId if the search term is numeric
+        const numericSearch = Number(search);
+        if (!isNaN(numericSearch) && isFinite(numericSearch)) {
+          searchConditions.push({ schoolId: numericSearch });
+        }
+
+        filter.$or = searchConditions;
       }
 
       const [schools, total] = await Promise.all([
@@ -145,15 +172,55 @@ export class SchoolService {
           .exec(),
         this.schoolModel.countDocuments(filter),
       ]);
+
+      let schoolsWithNeeds: any[] = schools;
+
+      // Add school need counts if requested
+      if (withNeedCount && schools.length > 0) {
+        // Convert school ObjectIds to strings for comparison
+        const schoolIds = schools.map((school) => school._id.toString());
+
+        const needCounts = await this.schoolNeedModel.aggregate([
+          {
+            $match: {
+              schoolId: { $in: schoolIds },
+            },
+          },
+          {
+            $group: {
+              _id: '$schoolId',
+              needCount: { $sum: 1 },
+            },
+          },
+        ]);
+
+        const needCountMap = new Map();
+        needCounts.forEach((item) => {
+          needCountMap.set(item._id, item.needCount);
+        });
+
+        schoolsWithNeeds = schools.map((school) => {
+          const needCount = needCountMap.get(school._id.toString()) || 0;
+          return {
+            ...school.toObject(),
+            additionalInfo: {
+              needCount,
+            },
+          };
+        });
+      }
+
       return {
         success: true,
-        data: schools,
+        data: schoolsWithNeeds,
         meta: {
           count: schools.length,
           totalItems: total,
           currentPage: page,
           totalPages: Math.ceil(total / limit),
           district: district || 'all',
+          search: search || 'none',
+          withNeedCount,
           timestamp: new Date(),
         },
       };

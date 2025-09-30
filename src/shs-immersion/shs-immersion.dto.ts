@@ -50,6 +50,9 @@ export class ImmersionInfoDto {
   @IsDateString()
   createdAt: string;
   @IsOptional()
+  @IsDateString()
+  updatedAt: string;
+  @IsOptional()
   updatedBy: string;
 }
 

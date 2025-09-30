@@ -1,25 +1,23 @@
 import {
   Controller,
   Post,
-  Put,
   Get,
-  Delete,
   Patch,
   Body,
   Param,
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { User } from 'src/user/user.decorator';
+// import { User } from 'src/user/user.decorator';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { ShsImmersionService } from './shs-immersion.service';
 import { ImmersionInfoDto, ImmersionVenueDto } from './shs-immersion.dto';
 
-@UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('shs-immersion')
 export class ShsImmersionController {
   constructor(private readonly shsImmersionService: ShsImmersionService) {}
@@ -30,7 +28,7 @@ export class ShsImmersionController {
     return this.shsImmersionService.createShsImmersionInfo(immersionDto);
   }
 
-  @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_MANAGE)
+  @PermissionsAllowed(PermissionsEnum.SHS_IMMERSION_VIEW)
   @Get()
   async getAll(
     @Query('schoolId') schoolId: string,

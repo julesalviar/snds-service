@@ -23,7 +23,7 @@ export class ImmersionInfoDto {
   totalMaleBeneficiary: number;
 
   @IsOptional()
-  totalFMaleBeneficiary: number;
+  totalFemaleBeneficiary: number;
 
   @IsNotEmpty()
   requiredHours: number;
@@ -74,7 +74,7 @@ export class ImmersionVenueDto {
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
-  deployedFmale: number;
+  deployedFemale: number;
 
   @IsNotEmpty()
   contactPerson: string;
@@ -86,6 +86,8 @@ export class ImmersionVenueDto {
   createdBy: string;
   @IsOptional()
   createdAt: string;
+  @IsOptional()
+  updatedAt: string;
   @IsOptional()
   updatedBy: string;
 }

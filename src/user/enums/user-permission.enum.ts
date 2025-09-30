@@ -8,6 +8,7 @@ export enum PermissionsEnum {
   SCHOOL_NEED_MANAGE = 'schoolNeed.manage',
 
   // Immersion Needs
+  SHS_IMMERSION_VIEW = 'shsImmersion.view',
   SHS_IMMERSION_MANAGE = 'shsImmersion.manage',
 
   // School Profile

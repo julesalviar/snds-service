@@ -37,7 +37,7 @@ export class ImmersionInfo extends Document {
     type: Number,
     set: (value: any) => Number(value),
   })
-  totalFMaleBeneficiary: number;
+  totalFemaleBeneficiary: number;
 
   @Prop()
   venues: immersionVenue[];

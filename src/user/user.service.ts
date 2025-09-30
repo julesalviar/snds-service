@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  NotAcceptableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PROVIDER } from '../common/constants/providers';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
@@ -146,5 +152,37 @@ export class UserService {
       user.password,
     );
     return isPasswordValid ? user : null;
+  }
+
+  async changeMyPassword(userName: string, newPasswordData: any): Promise<any> {
+    const { currentPassword, newPassword, confirmNewPassword } =
+      newPasswordData;
+    if (newPassword != confirmNewPassword)
+      throw new NotAcceptableException('Password did not match');
+    const userData: User = await this.getUserByUsername(userName);
+    const isPasswordValid = await this.encryptionService.comparePassword(
+      currentPassword,
+      userData.password,
+    );
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Incorrect password');
+    }
+    const hashedPassword =
+      await this.encryptionService.hashPassword(newPassword);
+
+    const updatedUserPass = await this.userModel
+      .findByIdAndUpdate(userData._id.toString(), {
+        password: hashedPassword,
+      })
+      .exec();
+
+    return {
+      success: true,
+      meta: {
+        username: userName,
+        remarks: 'Login password changed',
+        timestamp: new Date(),
+      },
+    };
   }
 }

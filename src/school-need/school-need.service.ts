@@ -186,65 +186,78 @@ export class SchoolNeedService {
         };
       }
 
-      const [needs, total, totalBySchool, school, totalQuantityResult] = await Promise.all([
-        this.schoolNeedModel
-          .find(queryFilter)
-          .populate({
-            path: 'projectId',
-            select: 'title objectives schoolYear pillars',
-          })
-          .populate({
-            path: 'schoolId',
-            select:
-              'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
-          })
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .exec(),
-        this.schoolNeedModel.countDocuments(queryFilter),
-        this.schoolNeedModel
-          .aggregate([
-            { $match: queryFilter },
-            { $group: { _id: '$schoolId' } },
-            { $count: 'totalBySchool' },
-          ])
-          .exec(),
-        schoolId
-          ? this.schoolModel
-              .findById(schoolId)
-              .select(
-                'schoolName division districtOrCluster schoolOffering officialEmailAddress',
-              )
-              .lean()
-          : null,
-        specificContribution
-          ? this.schoolNeedModel.aggregate([
+      const [needs, total, totalBySchool, school, totalQuantityResult] =
+        await Promise.all([
+          this.schoolNeedModel
+            .find(queryFilter)
+            .populate({
+              path: 'projectId',
+              select: 'title objectives schoolYear pillars',
+            })
+            .populate({
+              path: 'schoolId',
+              select:
+                'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
+            })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .exec(),
+          this.schoolNeedModel.countDocuments(queryFilter),
+          this.schoolNeedModel
+            .aggregate([
               { $match: queryFilter },
-              { $addFields: { 
-                  quantityAsNumber: { 
-                    $cond: [
-                      { $and: [
-                        { $ne: ['$quantity', null] },
-                        { $ne: ['$quantity', ''] },
-                        { $or: [
-                          { $eq: [{ $type: '$quantity' }, 'number'] },
-                          { $eq: [{ $type: '$quantity' }, 'int'] },
-                          { $eq: [{ $type: '$quantity' }, 'long'] },
-                          { $eq: [{ $type: '$quantity' }, 'double'] },
-                          { $eq: [{ $type: '$quantity' }, 'decimal'] }
-                        ]}
-                      ]},
-                      { $toDouble: '$quantity' },
-                      0
-                    ]
-                  }
-                }
-              },
-              { $group: { _id: null, totalQuantity: { $sum: '$quantityAsNumber' } } }
-            ]).exec()
-          : null,
-      ]);
+              { $group: { _id: '$schoolId' } },
+              { $count: 'totalBySchool' },
+            ])
+            .exec(),
+          schoolId
+            ? this.schoolModel
+                .findById(schoolId)
+                .select(
+                  'schoolName division districtOrCluster schoolOffering officialEmailAddress',
+                )
+                .lean()
+            : null,
+          specificContribution
+            ? this.schoolNeedModel
+                .aggregate([
+                  { $match: queryFilter },
+                  {
+                    $addFields: {
+                      quantityAsNumber: {
+                        $cond: [
+                          {
+                            $and: [
+                              { $ne: ['$quantity', null] },
+                              { $ne: ['$quantity', ''] },
+                              {
+                                $or: [
+                                  { $eq: [{ $type: '$quantity' }, 'number'] },
+                                  { $eq: [{ $type: '$quantity' }, 'int'] },
+                                  { $eq: [{ $type: '$quantity' }, 'long'] },
+                                  { $eq: [{ $type: '$quantity' }, 'double'] },
+                                  { $eq: [{ $type: '$quantity' }, 'decimal'] },
+                                ],
+                              },
+                            ],
+                          },
+                          { $toDouble: '$quantity' },
+                          0,
+                        ],
+                      },
+                    },
+                  },
+                  {
+                    $group: {
+                      _id: null,
+                      totalQuantity: { $sum: '$quantityAsNumber' },
+                    },
+                  },
+                ])
+                .exec()
+            : null,
+        ]);
 
       const transformedNeeds = needs.map((need) => {
         const needObj = need.toObject({ versionKey: false });
@@ -263,9 +276,12 @@ export class SchoolNeedService {
         totalBySchool.length > 0 ? totalBySchool[0].totalBySchool : 0;
 
       // Extract totalQuantity from aggregation result when specificContribution is provided
-      const totalQuantity = specificContribution && totalQuantityResult && totalQuantityResult.length > 0 
-        ? totalQuantityResult[0].totalQuantity || 0 
-        : undefined;
+      const totalQuantity =
+        specificContribution &&
+        totalQuantityResult &&
+        totalQuantityResult.length > 0
+          ? totalQuantityResult[0].totalQuantity || 0
+          : undefined;
 
       const response: any = {
         success: true,

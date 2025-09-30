@@ -36,9 +36,9 @@ export class ClusterService {
         clusterDto,
       );
 
-      const code = clusterDto.code || await this.counterService.getNextSequenceValue(
-        COUNTER.CLUSTER_CODE,
-      );
+      const code =
+        clusterDto.code ||
+        (await this.counterService.getNextSequenceValue(COUNTER.CLUSTER_CODE));
 
       const createdCluster = new this.clusterModel({
         ...clusterDto,
@@ -69,9 +69,7 @@ export class ClusterService {
         await this.clusterModel.findByIdAndDelete(objectId);
       if (!deletedCluster) {
         this.logger.warn(`No Cluster found with ID: ${objectId}`);
-        throw new NotFoundException(
-          `Cluster with ID ${objectId} not found`,
-        );
+        throw new NotFoundException(`Cluster with ID ${objectId} not found`);
       }
 
       this.logger.log(`Cluster deleted successfully with ID: ${objectId}`);
@@ -143,14 +141,10 @@ export class ClusterService {
         `Attempting to retrieve Cluster with ${identifierType}: ${param}`,
       );
 
-      const retrievedCluster = await this.clusterModel
-        .findOne(query)
-        .exec();
+      const retrievedCluster = await this.clusterModel.findOne(query).exec();
 
       if (!retrievedCluster) {
-        this.logger.warn(
-          `No Cluster found with ${identifierType}: ${param}`,
-        );
+        this.logger.warn(`No Cluster found with ${identifierType}: ${param}`);
         throw new NotFoundException(
           `Cluster with ${identifierType} ${param} not found`,
         );
@@ -194,9 +188,7 @@ export class ClusterService {
 
       if (!updatedCluster) {
         this.logger.warn(`No Cluster found with ID: ${objectId}`);
-        throw new NotFoundException(
-          `Cluster with ID ${objectId} not found`,
-        );
+        throw new NotFoundException(`Cluster with ID ${objectId} not found`);
       }
 
       this.logger.log(`Cluster updated successfully with ID: ${objectId}`);

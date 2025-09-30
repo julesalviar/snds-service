@@ -1,14 +1,20 @@
 import {
   Controller,
   Get,
+  Patch,
+  Body,
+  UseGuards,
   Param,
   Query,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { User as userInfo } from 'src/user/user.decorator';
 import { User } from './schemas/user.schema';
 import { UserService } from './user.service';
 import { UserRole } from './enums/user-role.enum';
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UserService) {}
@@ -54,6 +60,20 @@ export class UsersController {
         Number(page),
         Number(limit),
       );
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  @Patch('change-mypassword')
+  async changePassword(
+    @userInfo('username') userName: string,
+    @Body() newPasswordData: any,
+  ): Promise<any> {
+    try {
+      return await this.userService.changeMyPassword(userName, newPasswordData);
     } catch (error) {
       throw new HttpException(
         error.message,

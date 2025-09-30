@@ -47,11 +47,7 @@ export class ClusterController {
     @Query('limit') limit = 10,
     @Query('division') division?: string,
   ) {
-    return this.clusterService.getAll(
-      Number(page),
-      Number(limit),
-      division,
-    );
+    return this.clusterService.getAll(Number(page), Number(limit), division);
   }
 
   @PermissionsAllowed(PermissionsEnum.CLUSTER_MANAGE)

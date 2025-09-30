@@ -67,7 +67,7 @@ export class UsersController {
       );
     }
   }
-  @Patch('change-mypassword')
+  @Patch('change-password')
   async changePassword(
     @userInfo('username') userName: string,
     @Body() newPasswordData: any,

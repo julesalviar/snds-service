@@ -19,7 +19,7 @@ import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { User } from 'src/user/user.decorator';
+import { UserInfo } from 'src/user/user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('school-needs')
@@ -47,7 +47,7 @@ export class SchoolNeedController {
   @Public()
   @Get()
   async getAll(
-    @User('schoolId') schoolId: string,
+    @UserInfo('schoolId') schoolId: string,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('schoolYear') schoolYear?: string,

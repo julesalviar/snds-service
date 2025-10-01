@@ -155,10 +155,7 @@ export class UserService {
   }
 
   async changeMyPassword(userName: string, newPasswordData: any): Promise<any> {
-    const { currentPassword, newPassword, confirmNewPassword } =
-      newPasswordData;
-    if (newPassword != confirmNewPassword)
-      throw new NotAcceptableException('Password did not match');
+    const { currentPassword, newPassword } = newPasswordData;
     const userData: User = await this.getUserByUsername(userName);
     const isPasswordValid = await this.encryptionService.comparePassword(
       currentPassword,
@@ -169,13 +166,11 @@ export class UserService {
     }
     const hashedPassword =
       await this.encryptionService.hashPassword(newPassword);
-
-    const updatedUserPass = await this.userModel
+    await this.userModel
       .findByIdAndUpdate(userData._id.toString(), {
         password: hashedPassword,
       })
       .exec();
-
     return {
       success: true,
       meta: {

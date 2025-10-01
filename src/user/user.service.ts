@@ -185,4 +185,35 @@ export class UserService {
       },
     };
   }
+  async updateProfile(userName: string, updatedProfileInfo: any): Promise<any> {
+    try {
+      const userData: User = await this.getUserByUsername(userName);
+
+      this.logger.log(
+        `Attempting to update user profile for user: ${userName}`,
+      );
+      const updatedUserInfo = await this.userModel
+        .findByIdAndUpdate(
+          userData._id.toString(),
+          { $set: updatedProfileInfo },
+          { new: true, runValidators: true },
+        )
+        .exec();
+
+      this.logger.log(
+        `User's profile info successfully updated for : ${userData.userName}`,
+      );
+      return {
+        success: true,
+        data: [updatedUserInfo],
+        meta: {
+          remarks: 'Profile Updated',
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Error updating User's Profile`, error.stack);
+      throw error;
+    }
+  }
 }

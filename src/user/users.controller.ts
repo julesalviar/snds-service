@@ -86,7 +86,7 @@ export class UsersController {
 
   @Patch('update-profile')
   async updateProfile(
-    @userInfo('username') userName: string,
+    @UserInfo('username') userName: string,
     @Body() updatedProfileInfo: UpdateUserDto,
   ): Promise<any> {
     try {

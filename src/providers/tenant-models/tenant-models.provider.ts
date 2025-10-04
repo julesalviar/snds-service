@@ -4,6 +4,10 @@ import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { Tenant, TenantSchema } from 'src/tenant/tenantSchema';
 import { Aip, AipSchema } from 'src/aip/aip.schema';
 import {
+  ImmersionInfo,
+  ImmersionInfoSchema,
+} from 'src/shs-immersion/shs-immersion-info.schema';
+import {
   SchoolNeedSchema,
   SchoolNeed,
 } from 'src/school-need/school-need.schema';
@@ -37,6 +41,16 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<SchoolNeed>> => {
       return tenantConnection.model(SchoolNeed.name, SchoolNeedSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  immersionInfoModel: {
+    provide: PROVIDER.IMMERSION_INFO_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<ImmersionInfo>> => {
+      return tenantConnection.model(ImmersionInfo.name, ImmersionInfoSchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

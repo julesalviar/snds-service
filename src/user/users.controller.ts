@@ -14,6 +14,7 @@ import { UserInfo } from 'src/user/user.decorator';
 import { User } from './schemas/user.schema';
 import { UserService } from './user.service';
 import { UserRole } from './enums/user-role.enum';
+import { UpdateUserDto } from 'src/common/dtos/create-user.dto';
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
@@ -75,6 +76,21 @@ export class UsersController {
   ): Promise<any> {
     try {
       return await this.userService.changeMyPassword(userName, newPasswordData);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Patch('update-profile')
+  async updateProfile(
+    @UserInfo('username') userName: string,
+    @Body() updatedProfileInfo: UpdateUserDto,
+  ): Promise<any> {
+    try {
+      return await this.userService.updateProfile(userName, updatedProfileInfo);
     } catch (error) {
       throw new HttpException(
         error.message,

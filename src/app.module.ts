@@ -17,6 +17,9 @@ import { UploadModule } from './upload/upload.module';
 import { ImageModule } from './image/image.module';
 import { StorageModule } from './storage/storage.module';
 import { ClusterModule } from './cluster/cluster.module';
+import { ShsImmersionController } from './shs-immersion/shs-immersion.controller';
+import { ShsImmersionService } from './shs-immersion/shs-immersion.service';
+import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
 
 @Module({
   imports: [
@@ -37,9 +40,10 @@ import { ClusterModule } from './cluster/cluster.module';
     UploadModule,
     ImageModule,
     StorageModule,
+    ShsImmersionModule,
     ClusterModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, ShsImmersionController],
+  providers: [AppService, ShsImmersionService],
 })
 export class AppModule {}

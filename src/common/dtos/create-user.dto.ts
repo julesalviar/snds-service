@@ -8,7 +8,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { UserRole } from 'src/user/enums/user-role.enum';
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 
 export class CreateUserDto {
   @IsDefined()
@@ -52,7 +52,9 @@ export class CreateUserDto {
   role: UserRole;
 }
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {
+export class UpdateUserDto extends PartialType(
+  OmitType(CreateUserDto, ['role', 'password'] as const),
+) {
   @IsOptional()
   _id?: string;
 }

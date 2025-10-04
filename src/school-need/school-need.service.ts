@@ -584,7 +584,7 @@ export class SchoolNeedService {
           .find({
             'engagement.stakeholderId': stakeholderId,
           })
-          .select('_id code description schoolId engagement')
+          .select('_id code specificContribution description schoolId engagement')
           .populate({
             path: 'schoolId',
             select: 'schoolName division schoolName districtOrCluster  ',
@@ -610,6 +610,7 @@ export class SchoolNeedService {
           schoolId: need.schoolId,
           code: need.code,
           description: need.description,
+          specificContribution:  need.specificContribution,
           myEngagements,
         };
       });

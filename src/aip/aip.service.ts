@@ -66,20 +66,30 @@ export class AipService {
     }
   }
 
-  async getAll(page = 1, limit = 10) {
+  async getAll(schoolId?: string, schoolYear?: string, page = 1, limit = 10) {
     try {
       this.logger.log(
         `Attempting to retrieve paginated AIPs: page = ${page}, limit = ${limit}`,
       );
-
       const skip = (page - 1) * limit;
+      const queryFilter: any = {};
+      if (schoolId) queryFilter.schoolId = schoolId;
+      if (/^\d{4}-\d{4}$/.test(schoolYear || '')) {
+        queryFilter.schoolYear = schoolYear;
+      }
+
       const [data, total] = await Promise.all([
-        this.aipModel.find()
+        this.aipModel
+          .find(queryFilter)
           .populate({
             path: 'schoolId',
-            select: 'schoolId schoolName districtOrCluster division accountablePerson contactNumber contactNumber officialEmailAddress'
+            select:
+              'schoolId schoolName districtOrCluster division accountablePerson contactNumber contactNumber officialEmailAddress',
           })
-          .sort({ apn: -1 }).skip(skip).limit(limit).exec(),
+          .sort({ apn: -1 })
+          .skip(skip)
+          .limit(limit)
+          .exec(),
         this.aipModel.countDocuments(),
       ]);
 
@@ -113,7 +123,8 @@ export class AipService {
         .findById(objectId)
         .populate({
           path: 'schoolId',
-          select: 'schoolId schoolName districtOrCluster division accountablePerson contactNumber contactNumber officialEmailAddress'
+          select:
+            'schoolId schoolName districtOrCluster division accountablePerson contactNumber contactNumber officialEmailAddress',
         })
         .populate({ path: 'createdBy', select: 'name role address email' })
         .exec();

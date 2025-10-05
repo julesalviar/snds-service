@@ -37,8 +37,21 @@ export class AipController {
 
   @PermissionsAllowed(PermissionsEnum.PROJECT_VIEW)
   @Get()
-  async getAll(@Query('page') page = 1, @Query('limit') limit = 10) {
-    return this.aipService.getAll(Number(page), Number(limit));
+  async getAll(
+    @UserInfo('schoolId') schoolId: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('schoolYear') schoolYear?: string,
+  ) {
+    const isValidFormat = /^\d{4}-\d{4}$/.test(schoolYear || '');
+    const finalSchoolYear = isValidFormat ? schoolYear : undefined;
+
+    return this.aipService.getAll(
+      schoolId,
+      finalSchoolYear,
+      Number(page),
+      Number(limit),
+    );
   }
 
   @PermissionsAllowed(PermissionsEnum.PROJECT_MANAGE)

@@ -12,6 +12,7 @@ import { AipModule } from './aip/aip.module';
 import { CounterModule } from './common/counter/counter.module';
 import { SchoolNeedModule } from 'src/school-need/school-need.module';
 import { ReferenceDataModule } from 'src/reference-data/reference-data.module';
+import { InternalReferenceDataModule } from 'src/internal-reference-data/internal-reference-data.module';
 import { SchoolModule } from './schools/school.module';
 import { UploadModule } from './upload/upload.module';
 import { ImageModule } from './image/image.module';
@@ -37,6 +38,7 @@ import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
     SchoolNeedModule,
     SchoolModule,
     ReferenceDataModule,
+    InternalReferenceDataModule,
     UploadModule,
     ImageModule,
     StorageModule,

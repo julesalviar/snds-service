@@ -16,10 +16,6 @@ export class Image {
   thumbnailUrl: string;
 }
 
-export class Engagement {
-
-}
-
 @Schema({ timestamps: true, collection: 'school_needs' })
 export class SchoolNeed extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Aip', required: true })

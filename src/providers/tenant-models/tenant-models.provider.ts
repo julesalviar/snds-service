@@ -17,6 +17,10 @@ import {
   ImageUploadSchema,
 } from 'src/upload/schemas/image-upload.schema';
 import { Cluster, ClusterSchema } from 'src/cluster/cluster.schema';
+import {
+  InternalReferenceData,
+  InternalReferenceDataSchema,
+} from 'src/internal-reference-data/internal-reference-data.schema';
 
 export const TenantModels = {
   userModel: {
@@ -89,6 +93,19 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<Cluster>> => {
       return tenantConnection.model(Cluster.name, ClusterSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  internalReferenceDataModel: {
+    provide: PROVIDER.INTERNAL_REFERENCE_DATA_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<InternalReferenceData>> => {
+      return tenantConnection.model(
+        InternalReferenceData.name,
+        InternalReferenceDataSchema,
+      );
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

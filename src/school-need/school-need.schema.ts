@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, HydratedDocument } from 'mongoose';
-import { StakeHolderEngageDto as stakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
+import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 
 export class Image {
   @Prop({ required: true })
@@ -14,6 +14,10 @@ export class Image {
 
   @Prop({ required: true })
   thumbnailUrl: string;
+}
+
+export class Engagement {
+
 }
 
 @Schema({ timestamps: true, collection: 'school_needs' })
@@ -58,7 +62,7 @@ export class SchoolNeed extends Document {
   images: Image[];
 
   @Prop()
-  engagement: stakeHolderEngageDto[];
+  engagement: StakeHolderEngageDto[];
 
   @Prop()
   implementationStatus: string;

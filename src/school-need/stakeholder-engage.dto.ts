@@ -7,7 +7,10 @@ import {
 
 export class StakeHolderEngageDto {
   @IsNotEmpty()
-  donatedAmount: number;
+  amount: number;
+
+  @IsNotEmpty()
+  quantity: number;
 
   @IsNotEmpty()
   @IsMongoId({
@@ -16,7 +19,7 @@ export class StakeHolderEngageDto {
   stakeholderId: string;
 
   @IsNotEmpty()
-  unitMeasure: string;
+  unit: string;
 
   @IsNotEmpty()
   @IsDateString()

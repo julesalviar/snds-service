@@ -74,7 +74,12 @@ export class AipService {
 
       const skip = (page - 1) * limit;
       const [data, total] = await Promise.all([
-        this.aipModel.find().sort({ apn: -1 }).skip(skip).limit(limit).exec(),
+        this.aipModel.find()
+          .populate({
+            path: 'schoolId',
+            select: 'schoolId schoolName districtOrCluster division accountablePerson contactNumber contactNumber officialEmailAddress'
+          })
+          .sort({ apn: -1 }).skip(skip).limit(limit).exec(),
         this.aipModel.countDocuments(),
       ]);
 

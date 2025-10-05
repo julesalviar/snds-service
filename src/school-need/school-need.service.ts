@@ -617,7 +617,7 @@ export class SchoolNeedService {
       const totalDonatedAmt = formattedContributions
         .flatMap((n) => n.myEngagements)
         .reduce((sum, e) => {
-          return sum + (Number(e.donatedAmount) || 0);
+          return sum + (Number(e.amount) || 0);
         }, 0);
 
       const numberOfSchools = new Set(

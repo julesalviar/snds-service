@@ -90,7 +90,7 @@ export class AipService {
           .skip(skip)
           .limit(limit)
           .exec(),
-        this.aipModel.countDocuments(),
+        this.aipModel.countDocuments(queryFilter),
       ]);
 
       return {

@@ -1,12 +1,13 @@
 import { IsNotEmpty, MinLength, IsOptional, MaxLength } from 'class-validator';
 import { AipStatus } from 'src/aip/aip-status.enum';
+import mongoose from 'mongoose';
 
 export class AipDto {
   @IsOptional()
   apn: number;
 
   @IsOptional()
-  schoolId: string;
+  schoolId: string | mongoose.Types.ObjectId;
 
   @IsNotEmpty()
   @MinLength(9)

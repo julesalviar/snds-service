@@ -15,10 +15,25 @@ import {
 import { Engagement } from './engagement.schema';
 import { User } from 'src/user/schemas/user.schema';
 import { SchoolNeed } from 'src/school-need/school-need.schema';
+import { School } from 'src/schools/school.schema';
 
 @Injectable()
 export class EngagementService {
   private readonly logger = new Logger(EngagementService.name);
+
+  private getCurrentSchoolYear(): string {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0 = January
+
+    // Determine the base school year
+    // If current month is May (4) or later, we're in the school year that started last calendar year
+    // Calculate the school year range
+    const startYear = currentMonth >= 4 ? currentYear : currentYear - 1;
+    const endYear = startYear + 1;
+
+    return `${startYear}-${endYear}`;
+  }
 
   constructor(
     @Inject(PROVIDER.ENGAGEMENT_MODEL)
@@ -29,12 +44,17 @@ export class EngagementService {
 
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
     private readonly schoolNeedModel: Model<SchoolNeed>,
+
+    @Inject(PROVIDER.SCHOOL_MODEL)
+    private readonly schoolModel: Model<School>,
   ) {}
 
   async getAllEngagements(
     page = 1,
     limit = 10,
     stakeholderUserId?: string,
+    schoolYear?: string,
+    specificContribution?: string,
   ): Promise<any> {
     try {
       this.logger.log('Attempting to retrieve all engagements');
@@ -42,6 +62,7 @@ export class EngagementService {
       const skip = (page - 1) * limit;
       const queryFilter: any = {};
 
+      // Filter by stakeholder if provided
       if (stakeholderUserId) {
         if (!Types.ObjectId.isValid(stakeholderUserId)) {
           throw new BadRequestException(
@@ -51,12 +72,25 @@ export class EngagementService {
         queryFilter.stakeholderUserId = new Types.ObjectId(stakeholderUserId);
       }
 
+      // Determine the school year to filter by
+      const filterSchoolYear = /^\d{4}-\d{4}$/.test(schoolYear || '')
+        ? schoolYear
+        : this.getCurrentSchoolYear();
+
+      // Filter directly on engagement.schoolYear (denormalized field)
+      queryFilter.schoolYear = filterSchoolYear;
+
+      // Filter by specificContribution if provided
+      if (specificContribution) {
+        queryFilter.specificContribution = specificContribution;
+      }
+
       const [engagements, total] = await Promise.all([
         this.engagementModel
           .find(queryFilter)
           .populate({
             path: 'schoolNeedId',
-            select: 'code description schoolId',
+            select: 'code description schoolId schoolYear specificContribution',
             populate: {
               path: 'schoolId',
               select: 'schoolName division districtOrCluster',
@@ -111,19 +145,34 @@ export class EngagementService {
         );
       }
 
-      if (schoolNeedId) {
-        if (!Types.ObjectId.isValid(schoolNeedId)) {
-          throw new BadRequestException(
-            `Invalid School Need ID: ${schoolNeedId}`,
-          );
-        }
+      // Validate and fetch school need to get schoolYear
+      if (!schoolNeedId) {
+        throw new BadRequestException('schoolNeedId is required');
+      }
 
-        const schoolNeed = await this.schoolNeedModel.findById(schoolNeedId);
-        if (!schoolNeed) {
-          throw new BadRequestException(
-            `School Need with ID: ${schoolNeedId} not found`,
-          );
-        }
+      if (!Types.ObjectId.isValid(schoolNeedId)) {
+        throw new BadRequestException(
+          `Invalid School Need ID: ${schoolNeedId}`,
+        );
+      }
+
+      const schoolNeed = await this.schoolNeedModel.findById(schoolNeedId);
+      if (!schoolNeed) {
+        throw new BadRequestException(
+          `School Need with ID: ${schoolNeedId} not found`,
+        );
+      }
+
+      if (!schoolNeed.schoolYear) {
+        throw new BadRequestException(
+          `School Need with ID: ${schoolNeedId} does not have a schoolYear assigned`,
+        );
+      }
+
+      if (!schoolNeed.specificContribution) {
+        throw new BadRequestException(
+          `School Need with ID: ${schoolNeedId} does not have a specificContribution assigned`,
+        );
       }
 
       this.logger.log(
@@ -133,6 +182,8 @@ export class EngagementService {
 
       const createdEngagement = new this.engagementModel({
         ...engagementDto,
+        schoolYear: schoolNeed.schoolYear,
+        specificContribution: schoolNeed.specificContribution,
       });
       const savedEngagement = await createdEngagement.save();
 

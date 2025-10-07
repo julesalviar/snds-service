@@ -1,25 +1,11 @@
-import {
-  Controller,
-  Post,
-  Put,
-  Get,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  CreateEngagementDto,
-  UpdateEngagementDto,
-} from './engagement.dto';
+import { Controller, Post, Get, Body, Query, UseGuards } from '@nestjs/common';
+import { CreateEngagementDto } from './engagement.dto';
 import { EngagementService } from './engagement.service';
-import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
-import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Public } from 'src/common/decorators/public.decorator';
+import { UserInfo } from 'src/user/user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('engagements')
@@ -32,9 +18,27 @@ export class EngagementController {
   }
 
   @Public()
-  @Get(':stakeholderUserId')
-  async getEngagementsByStakeholder(
-    @Param('stakeholderUserId') stakeholderUserId: string,
+  @Get()
+  async getAllEngagements(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('stakeholderUserId') stakeholderUserId?: string,
+    @Query('schoolYear') schoolYear?: string,
+    @Query('specificContribution') specificContribution?: string,
+  ) {
+    return this.engagementService.getAllEngagements(
+      Number(page),
+      Number(limit),
+      stakeholderUserId,
+      schoolYear,
+      specificContribution,
+    );
+  }
+
+  @Public()
+  @Get('my-contributions')
+  async getMyContributions(
+    @UserInfo('_id') stakeholderUserId: string,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
   ) {

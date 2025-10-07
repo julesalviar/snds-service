@@ -13,7 +13,7 @@ export class Aip extends Document {
   @Prop({ required: true })
   schoolYear: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   title: string;
 
   @Prop()
@@ -50,3 +50,4 @@ export class Aip extends Document {
 
 export type AipDocument = HydratedDocument<Aip>;
 export const AipSchema = SchemaFactory.createForClass(Aip);
+AipSchema.index({ title: 1, schoolId: 1, schoolYear: 1 }, { unique: true });

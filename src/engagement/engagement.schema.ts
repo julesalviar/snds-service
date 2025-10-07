@@ -26,6 +26,16 @@ export class Engagement extends Document {
 
   @Prop({ type: Types.ObjectId, ref: 'SchoolNeed' })
   schoolNeedId?: Types.ObjectId;
+
+  @Prop({
+    required: true,
+    type: String,
+    match: /^\d{4}-\d{4}$/, // Format validation: YYYY-YYYY
+  })
+  schoolYear: string;
+
+  @Prop({ required: true })
+  specificContribution: string;
 }
 
 export type EngagementDocument = HydratedDocument<Engagement>;

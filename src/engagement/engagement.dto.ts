@@ -74,6 +74,8 @@ export class EngagementResponseDto {
   startDate?: string;
   endDate?: string;
   schoolNeedId?: string;
+  schoolYear: string;
+  specificContribution: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

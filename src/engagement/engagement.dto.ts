@@ -44,11 +44,15 @@ export class EngagementDto {
   @IsDateString()
   endDate?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsMongoId({
     message: `schoolNeedId must be a valid school need id.`,
   })
-  schoolNeedId: string | mongoose.Types.ObjectId;
+  schoolNeedId?: string | mongoose.Types.ObjectId;
+
+  @IsOptional()
+  @IsNumber()
+  schoolNeedCode?: number;
 
   @IsOptional()
   createdAt?: Date;

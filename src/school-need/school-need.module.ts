@@ -1,10 +1,11 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TenantModels } from 'src/providers/tenant-models/tenant-models.provider';
 import { TenantValidationMiddleware } from 'src/common/middlewares/tenant-validation/tenant-validation.middleware';
+import { UserModule } from 'src/user/user.module';
 import { SchoolNeedController } from './school-need.controller';
 import { SchoolNeedService } from './school-need.service';
 @Module({
-  imports: [],
+  imports: [UserModule],
   providers: [SchoolNeedService, ...Object.values(TenantModels)],
   controllers: [SchoolNeedController],
   exports: [SchoolNeedService, ...Object.values(TenantModels)],

@@ -17,6 +17,8 @@ import {
 import { SchoolNeed } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
 import { School } from 'src/schools/school.schema';
+import { Engagement } from 'src/engagement/engagement.schema';
+import { User } from 'src/user/schemas/user.schema';
 import { SchoolNeedStatus } from './school-need.enums';
 import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 
@@ -52,6 +54,13 @@ export class SchoolNeedService {
 
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
     private readonly schoolNeedModel: Model<SchoolNeed>,
+
+    @Inject(PROVIDER.ENGAGEMENT_MODEL)
+    private readonly engagementModel: Model<Engagement>,
+
+    @Inject(PROVIDER.USER_MODEL)
+    private readonly userModel: Model<User>,
+
     private readonly counterService: CounterService,
   ) {}
 
@@ -333,7 +342,7 @@ export class SchoolNeedService {
         .populate({
           path: 'schoolId',
           select:
-            'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
+            'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress accountablePerson contactNumber designation',
         })
         .exec();
 
@@ -350,6 +359,45 @@ export class SchoolNeedService {
         `School Need retrieved successfully with ${identifierType}: ${param}`,
       );
 
+      // Fetch engagements related to this school need with populated stakeholder user
+      let engagements = [];
+      try {
+        engagements = await this.engagementModel
+          .find({ schoolNeedId: retrievedSchoolNeed._id })
+          .populate({
+            path: 'stakeholderUserId',
+            select: 'firstName lastName name email',
+          })
+          .exec();
+
+        this.logger.log(
+          `Successfully fetched ${engagements.length} engagements for School Need ${identifierType}: ${param}`,
+        );
+      } catch (populateError) {
+        this.logger.error(
+          `Error populating stakeholder user data for engagements: ${populateError.message}`,
+          populateError.stack,
+        );
+
+        // Fallback: fetch engagements without populate
+        try {
+          engagements = await this.engagementModel
+            .find({ schoolNeedId: retrievedSchoolNeed._id })
+            .exec();
+
+          this.logger.warn(
+            `Fetched ${engagements.length} engagements without user population for School Need ${identifierType}: ${param}`,
+          );
+        } catch (fallbackError) {
+          this.logger.error(
+            `Error fetching engagements without population: ${fallbackError.message}`,
+            fallbackError.stack,
+          );
+          // If engagements fetch fails, continue with empty array
+          engagements = [];
+        }
+      }
+
       const needObj = retrievedSchoolNeed.toObject({ versionKey: false });
       const { schoolId, ...restNeedObj } = needObj;
       const responseDto: SchoolNeedResponseDto = {
@@ -358,6 +406,9 @@ export class SchoolNeedService {
         createdAt: retrievedSchoolNeed.createdAt,
         updatedAt: retrievedSchoolNeed.updatedAt,
         school: schoolId, // Rename schoolId to school
+        engagements: engagements.map((engagement) =>
+          engagement.toObject({ versionKey: false }),
+        ),
       };
 
       return {
@@ -368,11 +419,49 @@ export class SchoolNeedService {
         },
       };
     } catch (error) {
+      const identifierType = Types.ObjectId.isValid(param) ? 'ID' : 'code';
+
+      // Handle specific error types
+      if (error instanceof NotFoundException) {
+        this.logger.warn(
+          `School Need not found with ${identifierType}: ${param}`,
+        );
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        this.logger.warn(
+          `Bad request when getting School Need by ${identifierType}: ${param}`,
+        );
+        throw error;
+      }
+
+      if (error.name === 'CastError') {
+        this.logger.error(
+          `Invalid ${identifierType} format: ${param}`,
+          error.stack,
+        );
+        throw new BadRequestException(
+          `Invalid ${identifierType} format: ${param}`,
+        );
+      }
+
+      if (error.name === 'ValidationError') {
+        this.logger.error(
+          `Validation error when getting School Need by ${identifierType}: ${param}`,
+          error.stack,
+        );
+        throw new BadRequestException(`Validation error: ${error.message}`);
+      }
+
+      // Handle any other unexpected errors
       this.logger.error(
-        `Error getting School Need by ${Types.ObjectId.isValid(param) ? 'ID' : 'code'}`,
+        `Unexpected error getting School Need by ${identifierType}: ${param}`,
         error.stack,
       );
-      throw error;
+      throw new BadRequestException(
+        `Failed to retrieve School Need: ${error.message || 'Unknown error occurred'}`,
+      );
     }
   }
 
@@ -507,140 +596,6 @@ export class SchoolNeedService {
       }
 
       this.logger.error('Error updating SchoolNeed', error.stack);
-      throw error;
-    }
-  }
-
-  async engageSchoolNeeds(
-    param: string,
-    stakeHolderEngageDto: StakeHolderEngageDto,
-  ): Promise<any> {
-    try {
-      const isObjectId = Types.ObjectId.isValid(param);
-      const query = isObjectId
-        ? { _id: new Types.ObjectId(param) }
-        : { code: param };
-
-      const identifierType = isObjectId ? 'ID' : 'code';
-      const retrievedSchoolNeed = await this.schoolNeedModel
-        .findOne(query)
-        .exec();
-
-      if (!retrievedSchoolNeed) {
-        this.logger.warn(
-          `No School Need found with ${identifierType}: ${param}`,
-        );
-        throw new NotFoundException(
-          `School Need with ${identifierType} ${param} not found`,
-        );
-      }
-
-      if (!retrievedSchoolNeed.engagement) {
-        retrievedSchoolNeed.engagement = [];
-      }
-
-      retrievedSchoolNeed.engagement.push(stakeHolderEngageDto);
-      retrievedSchoolNeed.markModified('engagement');
-      await retrievedSchoolNeed.save();
-
-      this.logger.log(
-        `School Need engaged successfully with ${identifierType}: ${param}`,
-      );
-
-      const needObj = retrievedSchoolNeed.toObject({ versionKey: false });
-      const { schoolId, ...restNeedObj } = needObj;
-      const responseDto: SchoolNeedResponseDto = {
-        ...restNeedObj,
-        _id: retrievedSchoolNeed._id.toString(),
-        createdAt: retrievedSchoolNeed.createdAt,
-        updatedAt: retrievedSchoolNeed.updatedAt,
-        school: schoolId, // Rename schoolId to school
-      };
-
-      return {
-        success: true,
-        data: responseDto,
-        meta: {
-          timestamp: new Date(),
-        },
-      };
-    } catch (error) {
-      this.logger.error(
-        `Error engaging SchoolNeed with ${Types.ObjectId.isValid(param) ? 'ID' : 'code'}`,
-        error.stack,
-      );
-      throw error;
-    }
-  }
-  async getStakeholderContributions(
-    stakeholderId: string,
-    page = 1,
-    limit = 10,
-  ): Promise<any> {
-    try {
-      const skip = (page - 1) * limit;
-      const [stakeholderContributions, total] = await Promise.all([
-        this.schoolNeedModel
-          .find({
-            'engagement.stakeholderId': stakeholderId,
-          })
-          .select('_id code description schoolId engagement')
-          .populate({
-            path: 'schoolId',
-            select: 'schoolName division schoolName districtOrCluster  ',
-          })
-          .sort({ code: 1 })
-          .skip(skip)
-          .limit(limit)
-          .exec(),
-        this.schoolNeedModel.countDocuments({
-          'engagement.stakeholderId': stakeholderId,
-        }),
-      ]);
-
-      const _stakeholderId = stakeholderId;
-      const formattedContributions = stakeholderContributions.map((needDoc) => {
-        const need = needDoc.toObject();
-        const myEngagements = need.engagement.filter((e) => {
-          return e.stakeholderId == _stakeholderId;
-        });
-
-        return {
-          _id: need._id,
-          schoolId: need.schoolId,
-          code: need.code,
-          description: need.description,
-          myEngagements,
-        };
-      });
-
-      const totalDonatedAmt = formattedContributions
-        .flatMap((n) => n.myEngagements)
-        .reduce((sum, e) => {
-          return sum + (Number(e.amount) || 0);
-        }, 0);
-
-      const numberOfSchools = new Set(
-        formattedContributions.map((n) => {
-          return n.schoolId?._id?.toString() || n.schoolId;
-        }),
-      ).size;
-
-      const summary = { totalDonatedAmt, numberOfSchools };
-
-      return {
-        success: true,
-        data: formattedContributions,
-        meta: {
-          summary,
-          count: stakeholderContributions.length,
-          totalItems: total,
-          currentPage: page,
-          totalPages: Math.ceil(total / limit),
-        },
-      };
-    } catch (error) {
-      this.logger.error('Error getting school needs', error.stack);
       throw error;
     }
   }

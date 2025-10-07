@@ -88,13 +88,4 @@ export class SchoolNeedController {
       updateNeedStatusDto,
     );
   }
-
-  @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_MANAGE)
-  @Patch(':id/engage')
-  async engageSchoolNeed(
-    @Param('id') id: string,
-    @Body() stakeHolderEngageDto: StakeHolderEngageDto,
-  ) {
-    return this.schoolNeedService.engageSchoolNeeds(id, stakeHolderEngageDto);
-  }
 }

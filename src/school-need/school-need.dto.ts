@@ -65,10 +65,10 @@ export class SchoolNeedDto {
   })
   implementationStatus: string;
 
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => StakeHolderEngageDto)
-  engagement: StakeHolderEngageDto[];
+  // @IsOptional()
+  // @ValidateNested({ each: true })
+  // @Type(() => StakeHolderEngageDto)
+  // engagement: StakeHolderEngageDto[];
 
   @IsOptional()
   createdAt: string;
@@ -119,6 +119,9 @@ export class SchoolNeedResponseDto extends OmitType(SchoolNeedDto, [
 
   @IsOptional()
   project?: any;
+
+  @IsOptional()
+  engagements?: any[];
 }
 
 export class UpdateSchoolNeedStatusDto {

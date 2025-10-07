@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { CreateEngagementDto, EngagementResponseDto } from './engagement.dto';
-import { Engagement } from './engagement.schema';
+import { Engagement } from 'src/engagement/engagement.schema';
 import { User } from 'src/user/schemas/user.schema';
 import { SchoolNeed } from 'src/school-need/school-need.schema';
 import { School } from 'src/schools/school.schema';

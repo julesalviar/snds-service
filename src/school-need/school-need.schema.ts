@@ -58,9 +58,6 @@ export class SchoolNeed extends Document {
   images: Image[];
 
   @Prop()
-  engagement: StakeHolderEngageDto[];
-
-  @Prop()
   implementationStatus: string;
 
   @Prop()

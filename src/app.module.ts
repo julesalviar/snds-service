@@ -21,6 +21,7 @@ import { ClusterModule } from './cluster/cluster.module';
 import { ShsImmersionController } from './shs-immersion/shs-immersion.controller';
 import { ShsImmersionService } from './shs-immersion/shs-immersion.service';
 import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
+import { EngagementModule } from './engagement/engagement.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
     StorageModule,
     ShsImmersionModule,
     ClusterModule,
+    EngagementModule,
   ],
   controllers: [AppController, ShsImmersionController],
   providers: [AppService, ShsImmersionService],

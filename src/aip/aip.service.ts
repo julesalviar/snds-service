@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { AipDto } from 'src/aip/aip.dto';
 import { Aip, AipDocument } from './aip.schema';
+import { School } from 'src/schools/school.schema';
 import { CounterService } from 'src/common/counter/counter.services';
 
 @Injectable()
@@ -18,16 +19,41 @@ export class AipService {
   constructor(
     @Inject(PROVIDER.AIP_MODEL)
     private readonly aipModel: Model<Aip>, // Inject the custom provider
+    @Inject(PROVIDER.SCHOOL_MODEL)
+    private readonly schoolModel: Model<School>,
+    @Inject(PROVIDER.USER_MODEL)
     private readonly counterService: CounterService,
   ) {}
 
-  // Create a New AIP
-  async createAip(aipDto: AipDto): Promise<AipDocument> {
+  /**
+   * This TypeScript function creates a new AIP document with data provided in the AipDto object,
+   * assigns schoolId and createdBy values from the currentUser object, and saves the document to the
+   * database.
+   * @param {AipDto} aipDto - AipDto is an object containing data for creating a new AIP (Assessment
+   * and Intervention Plan). It likely includes information such as student details, assessment
+   * results, intervention strategies, and other relevant data needed for creating the AIP.
+   * @param {any} currentUser - The `currentUser` parameter is an object that represents the current
+   * user making the request. It likely contains information about the user, such as their school ID
+   * and user ID. In the provided code snippet, the `schoolId` and `userId` are extracted from the
+   * `currentUser` object to be used
+   * @returns The `createAip` function is returning a Promise that resolves to an `AipDocument` object,
+   * which represents the AIP (Annual Implementation Plan) that was created and saved in the database.
+   */
+  async createAip(aipDto: AipDto, currentUser: any): Promise<AipDocument> {
     try {
+      const schoolId = currentUser.schoolId;
+      const createdBy = currentUser.userId;
+      if (!schoolId) {
+        throw new BadRequestException(
+          `No school ID found where this user is under to `,
+        );
+      }
+      aipDto = { ...aipDto, schoolId: schoolId, createdBy: createdBy };
       this.logger.log(
         'Creating new AIP information with the following data:',
         aipDto,
       );
+
       const apn = await this.counterService.getNextSequenceValue('aip');
       const createdAip = new this.aipModel({ ...aipDto, apn });
       const savedAip = await createdAip.save();
@@ -40,16 +66,31 @@ export class AipService {
     }
   }
 
-  async getAll(page = 1, limit = 10) {
+  async getAll(schoolId?: string, schoolYear?: string, page = 1, limit = 10) {
     try {
       this.logger.log(
         `Attempting to retrieve paginated AIPs: page = ${page}, limit = ${limit}`,
       );
-
       const skip = (page - 1) * limit;
+      const queryFilter: any = {};
+      if (schoolId) queryFilter.schoolId = schoolId;
+      if (/^\d{4}-\d{4}$/.test(schoolYear || '')) {
+        queryFilter.schoolYear = schoolYear;
+      }
+
       const [data, total] = await Promise.all([
-        this.aipModel.find().sort({ apn: -1 }).skip(skip).limit(limit).exec(),
-        this.aipModel.countDocuments(),
+        this.aipModel
+          .find(queryFilter)
+          .populate({
+            path: 'schoolId',
+            select:
+              'schoolId schoolName districtOrCluster division accountablePerson contactNumber contactNumber officialEmailAddress',
+          })
+          .sort({ apn: -1 })
+          .skip(skip)
+          .limit(limit)
+          .exec(),
+        this.aipModel.countDocuments(queryFilter),
       ]);
 
       return {
@@ -78,7 +119,15 @@ export class AipService {
       const objectId = new Types.ObjectId(id);
 
       this.logger.log(`Attempting to retrieve AIP with ID: ${id}`);
-      const retrievedAip = await this.aipModel.findById(objectId);
+      const retrievedAip = await this.aipModel
+        .findById(objectId)
+        .populate({
+          path: 'schoolId',
+          select:
+            'schoolId schoolName districtOrCluster division accountablePerson contactNumber contactNumber officialEmailAddress',
+        })
+        .populate({ path: 'createdBy', select: 'name role address email' })
+        .exec();
       if (!retrievedAip) {
         this.logger.warn(`No AIP found with ID: ${objectId}`);
         throw new NotFoundException(`AIP with ID ${objectId} not found`);

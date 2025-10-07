@@ -16,6 +16,7 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { UserInfo } from 'src/user/user.decorator';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
 @Controller('aips')
@@ -24,8 +25,8 @@ export class AipController {
 
   @PermissionsAllowed(PermissionsEnum.PROJECT_MANAGE)
   @Post()
-  async createNewAip(@Body() aipDto: AipDto) {
-    return this.aipService.createAip(aipDto);
+  async createNewAip(@UserInfo() currentUser: any, @Body() aipDto: AipDto) {
+    return this.aipService.createAip(aipDto, currentUser);
   }
 
   @PermissionsAllowed(PermissionsEnum.PROJECT_VIEW)
@@ -36,8 +37,21 @@ export class AipController {
 
   @PermissionsAllowed(PermissionsEnum.PROJECT_VIEW)
   @Get()
-  async getAll(@Query('page') page = 1, @Query('limit') limit = 10) {
-    return this.aipService.getAll(Number(page), Number(limit));
+  async getAll(
+    @UserInfo('schoolId') schoolId: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('schoolYear') schoolYear?: string,
+  ) {
+    const isValidFormat = /^\d{4}-\d{4}$/.test(schoolYear || '');
+    const finalSchoolYear = isValidFormat ? schoolYear : undefined;
+
+    return this.aipService.getAll(
+      schoolId,
+      finalSchoolYear,
+      Number(page),
+      Number(limit),
+    );
   }
 
   @PermissionsAllowed(PermissionsEnum.PROJECT_MANAGE)

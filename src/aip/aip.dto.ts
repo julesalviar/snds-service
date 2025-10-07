@@ -5,6 +5,9 @@ export class AipDto {
   @IsOptional()
   apn: number;
 
+  @IsOptional()
+  schoolId: string;
+
   @IsNotEmpty()
   @MinLength(9)
   @MaxLength(9)

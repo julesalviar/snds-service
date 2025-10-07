@@ -74,8 +74,18 @@ export class EngagementResponseDto {
   startDate?: string;
   endDate?: string;
   schoolNeedId?: string;
+  schoolId: string;
   schoolYear: string;
   specificContribution: string;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export class EngagementSummaryDto {
+  specificContribution: string;
+  schoolYear: string;
+  schoolId: any;
+  totalAmount: number;
+  totalQuantity: number;
+  engagementCount: number;
 }

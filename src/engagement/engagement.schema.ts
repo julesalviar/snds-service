@@ -27,6 +27,9 @@ export class Engagement extends Document {
   @Prop({ type: Types.ObjectId, ref: 'SchoolNeed' })
   schoolNeedId?: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'School', required: true })
+  schoolId: Types.ObjectId;
+
   @Prop({
     required: true,
     type: String,

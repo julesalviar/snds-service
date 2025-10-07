@@ -25,6 +25,7 @@ export class EngagementController {
     @Query('stakeholderUserId') stakeholderUserId?: string,
     @Query('schoolYear') schoolYear?: string,
     @Query('specificContribution') specificContribution?: string,
+    @Query('schoolId') schoolId?: string,
   ) {
     return this.engagementService.getAllEngagements(
       Number(page),
@@ -32,12 +33,24 @@ export class EngagementController {
       stakeholderUserId,
       schoolYear,
       specificContribution,
+      schoolId,
+    );
+  }
+
+  @Get('my-contributions/summary')
+  async getEngagementsSummary(
+    @UserInfo('_id') stakeholderUserId?: string,
+    @Query('schoolYear') schoolYear?: string,
+  ) {
+    return this.engagementService.getEngagementsSummary(
+      stakeholderUserId,
+      schoolYear,
     );
   }
 
   @Public()
   @Get('my-contributions')
-  async getMyContributions(
+  async getEngagementsByStakeholder(
     @UserInfo('_id') stakeholderUserId: string,
     @Query('page') page = 1,
     @Query('limit') limit = 10,

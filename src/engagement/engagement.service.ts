@@ -55,6 +55,7 @@ export class EngagementService {
     stakeholderUserId?: string,
     schoolYear?: string,
     specificContribution?: string,
+    schoolId?: string,
   ): Promise<any> {
     try {
       this.logger.log('Attempting to retrieve all engagements');
@@ -83,6 +84,14 @@ export class EngagementService {
       // Filter by specificContribution if provided
       if (specificContribution) {
         queryFilter.specificContribution = specificContribution;
+      }
+
+      // Filter by schoolId if provided
+      if (schoolId) {
+        if (!Types.ObjectId.isValid(schoolId)) {
+          throw new BadRequestException(`Invalid School ID: ${schoolId}`);
+        }
+        queryFilter.schoolId = new Types.ObjectId(schoolId);
       }
 
       const [engagements, total] = await Promise.all([
@@ -175,6 +184,12 @@ export class EngagementService {
         );
       }
 
+      if (!schoolNeed.schoolId) {
+        throw new BadRequestException(
+          `School Need with ID: ${schoolNeedId} does not have a schoolId assigned`,
+        );
+      }
+
       this.logger.log(
         'Creating new Engagement with the following data:',
         engagementDto,
@@ -184,6 +199,7 @@ export class EngagementService {
         ...engagementDto,
         schoolYear: schoolNeed.schoolYear,
         specificContribution: schoolNeed.specificContribution,
+        schoolId: schoolNeed.schoolId,
       });
       const savedEngagement = await createdEngagement.save();
 
@@ -191,11 +207,13 @@ export class EngagementService {
         `Engagement created successfully with ID: ${savedEngagement._id.toString()}`,
       );
 
+      const engagementObj = savedEngagement.toObject({ versionKey: false });
       const responseDto: EngagementResponseDto = {
-        ...savedEngagement.toObject({ versionKey: false }),
+        ...engagementObj,
         _id: savedEngagement._id.toString(),
         schoolNeedId: savedEngagement.schoolNeedId.toString(),
         stakeholderUserId: savedEngagement.stakeholderUserId.toString(),
+        schoolId: savedEngagement.schoolId.toString(),
       };
 
       return {
@@ -406,5 +424,110 @@ export class EngagementService {
     limit = 10,
   ): Promise<any> {
     return this.getAllEngagements(page, limit, stakeholderUserId);
+  }
+
+  async getEngagementsSummary(
+    stakeholderUserId?: string,
+    schoolYear?: string,
+  ): Promise<any> {
+    try {
+      this.logger.log('Attempting to retrieve engagements summary');
+
+      const matchStage: any = {};
+
+      // Filter by stakeholder if provided
+      if (stakeholderUserId) {
+        if (!Types.ObjectId.isValid(stakeholderUserId)) {
+          throw new BadRequestException(
+            `Invalid Stakeholder ID: ${stakeholderUserId}`,
+          );
+        }
+        matchStage.stakeholderUserId = new Types.ObjectId(stakeholderUserId);
+      }
+
+      // Filter by school year if provided, otherwise use current school year
+      const filterSchoolYear = /^\d{4}-\d{4}$/.test(schoolYear || '')
+        ? schoolYear
+        : this.getCurrentSchoolYear();
+
+      matchStage.schoolYear = filterSchoolYear;
+
+      const pipeline: any[] = [
+        { $match: matchStage },
+        {
+          $group: {
+            _id: {
+              specificContribution: '$specificContribution',
+              schoolYear: '$schoolYear',
+              schoolId: '$schoolId',
+            },
+            totalAmount: { $sum: '$amount' },
+            totalQuantity: { $sum: '$quantity' },
+            engagementCount: { $sum: 1 },
+          },
+        },
+        {
+          $addFields: {
+            schoolIdRef: {
+              $cond: {
+                if: { $eq: [{ $type: '$_id.schoolId' }, 'string'] },
+                then: { $toObjectId: '$_id.schoolId' },
+                else: '$_id.schoolId',
+              },
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'schools',
+            localField: 'schoolIdRef',
+            foreignField: '_id',
+            as: 'schoolData',
+          },
+        },
+        {
+          $unwind: {
+            path: '$schoolData',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            specificContribution: '$_id.specificContribution',
+            schoolYear: '$_id.schoolYear',
+            schoolId: {
+              _id: '$schoolData._id',
+              schoolName: '$schoolData.schoolName',
+              division: '$schoolData.division',
+              districtOrCluster: '$schoolData.districtOrCluster',
+            },
+            totalAmount: 1,
+            totalQuantity: 1,
+            engagementCount: 1,
+          },
+        },
+        {
+          $sort: {
+            schoolYear: 1,
+            specificContribution: 1,
+          },
+        },
+      ];
+
+      const summary = await this.engagementModel.aggregate(pipeline).exec();
+
+      return {
+        success: true,
+        data: summary,
+        meta: {
+          count: summary.length,
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      this.logger.error('Error getting engagements summary', error.stack);
+      throw error;
+    }
   }
 }

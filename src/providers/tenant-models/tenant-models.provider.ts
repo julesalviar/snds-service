@@ -21,6 +21,7 @@ import {
   InternalReferenceData,
   InternalReferenceDataSchema,
 } from 'src/internal-reference-data/internal-reference-data.schema';
+import { Engagement, EngagementSchema } from 'src/engagement/engagement.schema';
 
 export const TenantModels = {
   userModel: {
@@ -106,6 +107,16 @@ export const TenantModels = {
         InternalReferenceData.name,
         InternalReferenceDataSchema,
       );
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  engagementModel: {
+    provide: PROVIDER.ENGAGEMENT_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<Engagement>> => {
+      return tenantConnection.model(Engagement.name, EngagementSchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

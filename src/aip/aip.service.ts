@@ -5,7 +5,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
-  Logger,
+  Logger, ConflictException,
 } from '@nestjs/common';
 import { AipDto } from 'src/aip/aip.dto';
 import { Aip, AipDocument } from './aip.schema';
@@ -18,10 +18,11 @@ export class AipService {
 
   constructor(
     @Inject(PROVIDER.AIP_MODEL)
-    private readonly aipModel: Model<Aip>, // Inject the custom provider
+    private readonly aipModel: Model<Aip>,
+
     @Inject(PROVIDER.SCHOOL_MODEL)
     private readonly schoolModel: Model<School>,
-    @Inject(PROVIDER.USER_MODEL)
+
     private readonly counterService: CounterService,
   ) {}
 
@@ -61,6 +62,9 @@ export class AipService {
       this.logger.log(`AIP created successfully with ID: ${createdAip?.apn}`);
       return savedAip;
     } catch (error) {
+      if (error.code === 11000) {
+        throw new ConflictException('Title already exists for this school.');
+      }
       this.logger.error('Error creating AIP', error.stack);
       throw error;
     }

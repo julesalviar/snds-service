@@ -49,26 +49,6 @@ export class UsersController {
     }
   }
 
-  @Get(':id/my-contributions')
-  async myContributions(
-    @Param('id') id: string,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-  ): Promise<any> {
-    try {
-      return await this.userService.getMyContributions(
-        id,
-        Number(page),
-        Number(limit),
-      );
-    } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
   @Patch('change-password')
   async changePassword(
     @UserInfo('username') userName: string,

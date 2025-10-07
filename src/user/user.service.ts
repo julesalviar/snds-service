@@ -2,7 +2,6 @@ import {
   Inject,
   Injectable,
   Logger,
-  NotAcceptableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PROVIDER } from '../common/constants/providers';
@@ -10,7 +9,6 @@ import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { UserRole } from './enums/user-role.enum';
 import { Tenant } from '../tenant/tenantSchema';
-import { SchoolNeedService } from 'src/school-need/school-need.service';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { School } from 'src/schools/school.schema';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
@@ -25,7 +23,6 @@ export class UserService {
     @Inject(PROVIDER.TENANT_MODEL) private readonly tenantModel: Model<Tenant>,
     @Inject(PROVIDER.SCHOOL_MODEL) private readonly schoolModel: Model<School>,
     private readonly encryptionService: EncryptionService, // Inject EncryptionService
-    private readonly schoolNeedService: SchoolNeedService,
   ) {
     this.logger = new Logger(UserService.name);
   }
@@ -35,18 +32,6 @@ export class UserService {
       .findOne({ userName })
       .select('+password')
       .exec();
-  }
-
-  async getMyContributions(
-    userId: string,
-    page: number,
-    limit: number,
-  ): Promise<any> {
-    return await this.schoolNeedService.getStakeholderContributions(
-      userId,
-      page,
-      limit,
-    );
   }
 
   async getUserByUserEmail(email: string): Promise<User | null> {

@@ -5,13 +5,8 @@ import {
   Inject,
   Injectable,
   Logger,
-  // NotFoundException,
 } from '@nestjs/common';
-import {
-  CreateEngagementDto,
-  // UpdateEngagementDto,
-  EngagementResponseDto,
-} from './engagement.dto';
+import { CreateEngagementDto, EngagementResponseDto } from './engagement.dto';
 import { Engagement } from './engagement.schema';
 import { User } from 'src/user/schemas/user.schema';
 import { SchoolNeed } from 'src/school-need/school-need.schema';
@@ -138,7 +133,7 @@ export class EngagementService {
   }
 
   async createEngagement(engagementDto: CreateEngagementDto): Promise<any> {
-    const { stakeholderUserId, schoolNeedId } = engagementDto;
+    const { stakeholderUserId, schoolNeedId, schoolNeedCode } = engagementDto;
 
     try {
       if (!Types.ObjectId.isValid(stakeholderUserId)) {
@@ -155,38 +150,56 @@ export class EngagementService {
       }
 
       // Validate and fetch school need to get schoolYear
-      if (!schoolNeedId) {
-        throw new BadRequestException('schoolNeedId is required');
-      }
-
-      if (!Types.ObjectId.isValid(schoolNeedId)) {
+      if (!schoolNeedId && !schoolNeedCode) {
         throw new BadRequestException(
-          `Invalid School Need ID: ${schoolNeedId}`,
+          'Either schoolNeedId or schoolNeedCode is required',
         );
       }
 
-      const schoolNeed = await this.schoolNeedModel.findById(schoolNeedId);
-      if (!schoolNeed) {
-        throw new BadRequestException(
-          `School Need with ID: ${schoolNeedId} not found`,
-        );
+      let schoolNeed: SchoolNeed | null = null;
+
+      if (schoolNeedId) {
+        if (!Types.ObjectId.isValid(schoolNeedId)) {
+          throw new BadRequestException(
+            `Invalid School Need ID: ${schoolNeedId}`,
+          );
+        }
+        schoolNeed = await this.schoolNeedModel.findById(schoolNeedId);
+        if (!schoolNeed) {
+          throw new BadRequestException(
+            `School Need with ID: ${schoolNeedId} not found`,
+          );
+        }
+      } else if (schoolNeedCode) {
+        schoolNeed = await this.schoolNeedModel.findOne({
+          code: schoolNeedCode,
+        });
+        if (!schoolNeed) {
+          throw new BadRequestException(
+            `School Need with code: ${schoolNeedCode} not found`,
+          );
+        }
       }
+
+      const schoolNeedIdentifier = schoolNeedId
+        ? `ID: ${schoolNeedId}`
+        : `code: ${schoolNeedCode}`;
 
       if (!schoolNeed.schoolYear) {
         throw new BadRequestException(
-          `School Need with ID: ${schoolNeedId} does not have a schoolYear assigned`,
+          `School Need with ${schoolNeedIdentifier} does not have a schoolYear assigned`,
         );
       }
 
       if (!schoolNeed.specificContribution) {
         throw new BadRequestException(
-          `School Need with ID: ${schoolNeedId} does not have a specificContribution assigned`,
+          `School Need with ${schoolNeedIdentifier} does not have a specificContribution assigned`,
         );
       }
 
       if (!schoolNeed.schoolId) {
         throw new BadRequestException(
-          `School Need with ID: ${schoolNeedId} does not have a schoolId assigned`,
+          `School Need with ${schoolNeedIdentifier} does not have a schoolId assigned`,
         );
       }
 
@@ -197,6 +210,7 @@ export class EngagementService {
 
       const createdEngagement = new this.engagementModel({
         ...engagementDto,
+        schoolNeedId: schoolNeed._id, // Use the school need ID from the found school need
         schoolYear: schoolNeed.schoolYear,
         specificContribution: schoolNeed.specificContribution,
         schoolId: schoolNeed.schoolId,

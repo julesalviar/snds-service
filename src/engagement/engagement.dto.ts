@@ -88,4 +88,5 @@ export class EngagementSummaryDto {
   totalAmount: number;
   totalQuantity: number;
   engagementCount: number;
+  engagementDates: string;
 }

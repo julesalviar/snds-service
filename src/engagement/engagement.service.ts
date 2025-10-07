@@ -464,6 +464,7 @@ export class EngagementService {
             totalAmount: { $sum: '$amount' },
             totalQuantity: { $sum: '$quantity' },
             engagementCount: { $sum: 1 },
+            engagementDates: { $push: '$createdAt' },
           },
         },
         {
@@ -473,6 +474,25 @@ export class EngagementService {
                 if: { $eq: [{ $type: '$_id.schoolId' }, 'string'] },
                 then: { $toObjectId: '$_id.schoolId' },
                 else: '$_id.schoolId',
+              },
+            },
+            engagementDatesFormatted: {
+              $reduce: {
+                input: '$engagementDates',
+                initialValue: '',
+                in: {
+                  $concat: [
+                    '$$value',
+                    {
+                      $cond: {
+                        if: { $eq: ['$$value', ''] },
+                        then: '',
+                        else: ', ',
+                      },
+                    },
+                    { $toString: '$$this' },
+                  ],
+                },
               },
             },
           },
@@ -505,6 +525,7 @@ export class EngagementService {
             totalAmount: 1,
             totalQuantity: 1,
             engagementCount: 1,
+            engagementDates: '$engagementDatesFormatted',
           },
         },
         {

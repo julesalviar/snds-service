@@ -61,39 +61,4 @@ export class EngagementController {
       Number(limit),
     );
   }
-
-  // @Public()
-  // @Get('school-need/:schoolNeedId')
-  // async getEngagementsBySchoolNeed(
-  //   @Param('schoolNeedId') schoolNeedId: string,
-  //   @Query('page') page = 1,
-  //   @Query('limit') limit = 10,
-  // ) {
-  //   return this.engagementService.getEngagementsBySchoolNeed(
-  //     schoolNeedId,
-  //     Number(page),
-  //     Number(limit),
-  //   );
-  // }
-
-  // @Public()
-  // @Get(':id')
-  // async getEngagementById(@Param('id') id: string) {
-  //   return this.engagementService.getEngagementById(id);
-  // }
-
-  // @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_MANAGE)
-  // @Put(':id')
-  // async updateEngagement(
-  //   @Param('id') id: string,
-  //   @Body() updateEngagementDto: UpdateEngagementDto,
-  // ) {
-  //   return this.engagementService.updateEngagement(id, updateEngagementDto);
-  // }
-
-  // @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_MANAGE)
-  // @Delete(':id')
-  // async deleteEngagement(@Param('id') id: string) {
-  //   return this.engagementService.deleteEngagement(id);
-  // }
 }

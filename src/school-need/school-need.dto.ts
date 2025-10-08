@@ -75,6 +75,9 @@ export class SchoolNeedDto {
 
   @IsOptional()
   updatedAt: string;
+
+  @IsOptional()
+  engagements?: any;
 }
 
 export class SchoolCreateNeedDto extends OmitType(SchoolNeedDto, [

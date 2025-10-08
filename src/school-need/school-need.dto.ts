@@ -9,7 +9,6 @@ import {
 } from 'class-validator';
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { SchoolNeedStatus } from './school-need.enums';
-import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 import { Type } from 'class-transformer';
 
 export class SchoolNeedDto {
@@ -64,11 +63,6 @@ export class SchoolNeedDto {
     message: 'implementationStatus must be a valid SchoolNeedStatus value',
   })
   implementationStatus: string;
-
-  // @IsOptional()
-  // @ValidateNested({ each: true })
-  // @Type(() => StakeHolderEngageDto)
-  // engagement: StakeHolderEngageDto[];
 
   @IsOptional()
   createdAt: string;

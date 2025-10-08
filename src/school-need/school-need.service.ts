@@ -172,6 +172,7 @@ export class SchoolNeedService {
     limit = 10,
     schoolYear?: string,
     specificContribution?: string,
+    withEngagements?: string,
   ) {
     try {
       this.logger.log(`Attempting to retrieve all school Needs`);
@@ -268,28 +269,55 @@ export class SchoolNeedService {
             : null,
         ]);
 
+      // Fetch engagements if withEngagements is present
+      let engagementsByNeedId = {};
+      if (withEngagements) {
+        const needIds = needs.map((need) => need._id);
+        const engagements = await this.engagementModel
+          .find({ schoolNeedId: { $in: needIds } })
+          .populate({
+            path: 'stakeholderUserId',
+            select: 'firstName lastName name email',
+          })
+          .exec();
+
+        // Group engagements by schoolNeedId
+        engagementsByNeedId = engagements.reduce((acc, engagement) => {
+          const needId = engagement.schoolNeedId.toString();
+          acc[needId] ??= [];
+          acc[needId].push(engagement.toObject({ versionKey: false }));
+          return acc;
+        }, {});
+      }
+
       const transformedNeeds = needs.map((need) => {
         const needObj = need.toObject({ versionKey: false });
         const { schoolId, ...restNeedObj } = needObj;
-        return {
+        const transformed: any = {
           ...restNeedObj,
           _id: need._id.toString(),
           createdAt: need.createdAt,
           updatedAt: need.updatedAt,
           school: schoolId, // Rename schoolId to school
         };
+
+        // Add engagements if withEngagements is present
+        if (withEngagements) {
+          const needIdStr = need._id.toString();
+          transformed.engagements = engagementsByNeedId[needIdStr] || [];
+        }
+
+        return transformed;
       });
 
-      // Extract totalBySchool from aggregation result (counts distinct schools from entire filtered dataset)
       const totalBySchoolCount =
         totalBySchool.length > 0 ? totalBySchool[0].totalBySchool : 0;
 
-      // Extract totalQuantity from aggregation result when specificContribution is provided
       const totalQuantity =
         specificContribution &&
         totalQuantityResult &&
         totalQuantityResult.length > 0
-          ? totalQuantityResult[0].totalQuantity || 0
+          ? (totalQuantityResult[0].totalQuantity ?? 0)
           : undefined;
 
       const response: any = {

@@ -53,6 +53,7 @@ export class SchoolNeedController {
     @Query('schoolYear') schoolYear?: string,
     @Query('specificContribution') specificContribution?: string,
     @Query('schoolId') querySchoolId?: string,
+    @Query('withEngagements') withEngagements?: string,
   ) {
     const effectiveSchoolId = querySchoolId || schoolId || undefined;
 
@@ -65,6 +66,7 @@ export class SchoolNeedController {
       Number(limit),
       finalSchoolYear,
       specificContribution,
+      withEngagements,
     );
   }
 

@@ -304,7 +304,7 @@ export class SchoolNeedService {
         // Add engagements if withEngagements is present
         if (withEngagements) {
           const needIdStr = need._id.toString();
-          transformed.engagements = engagementsByNeedId[needIdStr] || [];
+          transformed.engagements = engagementsByNeedId[needIdStr] ?? [];
         }
 
         return transformed;

@@ -166,7 +166,7 @@ export class SchoolService {
       const [schools, total] = await Promise.all([
         this.schoolModel
           .find(filter)
-          .sort({ schoolId: -1 })
+          .sort({ schoolName: 'asc' })
           .skip(skip)
           .limit(limit)
           .exec(),
@@ -200,7 +200,7 @@ export class SchoolService {
         });
 
         schoolsWithNeeds = schools.map((school) => {
-          const needCount = needCountMap.get(school._id.toString()) || 0;
+          const needCount = needCountMap.get(school._id.toString()) ?? 0;
           return {
             ...school.toObject(),
             additionalInfo: {

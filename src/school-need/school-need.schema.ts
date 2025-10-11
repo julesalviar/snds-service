@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, HydratedDocument } from 'mongoose';
-import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 
 export class Image {
   @Prop({ required: true })

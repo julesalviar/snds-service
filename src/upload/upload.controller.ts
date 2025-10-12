@@ -55,7 +55,10 @@ export class UploadController {
       }
 
       if (!file.buffer) {
-        this.logger.warn('Upload failed: File buffer is missing', requestContext);
+        this.logger.warn(
+          'Upload failed: File buffer is missing',
+          requestContext,
+        );
         throw new BadRequestException('File buffer is missing');
       }
 
@@ -66,8 +69,8 @@ export class UploadController {
         category || 'uncategorized',
       );
 
-      this.logger.log('Upload successful', { 
-        ...requestContext, 
+      this.logger.log('Upload successful', {
+        ...requestContext,
         uploadId: result.id,
         originalUrl: result.originalUrl,
         thumbnailUrl: result.thumbnailUrl,
@@ -89,7 +92,10 @@ export class UploadController {
         errorStatus: error.status,
       };
 
-      this.logger.error('Upload failed with detailed error information', errorContext);
+      this.logger.error(
+        'Upload failed with detailed error information',
+        errorContext,
+      );
 
       if (error instanceof BadRequestException) {
         this.logger.warn('Bad request error (400)', errorContext);
@@ -108,7 +114,7 @@ export class UploadController {
       });
 
       throw new InternalServerErrorException(
-        `Upload failed: ${error.message || 'Unknown error'}`,
+        `Upload failed: ${error.message ?? 'Unknown error'}`,
       );
     }
   }
@@ -157,7 +163,10 @@ export class UploadController {
         errorStatus: error.status,
       };
 
-      this.logger.error('Cancel image failed with detailed error information', errorContext);
+      this.logger.error(
+        'Cancel image failed with detailed error information',
+        errorContext,
+      );
 
       if (error instanceof NotFoundException) {
         this.logger.warn('Not found error (404)', errorContext);
@@ -174,7 +183,7 @@ export class UploadController {
       });
 
       throw new InternalServerErrorException(
-        `Cancel image failed: ${error.message || 'Unknown error'}`,
+        `Cancel image failed: ${error.message ?? 'Unknown error'}`,
       );
     }
   }

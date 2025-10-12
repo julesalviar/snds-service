@@ -1,25 +1,35 @@
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 import { Injectable, Logger } from '@nestjs/common';
+import { ClsService } from 'nestjs-cls';
 import { R2Service } from 'src/storage/r2.service';
 
 @Injectable()
 export class ImageService {
   private readonly logger = new Logger(ImageService.name);
 
-  constructor(private readonly r2Service: R2Service) {}
+  constructor(
+    private readonly r2Service: R2Service,
+    private readonly cls: ClsService,
+  ) {}
 
   async processAndUploadImage(file: Express.Multer.File, category: string) {
     try {
+      const tenantCode = this.cls.get<string>('tenantCode');
+      const tenantId = this.cls.get<string>('tenantId');
+
+      const ext = file.mimetype.split('/')[1];
+      const dateBucket = this.getDateBucket();
+      const shortUuid = uuidv4().slice(0, 8);
+
       this.logger.log('Processing image', {
         fileName: file.originalname,
         category,
         size: file.size,
         mimetype: file.mimetype,
+        tenantCode,
+        tenantId,
       });
-
-      const id = uuidv4();
-      const ext = file.mimetype.split('/')[1];
 
       if (!file.buffer || file.buffer.length === 0) {
         throw new Error('File buffer is empty');
@@ -37,8 +47,8 @@ export class ImageService {
         .jpeg({ quality: 60 })
         .toBuffer();
 
-      const originalKey = `${category}/${id}/original.${ext}`;
-      const thumbnailKey = `${category}/${id}/thumbnail.${ext}`;
+      const originalKey = `${tenantCode}/${category}/${dateBucket}/${shortUuid}/original.${ext}`;
+      const thumbnailKey = `${tenantCode}/${category}/${dateBucket}/${shortUuid}/thumbnail.${ext}`;
 
       this.logger.log('Uploading original image', { key: originalKey });
       const originalUrl = await this.r2Service.uploadFile(
@@ -55,14 +65,21 @@ export class ImageService {
       );
 
       this.logger.log('Image processing completed', {
-        id,
         originalUrl,
         thumbnailUrl,
       });
-      return { id, originalUrl, thumbnailUrl };
+      return { id: `${shortUuid}`, originalUrl, thumbnailUrl };
     } catch (error) {
       this.logger.error('Image processing failed', error.stack);
       throw error;
     }
+  }
+
+  getDateBucket(): string {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    return `${yyyy}${mm}${dd}`;
   }
 }

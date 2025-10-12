@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   Logger,
 } from '@nestjs/common';
+import { ClsService } from 'nestjs-cls';
 import { TenantService } from 'src/tenant/tenant.service';
 import { NextFunction, Request, Response } from 'express';
 
@@ -11,7 +12,10 @@ import { NextFunction, Request, Response } from 'express';
 export class TenantValidationMiddleware implements NestMiddleware {
   private readonly logger = new Logger(TenantValidationMiddleware.name);
 
-  constructor(private readonly tenantService: TenantService) {}
+  constructor(
+    private readonly tenantService: TenantService,
+    private readonly cls: ClsService,
+  ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
@@ -40,6 +44,10 @@ export class TenantValidationMiddleware implements NestMiddleware {
       this.logger.log('Tenant found', { tenantCode, tenantId: tenant._id });
       req['tenantId'] = tenant._id;
       req['tenantCode'] = tenant.tenantCode;
+
+      this.cls.set('tenantId', tenant._id);
+      this.cls.set('tenantCode', tenant.tenantCode);
+
       next();
     } catch (error) {
       this.logger.error('Tenant validation failed', error.stack);

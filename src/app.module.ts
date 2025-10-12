@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { ClsModule, ClsMiddleware } from 'nestjs-cls';
 import { mongooseModuleAsyncOptions } from './config/mongo.config';
 import { TenantModule } from './tenant/tenant.module';
 import { UserModule } from './user/user.module';
@@ -29,6 +30,12 @@ import { EngagementModule } from './engagement/engagement.module';
       isGlobal: true,
       cache: true,
     }),
+    ClsModule.forRoot({
+      global: true,
+      middleware: {
+        mount: false, // Mount it manually in configure() to control order
+      },
+    }),
     MongooseModule.forRootAsync(mongooseModuleAsyncOptions),
     TenantModule,
     UserModule,
@@ -50,4 +57,9 @@ import { EngagementModule } from './engagement/engagement.module';
   controllers: [AppController, ShsImmersionController],
   providers: [AppService, ShsImmersionService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply ClsMiddleware to all routes to ensure CLS context is available
+    consumer.apply(ClsMiddleware).forRoutes('*');
+  }
+}

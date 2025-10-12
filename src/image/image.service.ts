@@ -20,6 +20,7 @@ export class ImageService {
 
       const ext = file.mimetype.split('/')[1];
       const dateBucket = this.getDateBucket();
+      const hourBucket = this.getHourBucket();
       const shortUuid = uuidv4().slice(0, 8);
 
       this.logger.log('Processing image', {
@@ -47,8 +48,8 @@ export class ImageService {
         .jpeg({ quality: 60 })
         .toBuffer();
 
-      const originalKey = `${tenantCode}/${category}/${dateBucket}/${shortUuid}/original.${ext}`;
-      const thumbnailKey = `${tenantCode}/${category}/${dateBucket}/${shortUuid}/thumbnail.${ext}`;
+      const originalKey = `${tenantCode}/${category}/${dateBucket}/${hourBucket}-${shortUuid}.${ext}`;
+      const thumbnailKey = `${tenantCode}/${category}/${dateBucket}/${hourBucket}-${shortUuid}-thumb.${ext}`;
 
       this.logger.log('Uploading original image', { key: originalKey });
       const originalUrl = await this.r2Service.uploadFile(
@@ -81,5 +82,10 @@ export class ImageService {
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
     return `${yyyy}${mm}${dd}`;
+  }
+
+  getHourBucket(): string {
+    const now = new Date();
+    return String(now.getHours()).padStart(2, '0');
   }
 }

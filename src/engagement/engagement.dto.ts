@@ -72,7 +72,7 @@ export class EngagementResponseDto {
   _id: string;
   amount: number;
   quantity: number;
-  stakeholderUserId: string;
+  stakeholderUserId: string | mongoose.Types.ObjectId;
   unit: string;
   signingDate: string;
   startDate?: string;

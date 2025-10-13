@@ -39,7 +39,7 @@ export class EngagementController {
 
   @Get('my-contributions/summary')
   async getEngagementsSummary(
-    @UserInfo('_id') stakeholderUserId?: string,
+    @UserInfo('userId') stakeholderUserId?: string,
     @Query('schoolYear') schoolYear?: string,
   ) {
     return this.engagementService.getEngagementsSummary(
@@ -51,12 +51,14 @@ export class EngagementController {
   @Public()
   @Get('my-contributions')
   async getEngagementsByStakeholder(
-    @UserInfo('_id') stakeholderUserId: string,
+    @UserInfo('userId') stakeholderUserId: string,
+    @Query('schoolYear') schoolYear?: string,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
   ) {
     return this.engagementService.getEngagementsByStakeholder(
       stakeholderUserId,
+      schoolYear,
       Number(page),
       Number(limit),
     );

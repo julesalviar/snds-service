@@ -58,7 +58,6 @@ export class EngagementService {
       const skip = (page - 1) * limit;
       const queryFilter: any = {};
 
-      // Filter by stakeholder if provided
       if (stakeholderUserId) {
         if (!Types.ObjectId.isValid(stakeholderUserId)) {
           throw new BadRequestException(
@@ -94,11 +93,12 @@ export class EngagementService {
           .find(queryFilter)
           .populate({
             path: 'schoolNeedId',
-            select: 'code description schoolId schoolYear specificContribution',
-            populate: {
-              path: 'schoolId',
-              select: 'schoolName division districtOrCluster',
-            },
+            select:
+              'code description schoolId schoolYear specificContribution images',
+          })
+          .populate({
+            path: 'schoolId',
+            select: 'schoolName division districtOrCluster',
           })
           .sort({ createdAt: -1 })
           .skip(skip)
@@ -226,7 +226,7 @@ export class EngagementService {
         ...engagementObj,
         _id: savedEngagement._id.toString(),
         schoolNeedId: savedEngagement.schoolNeedId.toString(),
-        stakeholderUserId: savedEngagement.stakeholderUserId.toString(),
+        stakeholderUserId: savedEngagement.stakeholderUserId,
         schoolId: savedEngagement.schoolId.toString(),
       };
 
@@ -245,10 +245,11 @@ export class EngagementService {
 
   async getEngagementsByStakeholder(
     stakeholderUserId: string,
+    schoolYear?: string,
     page = 1,
     limit = 10,
   ): Promise<any> {
-    return this.getAllEngagements(page, limit, stakeholderUserId);
+    return this.getAllEngagements(page, limit, stakeholderUserId, schoolYear);
   }
 
   async getEngagementsSummary(

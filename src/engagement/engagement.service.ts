@@ -210,7 +210,8 @@ export class EngagementService {
 
       const createdEngagement = new this.engagementModel({
         ...engagementDto,
-        schoolNeedId: schoolNeed._id, // Use the school need ID from the found school need
+        stakeholderUserId: new Types.ObjectId(stakeholderUserId),
+        schoolNeedId: schoolNeed._id,
         schoolYear: schoolNeed.schoolYear,
         specificContribution: schoolNeed.specificContribution,
         schoolId: schoolNeed.schoolId,

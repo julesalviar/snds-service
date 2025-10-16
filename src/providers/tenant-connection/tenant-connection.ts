@@ -6,7 +6,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 
 export const TenantConnectionProvider = {
   provide: PROVIDER.TENANT_CONNECTION,
-  useFactory: async (request, connection: Connection) => {
+  useFactory: async (request: any, connection: Connection) => {
     if (!request.tenantCode) {
       throw new InternalServerErrorException();
     }

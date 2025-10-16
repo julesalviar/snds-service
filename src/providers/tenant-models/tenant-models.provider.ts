@@ -22,6 +22,10 @@ import {
   InternalReferenceDataSchema,
 } from 'src/internal-reference-data/internal-reference-data.schema';
 import { Engagement, EngagementSchema } from 'src/engagement/engagement.schema';
+import {
+  SchoolSummary,
+  SchoolSummarySchema,
+} from 'src/school-summary/school-summary.schema';
 
 export const TenantModels = {
   userModel: {
@@ -117,6 +121,16 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<Engagement>> => {
       return tenantConnection.model(Engagement.name, EngagementSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  schoolSummaryModel: {
+    provide: PROVIDER.SCHOOL_SUMMARY_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<SchoolSummary>> => {
+      return tenantConnection.model(SchoolSummary.name, SchoolSummarySchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

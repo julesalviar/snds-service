@@ -5,6 +5,7 @@ import {
   getPercentageComplete,
 } from '../school-need/implementation-status.enum';
 import { SchoolNeedSchema } from '../school-need/school-need.schema';
+import { SchoolSummaryService } from '../school-summary/school-summary.service';
 
 @Schema({ timestamps: true, collection: 'engagements' })
 export class Engagement extends Document {
@@ -112,6 +113,17 @@ async function updateSchoolNeedStatus(schoolNeedId: Types.ObjectId, doc: any) {
 
 // Middleware: After creating an engagement
 EngagementSchema.post('save', async function (doc) {
+  // Update school summary for specific school year
+  await SchoolSummaryService.updateSchoolSummary(
+    doc.schoolId,
+    doc.schoolYear,
+    doc,
+  );
+
+  // Update ALL_TIME summary
+  await SchoolSummaryService.updateSchoolSummary(doc.schoolId, null, doc);
+
+  // Update school need implementation status
   if (doc.schoolNeedId) {
     await updateSchoolNeedStatus(doc.schoolNeedId, doc);
   }
@@ -119,14 +131,74 @@ EngagementSchema.post('save', async function (doc) {
 
 // Middleware: After updating an engagement (covers findByIdAndUpdate as well)
 EngagementSchema.post('findOneAndUpdate', async function (doc) {
-  if (doc?.schoolNeedId) {
-    await updateSchoolNeedStatus(doc.schoolNeedId, doc);
+  if (doc) {
+    // Update school summary for specific school year
+    await SchoolSummaryService.updateSchoolSummary(
+      doc.schoolId,
+      doc.schoolYear,
+      doc,
+    );
+
+    // Update ALL_TIME summary
+    await SchoolSummaryService.updateSchoolSummary(doc.schoolId, null, doc);
+
+    // Update school need implementation status
+    if (doc.schoolNeedId) {
+      await updateSchoolNeedStatus(doc.schoolNeedId, doc);
+    }
   }
 });
 
 // Middleware: After deleting an engagement (covers findByIdAndDelete as well)
 EngagementSchema.post('findOneAndDelete', async function (doc) {
-  if (doc?.schoolNeedId) {
-    await updateSchoolNeedStatus(doc.schoolNeedId, doc);
+  if (doc) {
+    // Update school summary for specific school year
+    await SchoolSummaryService.updateSchoolSummary(
+      doc.schoolId,
+      doc.schoolYear,
+      doc,
+    );
+
+    // Update ALL_TIME summary
+    await SchoolSummaryService.updateSchoolSummary(doc.schoolId, null, doc);
+
+    // Update school need implementation status
+    if (doc.schoolNeedId) {
+      await updateSchoolNeedStatus(doc.schoolNeedId, doc);
+    }
+  }
+});
+
+// Middleware: After bulk insert (Edge Case: Bulk Operations)
+EngagementSchema.post('insertMany', async function (docs: any) {
+  if (docs && Array.isArray(docs) && docs.length > 0) {
+    // Track unique school+year combinations to avoid duplicate updates
+    const updates = new Set<string>();
+
+    for (const doc of docs) {
+      const schoolYearKey = `${doc.schoolId}-${doc.schoolYear}`;
+      const allTimeKey = `${doc.schoolId}-ALL_TIME`;
+
+      // Update for specific school year
+      if (!updates.has(schoolYearKey)) {
+        updates.add(schoolYearKey);
+        await SchoolSummaryService.updateSchoolSummary(
+          doc.schoolId,
+          doc.schoolYear,
+          doc,
+        );
+      }
+
+      // Update ALL_TIME summary
+      if (!updates.has(allTimeKey)) {
+        updates.add(allTimeKey);
+        await SchoolSummaryService.updateSchoolSummary(doc.schoolId, null, doc);
+      }
+
+      // Update school need implementation status
+      if (doc.schoolNeedId) {
+        await updateSchoolNeedStatus(doc.schoolNeedId, doc);
+      }
+    }
   }
 });

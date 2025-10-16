@@ -3,6 +3,7 @@ import { Document, Types, HydratedDocument } from 'mongoose';
 import { AipStatus } from '../aip/aip-status.enum';
 import { ImplementationStatus } from './implementation-status.enum';
 import { AipSchema } from '../aip/aip.schema';
+import { SchoolSummaryService } from '../school-summary/school-summary.service';
 
 export class Image {
   @Prop({ required: true })
@@ -161,6 +162,19 @@ async function updateAipStatus(aipId: Types.ObjectId, doc: any) {
 
 // Middleware: After creating a school need
 SchoolNeedSchema.post('save', async function (doc) {
+  // Update school summary for specific school year
+  if (doc.schoolYear) {
+    await SchoolSummaryService.updateSchoolSummary(
+      doc.schoolId,
+      doc.schoolYear,
+      doc,
+    );
+  }
+
+  // Update ALL_TIME summary
+  await SchoolSummaryService.updateSchoolSummary(doc.schoolId, null, doc);
+
+  // Update AIP status
   if (doc.projectId && doc.projectId.length > 0) {
     for (const aipId of doc.projectId) {
       await updateAipStatus(aipId, doc);
@@ -170,18 +184,84 @@ SchoolNeedSchema.post('save', async function (doc) {
 
 // Middleware: After updating a school need (covers findByIdAndUpdate as well)
 SchoolNeedSchema.post('findOneAndUpdate', async function (doc) {
-  if (doc?.projectId && doc.projectId.length > 0) {
-    for (const aipId of doc.projectId) {
-      await updateAipStatus(aipId, doc);
+  if (doc) {
+    // Update school summary for specific school year
+    if (doc.schoolYear) {
+      await SchoolSummaryService.updateSchoolSummary(
+        doc.schoolId,
+        doc.schoolYear,
+        doc,
+      );
+    }
+
+    // Update ALL_TIME summary
+    await SchoolSummaryService.updateSchoolSummary(doc.schoolId, null, doc);
+
+    // Update AIP status
+    if (doc.projectId && doc.projectId.length > 0) {
+      for (const aipId of doc.projectId) {
+        await updateAipStatus(aipId, doc);
+      }
     }
   }
 });
 
 // Middleware: After deleting a school need (covers findByIdAndDelete as well)
 SchoolNeedSchema.post('findOneAndDelete', async function (doc) {
-  if (doc?.projectId && doc.projectId.length > 0) {
-    for (const aipId of doc.projectId) {
-      await updateAipStatus(aipId, doc);
+  if (doc) {
+    // Update school summary for specific school year
+    if (doc.schoolYear) {
+      await SchoolSummaryService.updateSchoolSummary(
+        doc.schoolId,
+        doc.schoolYear,
+        doc,
+      );
+    }
+
+    // Update ALL_TIME summary
+    await SchoolSummaryService.updateSchoolSummary(doc.schoolId, null, doc);
+
+    // Update AIP status
+    if (doc.projectId && doc.projectId.length > 0) {
+      for (const aipId of doc.projectId) {
+        await updateAipStatus(aipId, doc);
+      }
+    }
+  }
+});
+
+// Middleware: After bulk insert (Edge Case: Bulk Operations)
+SchoolNeedSchema.post('insertMany', async function (docs: any) {
+  if (docs && Array.isArray(docs) && docs.length > 0) {
+    // Track unique school+year combinations to avoid duplicate updates
+    const updates = new Set<string>();
+
+    for (const doc of docs) {
+      const schoolYearKey = `${doc.schoolId}-${doc.schoolYear ?? 'NONE'}`;
+      const allTimeKey = `${doc.schoolId}-ALL_TIME`;
+
+      // Update for specific school year
+      if (doc.schoolYear && !updates.has(schoolYearKey)) {
+        updates.add(schoolYearKey);
+        await SchoolSummaryService.updateSchoolSummary(
+          doc.schoolId,
+          doc.schoolYear,
+          doc,
+        );
+      }
+
+      // Update ALL_TIME summary
+      if (!updates.has(allTimeKey)) {
+        updates.add(allTimeKey);
+        await SchoolSummaryService.updateSchoolSummary(doc.schoolId, null, doc);
+      }
+
+      // Update AIP status
+      if (doc.projectId && doc.projectId.length > 0) {
+        for (const aipId of doc.projectId) {
+          await updateAipStatus(aipId, doc);
+        }
+      }
     }
   }
 });

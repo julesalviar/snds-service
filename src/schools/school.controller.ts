@@ -52,14 +52,14 @@ export class SchoolController {
     @Query('limit') limit = 10,
     @Query('district') district?: string,
     @Query('search') search?: string,
-    @Query('withNeedCount') withNeedCount?: string,
+    @Query('withNeed') withNeed?: string,
   ) {
     return this.schoolService.getAll(
       Number(page),
       Number(limit),
       district,
       search,
-      withNeedCount === 'true',
+      withNeed === 'true',
     );
   }
 

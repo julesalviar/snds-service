@@ -1,4 +1,4 @@
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { PROVIDER } from 'src/common/constants/providers';
 import { COUNTER } from 'src/common/constants/counters';
 import { CounterService } from 'src/common/counter/counter.services';
@@ -14,13 +14,12 @@ import {
   SchoolNeedResponseDto,
   SchoolUpdateNeedDto,
 } from './school-need.dto';
-import { SchoolNeed } from './school-need.schema';
+import { SchoolNeedDocument } from './school-need.schema';
 import { Aip } from 'src/aip/aip.schema';
 import { School } from 'src/schools/school.schema';
 import { Engagement } from 'src/engagement/engagement.schema';
 import { User } from 'src/user/schemas/user.schema';
 import { SchoolNeedStatus } from './school-need.enums';
-import { StakeHolderEngageDto } from 'src/school-need/stakeholder-engage.dto';
 
 @Injectable()
 export class SchoolNeedService {
@@ -53,7 +52,7 @@ export class SchoolNeedService {
     private readonly schoolModel: Model<School>,
 
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
-    private readonly schoolNeedModel: Model<SchoolNeed>,
+    private readonly schoolNeedModel: Model<SchoolNeedDocument>,
 
     @Inject(PROVIDER.ENGAGEMENT_MODEL)
     private readonly engagementModel: Model<Engagement>,
@@ -73,19 +72,36 @@ export class SchoolNeedService {
         throw new BadRequestException(`Invalid School Id: ${schoolId}`);
       }
 
-      // Project validation
-      if (!Types.ObjectId.isValid(projectId)) {
-        throw new BadRequestException(`Invalid Project Id: ${projectId}`);
-      }
-
-      const project = await this.aipModel
-        .findById(projectId)
-        .select('schoolYear');
-      if (!project) {
+      // Validate that projectId is an array
+      if (!Array.isArray(projectId) || projectId.length === 0) {
         throw new BadRequestException(
-          `Project with Id: ${projectId} not found`,
+          'projectId must be a non-empty array of Project IDs',
         );
       }
+
+      // Validate all project IDs
+      for (const id of projectId) {
+        if (!Types.ObjectId.isValid(id)) {
+          throw new BadRequestException(`Invalid Project Id: ${id}`);
+        }
+      }
+
+      // Check if all projects exist and get the first project's schoolYear
+      const projects = await this.aipModel
+        .find({ _id: { $in: projectId } })
+        .select('schoolYear')
+        .exec();
+
+      if (projects.length !== projectId.length) {
+        const foundIds = projects.map((p) => p._id.toString());
+        const missingIds = projectId.filter((id) => !foundIds.includes(id));
+        throw new BadRequestException(
+          `Project(s) with Id(s): ${missingIds.join(', ')} not found`,
+        );
+      }
+
+      // Use the first project's schoolYear (assuming all projects have the same schoolYear)
+      const schoolYear = projects[0].schoolYear;
 
       this.logger.log(
         'Creating new School Needs information with the following data:',
@@ -101,20 +117,18 @@ export class SchoolNeedService {
         ...needDto,
         code,
         statusOfImplementation,
-        schoolYear: project.schoolYear,
+        schoolYear,
       });
 
       const savedSchoolNeed = await createdSchoolNeed.save();
 
       this.logger.log(
-        `SchoolNeed created successfully with ID: ${createdSchoolNeed._id.toString()}`,
+        `SchoolNeed created successfully with ID: ${String(savedSchoolNeed._id as mongoose.Types.ObjectId)}`,
       );
 
       const responseDto: SchoolNeedResponseDto = {
         ...savedSchoolNeed.toObject({ versionKey: false }),
-        _id: savedSchoolNeed._id.toString(),
-        createdAt: savedSchoolNeed.createdAt,
-        updatedAt: savedSchoolNeed.updatedAt,
+        _id: String(savedSchoolNeed._id as mongoose.Types.ObjectId),
       };
 
       return {
@@ -131,15 +145,18 @@ export class SchoolNeedService {
   }
 
   async deleteSchoolNeed(id: string): Promise<any> {
+    if (!Types.ObjectId.isValid(id)) {
+      this.logger.warn(`Invalid Need ID format: ${id}`);
+      throw new BadRequestException(`Invalid Need ID format: ${id}`);
+    }
+
+    const objectId = new Types.ObjectId(id);
+    this.logger.log(`Attempting to delete School Need with ID: ${id}`);
+
     try {
-      if (!Types.ObjectId.isValid(id))
-        throw new BadRequestException(`Invalid Need ID format: ${id}`);
-
-      const objectId = new Types.ObjectId(id);
-      this.logger.log(`Attempting to delete School Need with ID: ${id}`);
-
       const deletedSchoolNeed =
         await this.schoolNeedModel.findByIdAndDelete(objectId);
+
       if (!deletedSchoolNeed) {
         this.logger.warn(`No School Need found with ID: ${objectId}`);
         throw new NotFoundException(
@@ -152,16 +169,13 @@ export class SchoolNeedService {
       return {
         success: true,
         data: { message: 'School Need deleted successfully', objectId },
-        meta: {
-          timestamp: new Date(),
-        },
+        meta: { timestamp: new Date() },
       };
     } catch (error) {
-      if (error.name === 'CastError') {
-        throw new BadRequestException(`Invalid ID format: ${id}`);
-      }
-
-      this.logger.error('Error deleting School Need', error.stack);
+      this.logger.error(
+        `Error deleting School Need: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -296,9 +310,7 @@ export class SchoolNeedService {
         const transformed: any = {
           ...restNeedObj,
           _id: need._id.toString(),
-          createdAt: need.createdAt,
-          updatedAt: need.updatedAt,
-          school: schoolId, // Rename schoolId to school
+          school: schoolId,
         };
 
         // Add engagements if withEngagements is present
@@ -431,9 +443,7 @@ export class SchoolNeedService {
       const responseDto: SchoolNeedResponseDto = {
         ...restNeedObj,
         _id: retrievedSchoolNeed._id.toString(),
-        createdAt: retrievedSchoolNeed.createdAt,
-        updatedAt: retrievedSchoolNeed.updatedAt,
-        school: schoolId, // Rename schoolId to school
+        school: schoolId,
         engagements: engagements.map((engagement) =>
           engagement.toObject({ versionKey: false }),
         ),
@@ -508,6 +518,40 @@ export class SchoolNeedService {
       const { createdAt, updatedAt, code, ...secureUpdateData } =
         needDto as any;
 
+      // Validate projectId if it's being updated
+      if (secureUpdateData.projectId) {
+        if (!Array.isArray(secureUpdateData.projectId)) {
+          throw new BadRequestException(
+            'projectId must be an array of Project IDs',
+          );
+        }
+
+        // Validate all project IDs
+        for (const projectIdItem of secureUpdateData.projectId) {
+          if (!Types.ObjectId.isValid(projectIdItem)) {
+            throw new BadRequestException(
+              `Invalid Project Id: ${projectIdItem}`,
+            );
+          }
+        }
+
+        // Check if all projects exist
+        const projects = await this.aipModel
+          .find({ _id: { $in: secureUpdateData.projectId } })
+          .select('_id')
+          .exec();
+
+        if (projects.length !== secureUpdateData.projectId.length) {
+          const foundIds = projects.map((p) => p._id.toString());
+          const missingIds = secureUpdateData.projectId.filter(
+            (id: string) => !foundIds.includes(id),
+          );
+          throw new BadRequestException(
+            `Project(s) with Id(s): ${missingIds.join(', ')} not found`,
+          );
+        }
+      }
+
       const objectId = new Types.ObjectId(id);
       const updatedSchoolNeed = await this.schoolNeedModel
         .findByIdAndUpdate(
@@ -540,8 +584,6 @@ export class SchoolNeedService {
       const responseDto: SchoolNeedResponseDto = {
         ...restNeedObj,
         _id: updatedSchoolNeed._id.toString(),
-        createdAt: updatedSchoolNeed.createdAt,
-        updatedAt: updatedSchoolNeed.updatedAt,
         school: schoolId, // Rename schoolId to school
       };
 
@@ -578,6 +620,40 @@ export class SchoolNeedService {
       const { createdAt, updatedAt, code, ...secureUpdateData } =
         needDto as any;
 
+      // Validate projectId if it's being updated
+      if (secureUpdateData.projectId) {
+        if (!Array.isArray(secureUpdateData.projectId)) {
+          throw new BadRequestException(
+            'projectId must be an array of Project IDs',
+          );
+        }
+
+        // Validate all project IDs
+        for (const projectIdItem of secureUpdateData.projectId) {
+          if (!Types.ObjectId.isValid(projectIdItem)) {
+            throw new BadRequestException(
+              `Invalid Project Id: ${projectIdItem}`,
+            );
+          }
+        }
+
+        // Check if all projects exist
+        const projects = await this.aipModel
+          .find({ _id: { $in: secureUpdateData.projectId } })
+          .select('_id')
+          .exec();
+
+        if (projects.length !== secureUpdateData.projectId.length) {
+          const foundIds = projects.map((p) => p._id.toString());
+          const missingIds = secureUpdateData.projectId.filter(
+            (id: string) => !foundIds.includes(id),
+          );
+          throw new BadRequestException(
+            `Project(s) with Id(s): ${missingIds.join(', ')} not found`,
+          );
+        }
+      }
+
       const updatedSchoolNeed = await this.schoolNeedModel
         .findOneAndUpdate(
           query,
@@ -606,8 +682,6 @@ export class SchoolNeedService {
       const responseDto: SchoolNeedResponseDto = {
         ...restNeedObj,
         _id: updatedSchoolNeed._id.toString(),
-        createdAt: updatedSchoolNeed.createdAt,
-        updatedAt: updatedSchoolNeed.updatedAt,
         school: schoolId, // Rename schoolId to school
       };
 

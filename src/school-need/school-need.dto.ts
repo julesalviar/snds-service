@@ -1,6 +1,6 @@
 import {
+  IsArray,
   IsDateString,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -8,7 +8,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { OmitType, PartialType } from '@nestjs/mapped-types';
-import { SchoolNeedStatus } from './school-need.enums';
 import { Type } from 'class-transformer';
 
 export class SchoolNeedDto {
@@ -16,7 +15,9 @@ export class SchoolNeedDto {
   schoolYear?: string;
 
   @IsNotEmpty()
-  projectId: string;
+  @IsArray()
+  @IsString({ each: true })
+  projectId: string[];
 
   @IsNotEmpty()
   schoolId: string;
@@ -59,9 +60,7 @@ export class SchoolNeedDto {
   images?: ImageDto[];
 
   @IsOptional()
-  @IsEnum(SchoolNeedStatus, {
-    message: 'implementationStatus must be a valid SchoolNeedStatus value',
-  })
+  @IsString()
   implementationStatus: string;
 
   @IsOptional()
@@ -115,7 +114,7 @@ export class SchoolNeedResponseDto extends OmitType(SchoolNeedDto, [
   school?: any;
 
   @IsOptional()
-  project?: any;
+  projectId?: any[];
 
   @IsOptional()
   engagements?: any[];
@@ -123,10 +122,8 @@ export class SchoolNeedResponseDto extends OmitType(SchoolNeedDto, [
 
 export class UpdateSchoolNeedStatusDto {
   @IsNotEmpty()
-  @IsEnum(SchoolNeedStatus, {
-    message: 'implementationStatus must be a valid SchoolNeedStatus value',
-  })
-  statusOfImplementation: SchoolNeedStatus;
+  @IsString()
+  statusOfImplementation: string;
 }
 
 export class ImageDto {

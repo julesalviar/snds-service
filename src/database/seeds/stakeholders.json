@@ -1,0 +1,506 @@
+[
+    {
+        "name": "ALS Fund",
+        "userName": "user_alsfund@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "alsfund@example.com"
+    },
+    {
+        "name": "BEFF",
+        "userName": "user_beff@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "beff@example.com"
+    },
+    {
+        "name": "BFP",
+        "userName": "user_bfp@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "bfp@example.com"
+    },
+    {
+        "name": "Brigada Eskwela Program Fund",
+        "userName": "user_brigadaeskwela@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "brigadaeskwela@example.com"
+    },
+    {
+        "name": "Brigada Pagbasa Fund",
+        "userName": "user_brigadapagbasa@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "brigadapagbasa@example.com"
+    },
+    {
+        "name": "BPLP Fund (ASP/BE)",
+        "userName": "user_bplp@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "bplp@example.com"
+    },
+    {
+        "name": "Congressional Office",
+        "userName": "user_congress@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "congress@example.com"
+    },
+    {
+        "name": "City Agriculture Office",
+        "userName": "user_agriculture@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "agriculture@example.com"
+    },
+    {
+        "name": "CDRRMC",
+        "userName": "user_cdrrmc@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "cdrrmc@example.com"
+    },
+    {
+        "name": "City Engineering Office",
+        "userName": "user_engineering@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "engineering@example.com"
+    },
+    {
+        "name": "CENRO",
+        "userName": "user_cenro@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "cenro@example.com"
+    },
+    {
+        "name": "City Health Office",
+        "userName": "user_health@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "health@example.com"
+    },
+    {
+        "name": "DepEd – CO",
+        "userName": "user_depedco@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "depedco@example.com"
+    },
+    {
+        "name": "DepEd – RO",
+        "userName": "user_depedro@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "depedro@example.com"
+    },
+    {
+        "name": "DepEd - DO",
+        "userName": "user_depeddod@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "depeddod@example.com"
+    },
+    {
+        "name": "DA",
+        "userName": "user_da@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "da@example.com"
+    },
+    {
+        "name": "DOH",
+        "userName": "user_doh@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "doh@example.com"
+    },
+    {
+        "name": "DENR",
+        "userName": "user_denr@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "denr@example.com"
+    },
+    {
+        "name": "DPWH",
+        "userName": "user_dpwh@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "dpwh@example.com"
+    },
+    {
+        "name": "DTI",
+        "userName": "user_dti@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "dti@example.com"
+    },
+    {
+        "name": "DOST",
+        "userName": "user_dost@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "dost@example.com"
+    },
+    {
+        "name": "DSWD",
+        "userName": "user_dswp@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "dswd@example.com"
+    },
+    {
+        "name": "DRRM Fund",
+        "userName": "user_drrm@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "drrm@example.com"
+    },
+    {
+        "name": "Federated PTA",
+        "userName": "user_fpta@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "fpta@example.com"
+    },
+    {
+        "name": "IPeD Fund",
+        "userName": "user_iped@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "iped@example.com"
+    },
+    {
+        "name": "HRTD Fund",
+        "userName": "user_hrtd@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "hrtd@example.com"
+    },
+    {
+        "name": "LGU – Province",
+        "userName": "user_lguprov@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "lguprov@example.com"
+    },
+    {
+        "name": "LGU – Municipality",
+        "userName": "user_lgumun@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "lgumun@example.com"
+    },
+    {
+        "name": "LGU – City",
+        "userName": "user_lgucity@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "lgucity@example.com"
+    },
+    {
+        "name": "LGU - Barangay",
+        "userName": "user_lgubrgy@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "lgubrgy@example.com"
+    },
+    {
+        "name": "LR Fund",
+        "userName": "user_lrfund@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "lrfund@example.com"
+    },
+    {
+        "name": "Office of the President",
+        "userName": "user_president@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "president@example.com"
+    },
+    {
+        "name": "Office of the Vice-President",
+        "userName": "user_vicepresident@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "vicepresident@example.com"
+    },
+    {
+        "name": "Office of the Civil Defense",
+        "userName": "user_civildefense@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "civildefense@example.com"
+    },
+    {
+        "name": "Philippine Army",
+        "userName": "user_army@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "army@example.com"
+    },
+    {
+        "name": "PESPA",
+        "userName": "user_pespa@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "pespa@example.com"
+    },
+    {
+        "name": "PNP",
+        "userName": "user_pnp@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "pnp@example.com"
+    },
+    {
+        "name": "MEP Fund",
+        "userName": "user_mep@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "mep@example.com"
+    },
+    {
+        "name": "NAPSSHI",
+        "userName": "user_napsshi@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "napsshi@example.com"
+    },
+    {
+        "name": "Robotics Equipment Fund",
+        "userName": "user_robotics@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "robotics@example.com"
+    },
+    {
+        "name": "School Alumni",
+        "userName": "user_alumni@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "alumni@example.com"
+    },
+    {
+        "name": "School Canteen",
+        "userName": "user_canteen@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "canteen@example.com"
+    },
+    {
+        "name": "School MOOE",
+        "userName": "user_mooe@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "mooe@example.com"
+    },
+    {
+        "name": "HRPTA",
+        "userName": "user_hrpta@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "hrpta@example.com"
+    },
+    {
+        "name": "Grade Level PTA",
+        "userName": "user_gradepta@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "gradepta@example.com"
+    },
+    {
+        "name": "SPTA",
+        "userName": "user_spta@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "spta@example.com"
+    },
+    {
+        "name": "School Teachers Association",
+        "userName": "user_teachersassoc@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "teachersassoc@example.com"
+    },
+    {
+        "name": "SBFP Fund",
+        "userName": "user_sbfp@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "sbfp@example.com"
+    },
+    {
+        "name": "Science & Math Equipment Fund",
+        "userName": "user_sciencemath@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "sciencemath@example.com"
+    },
+    {
+        "name": "Senate Office",
+        "userName": "user_senate@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "senate@example.com"
+    },
+    {
+        "name": "SHS TVL Equipment Fund",
+        "userName": "user_shstvl@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "shstvl@example.com"
+    },
+    {
+        "name": "Special Education Fund",
+        "userName": "user_specialed@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "specialed@example.com"
+    },
+    {
+        "name": "SELG Fund",
+        "userName": "user_selg@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "selg@example.com"
+    },
+    {
+        "name": "SSLG Fund",
+        "userName": "user_sslg@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "sslg@example.com"
+    },
+    {
+        "name": "TESDA",
+        "userName": "user_tesda@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "tesda@example.com"
+    },
+    {
+        "name": "YFD Fund",
+        "userName": "user_yfd@example.com",
+        "address": "",
+        "sector": "Government",
+        "role": "stakeholder",
+        "created": "system",
+        "email": "yfd@example.com"
+    }
+]

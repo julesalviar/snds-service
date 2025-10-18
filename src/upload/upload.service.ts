@@ -33,26 +33,4 @@ export class UploadService {
   async uploadImage(file: Express.Multer.File, category: string) {
     return await this.imageService.processAndUploadImage(file, category);
   }
-
-  private async putObject(
-    key: string,
-    buffer: Buffer,
-    contentType: string,
-  ): Promise<void> {
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-      Body: buffer,
-      ContentType: contentType,
-      ACL: 'public-read',
-    });
-    await this.s3Client.send(command);
-  }
-
-  private buildPublicUrl(key: string): string {
-    if (!this.publicBaseUrl) {
-      return `${this.configService.get<string>('R2_ENDPOINT')}/${this.bucketName}/${key}`;
-    }
-    return `${this.publicBaseUrl.replace(/\/$/, '')}/${key}`;
-  }
 }

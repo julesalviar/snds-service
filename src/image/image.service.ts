@@ -48,11 +48,12 @@ export class ImageService {
         .jpeg({ quality: 60 })
         .toBuffer();
 
-      const originalKey = `${tenantCode}/${category}/${dateBucket}/${hourBucket}-${shortUuid}.${ext}`;
-      const thumbnailKey = `${tenantCode}/${category}/${dateBucket}/${hourBucket}-${shortUuid}-thumb.${ext}`;
+      const originalKey = `${category}/${dateBucket}/${hourBucket}-${shortUuid}.${ext}`;
+      const thumbnailKey = `${category}/${dateBucket}/${hourBucket}-${shortUuid}-thumb.${ext}`;
 
       this.logger.log('Uploading original image', { key: originalKey });
       const originalUrl = await this.r2Service.uploadFile(
+        tenantCode,
         compressed,
         originalKey,
         file.mimetype,
@@ -60,6 +61,7 @@ export class ImageService {
 
       this.logger.log('Uploading thumbnail', { key: thumbnailKey });
       const thumbnailUrl = await this.r2Service.uploadFile(
+        tenantCode,
         thumbnail,
         thumbnailKey,
         file.mimetype,

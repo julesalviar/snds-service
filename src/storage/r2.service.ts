@@ -21,6 +21,7 @@ export class R2Service {
   }
 
   async uploadFile(
+    tenantCode: string,
     buffer: Buffer,
     key: string,
     mimeType: string,
@@ -33,7 +34,7 @@ export class R2Service {
       });
 
       const command = new PutObjectCommand({
-        Bucket: this.bucketName,
+        Bucket: this.bucketName + `-${tenantCode}`,
         Key: key,
         Body: buffer,
         ContentType: mimeType,

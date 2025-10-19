@@ -1,23 +1,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 import { Injectable, Logger } from '@nestjs/common';
-import { ClsService } from 'nestjs-cls';
 import { R2Service } from 'src/storage/r2.service';
 
 @Injectable()
 export class ImageService {
   private readonly logger = new Logger(ImageService.name);
 
-  constructor(
-    private readonly r2Service: R2Service,
-    private readonly cls: ClsService,
-  ) {}
+  constructor(private readonly r2Service: R2Service) {}
 
   async processAndUploadImage(file: Express.Multer.File, category: string) {
     try {
-      const tenantCode = this.cls.get<string>('tenantCode');
-      const tenantId = this.cls.get<string>('tenantId');
-
       const ext = file.mimetype.split('/')[1];
       const dateBucket = this.getDateBucket();
       const shortUuid = uuidv4().replace(/-/g, '').slice(0, 12);
@@ -27,8 +20,6 @@ export class ImageService {
         category,
         size: file.size,
         mimetype: file.mimetype,
-        tenantCode,
-        tenantId,
       });
 
       if (!file.buffer || file.buffer.length === 0) {
@@ -52,7 +43,6 @@ export class ImageService {
 
       this.logger.log('Uploading original image', { key: originalKey });
       const originalUrl = await this.r2Service.uploadFile(
-        tenantCode,
         compressed,
         originalKey,
         file.mimetype,
@@ -60,7 +50,6 @@ export class ImageService {
 
       this.logger.log('Uploading thumbnail', { key: thumbnailKey });
       const thumbnailUrl = await this.r2Service.uploadFile(
-        tenantCode,
         thumbnail,
         thumbnailKey,
         file.mimetype,

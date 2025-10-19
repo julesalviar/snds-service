@@ -23,7 +23,6 @@ import { ShsImmersionController } from './shs-immersion/shs-immersion.controller
 import { ShsImmersionService } from './shs-immersion/shs-immersion.service';
 import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
 import { EngagementModule } from './engagement/engagement.module';
-import { TenantValidationMiddleware } from 'src/common/middlewares/tenant-validation/tenant-validation.middleware';
 
 @Module({
   imports: [
@@ -60,7 +59,7 @@ import { TenantValidationMiddleware } from 'src/common/middlewares/tenant-valida
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Apply ClsMiddleware and TenantValidationMiddleware in order to all routes to ensure CLS context is available
-    consumer.apply(ClsMiddleware, TenantValidationMiddleware).forRoutes('*');
+    // Apply ClsMiddleware to all routes to ensure CLS context is available
+    consumer.apply(ClsMiddleware).forRoutes('*');
   }
 }

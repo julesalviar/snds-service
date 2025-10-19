@@ -20,8 +20,7 @@ export class ImageService {
 
       const ext = file.mimetype.split('/')[1];
       const dateBucket = this.getDateBucket();
-      const hourBucket = this.getHourBucket();
-      const shortUuid = uuidv4().slice(0, 8);
+      const shortUuid = uuidv4().replace(/-/g, '').slice(0, 12);
 
       this.logger.log('Processing image', {
         fileName: file.originalname,
@@ -48,8 +47,8 @@ export class ImageService {
         .jpeg({ quality: 60 })
         .toBuffer();
 
-      const originalKey = `${category}/${dateBucket}/${hourBucket}-${shortUuid}.${ext}`;
-      const thumbnailKey = `${category}/${dateBucket}/${hourBucket}-${shortUuid}-thumb.${ext}`;
+      const originalKey = `${category}/${dateBucket}/${shortUuid}.${ext}`;
+      const thumbnailKey = `${category}/${dateBucket}/${shortUuid}-thumb.${ext}`;
 
       this.logger.log('Uploading original image', { key: originalKey });
       const originalUrl = await this.r2Service.uploadFile(
@@ -84,10 +83,5 @@ export class ImageService {
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
     return `${yyyy}${mm}${dd}`;
-  }
-
-  getHourBucket(): string {
-    const now = new Date();
-    return String(now.getHours()).padStart(2, '0');
   }
 }

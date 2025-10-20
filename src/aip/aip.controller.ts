@@ -38,19 +38,25 @@ export class AipController {
   @PermissionsAllowed(PermissionsEnum.PROJECT_VIEW)
   @Get()
   async getAll(
-    @UserInfo('schoolId') schoolId: string,
+    @UserInfo('schoolId') userSchoolId: string,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('schoolYear') schoolYear?: string,
+    @Query('schoolId') querySchoolId?: string,
   ) {
-    const isValidFormat = /^\d{4}-\d{4}$/.test(schoolYear || '');
-    const finalSchoolYear = isValidFormat ? schoolYear : undefined;
+    const schoolId = userSchoolId || querySchoolId;
+
+    const isSchoolYearValid = schoolYear && /^\d{4}-\d{4}$/.test(schoolYear);
+    const normalizedSchoolYear = isSchoolYearValid ? schoolYear : undefined;
+
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
 
     return this.aipService.getAll(
       schoolId,
-      finalSchoolYear,
-      Number(page),
-      Number(limit),
+      normalizedSchoolYear,
+      pageNumber,
+      limitNumber,
     );
   }
 

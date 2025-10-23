@@ -2,6 +2,7 @@ import { SchoolDto, UpdateSchoolDto } from './school.dto';
 import { Model, Types } from 'mongoose';
 import { School, SchoolDocument } from './school.schema';
 import { SchoolNeed } from '../school-need/school-need.schema';
+import { Aip } from '../aip/aip.schema';
 import { PROVIDER } from '../common/constants/providers';
 import {
   NotFoundException,
@@ -20,6 +21,8 @@ export class SchoolService {
     private readonly schoolModel: Model<School>,
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
     private readonly schoolNeedModel: Model<SchoolNeed>,
+    @Inject(PROVIDER.AIP_MODEL)
+    private readonly aipModel: Model<Aip>,
   ) {}
 
   // Create school
@@ -131,10 +134,12 @@ export class SchoolService {
     district?: string,
     search?: string,
     withNeedCount: boolean = false,
+    withAipCount: boolean = false,
+    schoolYear?: string,
   ) {
     try {
       this.logger.log(
-        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}, district = ${district || 'all'}, search = ${search || 'none'}, withNeedCount = ${withNeedCount}`,
+        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}, district = ${district || 'all'}, search = ${search || 'none'}, withNeedCount = ${withNeedCount}, withAipCount = ${withAipCount}, schoolYear = ${schoolYear || 'none'}`,
       );
 
       const skip = (page - 1) * limit;
@@ -173,6 +178,10 @@ export class SchoolService {
         this.schoolModel.countDocuments(filter),
       ]);
 
+      if (!/^\d{4}-\d{4}$/.test(schoolYear || '')) {
+        schoolYear = this.getCurrentSchoolYear();
+      }
+
       let schoolsWithNeeds: any[] = schools;
 
       // Add school need counts if requested
@@ -184,27 +193,92 @@ export class SchoolService {
           {
             $match: {
               schoolId: { $in: schoolIds },
+              schoolYear: schoolYear,
             },
           },
           {
             $group: {
               _id: '$schoolId',
-              needCount: { $sum: 1 },
+              totalNeed: { $sum: 1 },
+              completedNeed: {
+                $sum: {
+                  $cond: [
+                    { $eq: ['$implementationStatus', 'Completed'] },
+                    1,
+                    0,
+                  ],
+                },
+              },
             },
           },
         ]);
 
         const needCountMap = new Map();
         needCounts.forEach((item) => {
-          needCountMap.set(item._id, item.needCount);
+          needCountMap.set(item._id, {
+            totalNeed: item.totalNeed,
+            completedNeed: item.completedNeed,
+          });
         });
 
         schoolsWithNeeds = schools.map((school) => {
-          const needCount = needCountMap.get(school._id.toString()) ?? 0;
+          const needData = needCountMap.get(school._id.toString()) ?? {
+            totalNeed: 0,
+            completedNeed: 0,
+          };
           return {
             ...school.toObject(),
             additionalInfo: {
-              needCount,
+              totalNeed: needData.totalNeed,
+              completedNeed: needData.completedNeed,
+            },
+          };
+        });
+      }
+
+      // Add AIP counts if requested
+      if (withAipCount && schools.length > 0 && schoolYear) {
+        const schoolIds = schools.map((school) => school._id.toString());
+
+        const aipCounts = await this.aipModel.aggregate([
+          {
+            $match: {
+              schoolId: { $in: schoolIds },
+              schoolYear: schoolYear,
+            },
+          },
+          {
+            $group: {
+              _id: '$schoolId',
+              totalAip: { $sum: 1 },
+              completedAip: {
+                $sum: {
+                  $cond: [{ $eq: ['$status', 'Completed'] }, 1, 0],
+                },
+              },
+            },
+          },
+        ]);
+
+        const aipCountMap = new Map();
+        aipCounts.forEach((item) => {
+          aipCountMap.set(item._id.toString(), {
+            totalAip: item.totalAip,
+            completedAip: item.completedAip,
+          });
+        });
+
+        schoolsWithNeeds = schoolsWithNeeds.map((school) => {
+          const aipData = aipCountMap.get(school._id.toString()) ?? {
+            totalAip: 0,
+            completedAip: 0,
+          };
+          return {
+            ...school,
+            additionalInfo: {
+              ...(school.additionalInfo ?? {}),
+              totalAip: aipData.totalAip,
+              completedAip: aipData.completedAip,
             },
           };
         });
@@ -221,6 +295,8 @@ export class SchoolService {
           district: district || 'all',
           search: search || 'none',
           withNeedCount,
+          withAipCount,
+          schoolYear: schoolYear || 'none',
           timestamp: new Date(),
         },
       };
@@ -287,5 +363,24 @@ export class SchoolService {
       this.logger.error('Error getting School by Id', error.stack);
       throw error;
     }
+  }
+
+  /**
+   * Get current school year based on current date
+   * School year runs from June to May, so if current month is May or later,
+   * we're in the school year that started the previous calendar year
+   */
+  private getCurrentSchoolYear(): string {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0 = January
+
+    // Determine the base school year
+    // If current month is May (4) or later, we're in the school year that started last calendar year
+    // Calculate the school year range
+    const startYear = currentMonth >= 4 ? currentYear : currentYear - 1;
+    const endYear = startYear + 1;
+
+    return `${startYear}-${endYear}`;
   }
 }

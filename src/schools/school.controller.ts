@@ -53,6 +53,8 @@ export class SchoolController {
     @Query('district') district?: string,
     @Query('search') search?: string,
     @Query('withNeed') withNeed?: string,
+    @Query('withAip') withAip?: string,
+    @Query('schoolYear') schoolYear?: string,
   ) {
     return this.schoolService.getAll(
       Number(page),
@@ -60,6 +62,8 @@ export class SchoolController {
       district,
       search,
       withNeed === 'true',
+      withAip === 'true',
+      schoolYear,
     );
   }
 

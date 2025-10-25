@@ -32,9 +32,9 @@ export class SchoolNeedController {
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_MANAGE)
-  @Delete(':id')
-  async deleteSchoolNeed(@Param('id') id: string) {
-    return this.schoolNeedService.deleteSchoolNeed(id);
+  @Delete(':param')
+  async deleteSchoolNeed(@Param('param') param: string) {
+    return this.schoolNeedService.deleteSchoolNeed(param);
   }
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_VIEW)

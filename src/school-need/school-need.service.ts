@@ -144,39 +144,101 @@ export class SchoolNeedService {
     }
   }
 
-  async deleteSchoolNeed(id: string): Promise<any> {
-    if (!Types.ObjectId.isValid(id)) {
-      this.logger.warn(`Invalid Need ID format: ${id}`);
-      throw new BadRequestException(`Invalid Need ID format: ${id}`);
-    }
-
-    const objectId = new Types.ObjectId(id);
-    this.logger.log(`Attempting to delete School Need with ID: ${id}`);
-
+  async deleteSchoolNeed(param: string): Promise<any> {
     try {
-      const deletedSchoolNeed =
-        await this.schoolNeedModel.findByIdAndDelete(objectId);
+      const isObjectId = Types.ObjectId.isValid(param);
+      const query = isObjectId
+        ? { _id: new Types.ObjectId(param) }
+        : { code: param };
+      const identifierType = isObjectId ? 'ID' : 'code';
 
-      if (!deletedSchoolNeed) {
-        this.logger.warn(`No School Need found with ID: ${objectId}`);
+      this.logger.log(
+        `Attempting to delete School Need with ${identifierType}: ${param}`,
+      );
+
+      const schoolNeed = await this.schoolNeedModel.findOne(query).exec();
+
+      if (!schoolNeed) {
+        this.logger.warn(
+          `No School Need found with ${identifierType}: ${param}`,
+        );
         throw new NotFoundException(
-          `School Need with ID ${objectId} not found`,
+          `School Need with ${identifierType} ${param} not found`,
         );
       }
 
-      this.logger.log(`School Need deleted successfully with ID: ${objectId}`);
+      const existingEngagements = await this.engagementModel
+        .findOne({ schoolNeedId: schoolNeed._id })
+        .exec();
+
+      if (existingEngagements) {
+        this.logger.warn(
+          `Cannot delete School Need with ${identifierType}: ${param} - it has associated engagements`,
+        );
+        throw new BadRequestException(
+          `Cannot delete School Need with ${identifierType} ${param} because it has associated engagements. Please remove all engagements first.`,
+        );
+      }
+
+      // Delete the school need using the _id we found
+      await this.schoolNeedModel.findByIdAndDelete(schoolNeed._id).exec();
+      this.logger.log(
+        `School Need deleted successfully with ${identifierType}: ${param}`,
+      );
 
       return {
         success: true,
-        data: { message: 'School Need deleted successfully', objectId },
+        data: {
+          message: 'School Need deleted successfully',
+          identifier: param,
+          identifierType,
+        },
         meta: { timestamp: new Date() },
       };
     } catch (error) {
+      const identifierType = Types.ObjectId.isValid(param) ? 'ID' : 'code';
+
+      // Handle specific error types
+      if (error instanceof NotFoundException) {
+        this.logger.warn(
+          `School Need not found with ${identifierType}: ${param}`,
+        );
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        this.logger.warn(
+          `Bad request when deleting School Need by ${identifierType}: ${param}`,
+        );
+        throw error;
+      }
+
+      if (error.name === 'CastError') {
+        this.logger.error(
+          `Invalid ${identifierType} format: ${param}`,
+          error.stack,
+        );
+        throw new BadRequestException(
+          `Invalid ${identifierType} format: ${param}`,
+        );
+      }
+
+      if (error.name === 'ValidationError') {
+        this.logger.error(
+          `Validation error when deleting School Need by ${identifierType}: ${param}`,
+          error.stack,
+        );
+        throw new BadRequestException(`Validation error: ${error.message}`);
+      }
+
+      // Handle any other unexpected errors
       this.logger.error(
-        `Error deleting School Need: ${error.message}`,
+        `Unexpected error deleting School Need by ${identifierType}: ${param}`,
         error.stack,
       );
-      throw error;
+      throw new BadRequestException(
+        `Failed to delete School Need: ${error.message || 'Unknown error occurred'}`,
+      );
     }
   }
 

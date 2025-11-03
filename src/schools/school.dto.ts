@@ -35,7 +35,7 @@ export class SchoolDto {
   @Matches(/^\d{3,}$/, {
     message: 'School Id must be numeric with at least 3 digits (e.g., "123")',
   })
-  schoolId: number;
+  schoolId: string;
 
   @IsDefined()
   @IsNotEmpty()

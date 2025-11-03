@@ -3,13 +3,13 @@ import { Document, HydratedDocument } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class School extends Document {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   schoolId: number;
 
   @Prop()
   createdByUserId: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   schoolName: string;
 
   @Prop()
@@ -30,9 +30,13 @@ export class School extends Document {
   @Prop()
   contactNumber: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   officialEmailAddress: string;
 }
 
 export type SchoolDocument = HydratedDocument<School>;
 export const SchoolSchema = SchemaFactory.createForClass(School);
+
+SchoolSchema.index({ schoolId: 1 });
+SchoolSchema.index({ schoolName: 1 }, { unique: true });
+SchoolSchema.index({ officialEmailAddress: 1 }, { unique: true });

@@ -5,12 +5,15 @@ import {
   BadRequestException,
   Inject,
   Injectable,
-  Logger, ConflictException,
+  Logger,
+  ConflictException,
 } from '@nestjs/common';
 import { AipDto } from 'src/aip/aip.dto';
 import { Aip, AipDocument } from './aip.schema';
 import { School } from 'src/schools/school.schema';
+import { SchoolNeed } from 'src/school-need/school-need.schema';
 import { CounterService } from 'src/common/counter/counter.services';
+import { User } from 'src/user/schemas/user.schema';
 
 @Injectable()
 export class AipService {
@@ -22,6 +25,9 @@ export class AipService {
 
     @Inject(PROVIDER.SCHOOL_MODEL)
     private readonly schoolModel: Model<School>,
+
+    @Inject(PROVIDER.SCHOOL_NEED_MODEL)
+    private readonly schoolNeedModel: Model<SchoolNeed>,
 
     private readonly counterService: CounterService,
   ) {}
@@ -130,7 +136,6 @@ export class AipService {
           select:
             'schoolId schoolName districtOrCluster division accountablePerson contactNumber contactNumber officialEmailAddress',
         })
-        .populate({ path: 'createdBy', select: 'name role address email' })
         .exec();
       if (!retrievedAip) {
         this.logger.warn(`No AIP found with ID: ${objectId}`);
@@ -163,6 +168,21 @@ export class AipService {
       const objectId = new Types.ObjectId(id);
 
       this.logger.log(`Attempting to delete AIP with ID: ${id}`);
+
+      // Check if there are existing school needs linked to this AIP
+      const linkedSchoolNeeds = await this.schoolNeedModel
+        .countDocuments({ projectId: id })
+        .exec();
+
+      if (linkedSchoolNeeds > 0) {
+        this.logger.warn(
+          `Cannot delete AIP with ID: ${objectId}. Found ${linkedSchoolNeeds} linked school need(s).`,
+        );
+        throw new BadRequestException(
+          `Cannot delete AIP. There are ${linkedSchoolNeeds} school need(s) linked to this AIP. Please remove or reassign the school needs first.`,
+        );
+      }
+
       const deletedAip = await this.aipModel.findByIdAndDelete(objectId);
       if (!deletedAip) {
         this.logger.warn(`No AIP found with ID: ${objectId}`);

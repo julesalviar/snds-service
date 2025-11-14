@@ -5,6 +5,7 @@ import {
   getPercentageComplete,
 } from '../school-need/implementation-status.enum';
 import { SchoolNeedSchema } from '../school-need/school-need.schema';
+import { updateAipStatus } from '../school-need/update-aip-status.helper';
 
 @Schema({ timestamps: true, collection: 'engagements' })
 export class Engagement extends Document {
@@ -103,6 +104,15 @@ async function updateSchoolNeedStatus(schoolNeedId: Types.ObjectId, doc: any) {
       await SchoolNeedModel.findByIdAndUpdate(schoolNeedId, {
         implementationStatus: getPercentageComplete(percentage),
       });
+    }
+
+    if (
+      Array.isArray(schoolNeed.projectId) &&
+      schoolNeed.projectId.length > 0
+    ) {
+      for (const aipId of schoolNeed.projectId) {
+        await updateAipStatus(aipId, doc, { SchoolNeedSchema });
+      }
     }
   } catch (error) {
     console.error('Error updating school need status:', error);

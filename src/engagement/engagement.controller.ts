@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Body, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Body,
+  Query,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateEngagementDto } from './engagement.dto';
 import { EngagementService } from './engagement.service';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -62,5 +71,10 @@ export class EngagementController {
       Number(page),
       Number(limit),
     );
+  }
+
+  @Delete(':id')
+  async deleteEngagement(@Param('id') id: string) {
+    return this.engagementService.deleteEngagement(id);
   }
 }

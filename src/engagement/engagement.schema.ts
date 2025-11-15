@@ -71,7 +71,7 @@ async function updateSchoolNeedStatus(schoolNeedId: Types.ObjectId, doc: any) {
 
     // Get the school need
     const schoolNeed = await SchoolNeedModel.findById(schoolNeedId).exec();
-    if (!schoolNeed || !schoolNeed.quantity) return;
+    if (!schoolNeed?.quantity) return;
 
     // Get all engagements linked to this school need
     const engagements = await EngagementModel.find({

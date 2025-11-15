@@ -5,6 +5,7 @@ import {
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateEngagementDto, EngagementResponseDto } from './engagement.dto';
 import { Engagement } from 'src/engagement/engagement.schema';
@@ -375,6 +376,44 @@ export class EngagementService {
       };
     } catch (error) {
       this.logger.error('Error getting engagements summary', error.stack);
+      throw error;
+    }
+  }
+
+  async deleteEngagement(id: string): Promise<any> {
+    try {
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+      const objectId = new Types.ObjectId(id);
+
+      this.logger.log(`Attempting to delete Engagement with ID: ${id}`);
+
+      const deletedEngagement = await this.engagementModel.findByIdAndDelete(
+        objectId,
+      );
+      if (!deletedEngagement) {
+        this.logger.warn(`No Engagement found with ID: ${objectId}`);
+        throw new NotFoundException(`Engagement with ID ${objectId} not found`);
+      }
+
+      this.logger.log(
+        `Engagement deleted successfully with ID: ${objectId}`,
+      );
+
+      return {
+        success: true,
+        data: { message: 'Engagement deleted successfully', objectId },
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      if (error.name === 'CastError') {
+        throw new BadRequestException(`Invalid ID format: ${id}`);
+      }
+
+      this.logger.error('Error deleting Engagement', error.stack);
       throw error;
     }
   }

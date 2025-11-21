@@ -40,7 +40,7 @@ export class UsersController {
   ): Promise<User[]> {
     try {
       const maxLimit = Math.min(limit || 50, 100); // Cap at 100, default to 50
-      return await this.userService.getUsersByRole(role, search, maxLimit);
+      return await this.userService.getUsersWithRole(role, search, maxLimit);
     } catch (error) {
       throw new HttpException(
         error.message,

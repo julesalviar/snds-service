@@ -50,10 +50,20 @@ export class CreateUserDto {
   @IsDefined()
   @IsEnum(UserRole)
   role: UserRole;
+
+  @IsString({ each: true })
+  @IsDefined()
+  @IsEnum(UserRole, { each: true })
+  roles: UserRole[];
+
+  @IsString()
+  @IsDefined()
+  @IsEnum(UserRole)
+  activeRole: UserRole;
 }
 
 export class UpdateUserDto extends PartialType(
-  OmitType(CreateUserDto, ['role', 'password'] as const),
+  OmitType(CreateUserDto, ['role', 'roles', 'activeRole', 'password'] as const),
 ) {
   @IsOptional()
   _id?: string;

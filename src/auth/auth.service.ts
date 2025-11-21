@@ -58,14 +58,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const { role, schoolId } = user;
-    const perms = RolePermissions[role] ?? [];
+    const { role, activeRole, roles, schoolId } = user;
+    const perms = RolePermissions[activeRole ?? role] ?? [];
 
     const payload = {
       sub: user._id,
       username: user.userName,
       name: user.name,
       role,
+      activeRole,
+      roles,
       perms,
       sid: schoolId ?? '',
     };

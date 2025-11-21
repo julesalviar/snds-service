@@ -42,12 +42,12 @@ export class UserService {
     return await this.userModel.find().exec();
   }
 
-  async getUsersByRole(
+  async getUsersWithRole(
     role: UserRole,
     searchTerm?: string,
     limit: number = 50,
   ): Promise<User[]> {
-    const query: any = { role };
+    const query: any = { roles: { $in: [role] } };
 
     if (searchTerm) {
       query.$or = [

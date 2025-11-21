@@ -36,6 +36,13 @@ export class User extends Document {
 
   @Prop()
   schoolId?: string;
+
+  // Transition to multiple roles per user
+  @Prop({ required: true, enum: UserRole })
+  activeRole: UserRole;
+
+  @Prop({ required: true, type: [String], enum: UserRole })
+  roles: UserRole[];
 }
 
 export type UserDocument = HydratedDocument<User>;

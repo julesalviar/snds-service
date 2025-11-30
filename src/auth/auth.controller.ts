@@ -1,9 +1,20 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginDto } from 'src/common/dtos/login.dto';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
 import { CreateSchoolAdminDto } from 'src/common/dtos/create-school-admin.dto';
 import { RoleValidationPipe } from 'src/auth/role.validation.pipe';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { UserInfo } from 'src/user/user.decorator';
+import { SwitchRoleDto } from 'src/common/dtos/switch-role.dto';
+import { UserRole } from 'src/user/enums/user-role.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -21,5 +32,17 @@ export class AuthController {
   @Post('login')
   signIn(@Body() loginDto: LoginDto) {
     return this.authService.signIn(loginDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('switch-role')
+  async switchRole(
+    @UserInfo('userId') userId: string,
+    @UserInfo('roles') currentRoles: UserRole[] | string[],
+    @Body() switchRoleDto: SwitchRoleDto,
+  ) {
+    const roles = currentRoles as UserRole[];
+    return this.authService.switchRole(userId, switchRoleDto.role, roles);
   }
 }

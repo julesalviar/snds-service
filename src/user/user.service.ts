@@ -196,4 +196,26 @@ export class UserService {
       throw error;
     }
   }
+
+  async updateActiveRole(
+    userId: string,
+    newActiveRole: UserRole,
+  ): Promise<User> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (!user.roles.includes(newActiveRole)) {
+      throw new UnauthorizedException('User does not have this role');
+    }
+
+    return await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { activeRole: newActiveRole },
+        { new: true, runValidators: true },
+      )
+      .exec();
+  }
 }

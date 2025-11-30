@@ -14,8 +14,10 @@ export async function updateAipStatus(
   doc: any,
   options: UpdateAipStatusOptions = {},
 ) {
-  const { SchoolNeedSchema: schoolNeedSchemaOption, AipSchema: aipSchemaOption } =
-    options;
+  const {
+    SchoolNeedSchema: schoolNeedSchemaOption,
+    AipSchema: aipSchemaOption,
+  } = options;
 
   try {
     let AipModel;
@@ -24,12 +26,14 @@ export async function updateAipStatus(
     try {
       AipModel = doc.db.model('Aip');
     } catch (error) {
+      console.log(error);
       AipModel = doc.db.model('Aip', aipSchemaOption ?? AipSchema);
     }
 
     try {
       SchoolNeedModel = doc.db.model('SchoolNeed');
     } catch (error) {
+      console.log(error);
       if (!schoolNeedSchemaOption) {
         throw new Error('SchoolNeedSchema is required to register the model');
       }
@@ -89,5 +93,3 @@ export async function updateAipStatus(
     console.error('Error updating AIP status:', error);
   }
 }
-
-

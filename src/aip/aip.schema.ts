@@ -37,7 +37,7 @@ export class Aip extends Document {
   @Prop({
     type: String,
     enum: AipStatus,
-    default: AipStatus.CREATED,
+    default: AipStatus.FOR_IMPLEMENTATION,
   })
   status: string;
 

@@ -12,7 +12,7 @@ import { plainToInstance } from 'class-transformer';
 @Injectable()
 export class RoleValidationPipe implements PipeTransform {
   async transform(value: CreateUserDto | CreateSchoolAdminDto) {
-    switch (value.role) {
+    switch (value.activeRole) {
       case UserRole.STAKEHOLDER:
         await validateOrReject(plainToInstance(CreateUserDto, value));
         break;

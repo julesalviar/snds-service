@@ -43,11 +43,11 @@ export class UserService {
   }
 
   async getUsersWithRole(
-    role: UserRole,
+    activeRole: UserRole,
     searchTerm?: string,
     limit: number = 50,
   ): Promise<User[]> {
-    const query: any = { roles: { $in: [role] } };
+    const query: any = { roles: { $in: [activeRole] } };
 
     if (searchTerm) {
       query.$or = [

@@ -60,12 +60,14 @@ async function updateSchoolNeedStatus(schoolNeedId: Types.ObjectId, doc: any) {
     try {
       SchoolNeedModel = doc.db.model('SchoolNeed');
     } catch (error) {
+      console.log(error);
       SchoolNeedModel = doc.db.model('SchoolNeed', SchoolNeedSchema);
     }
 
     try {
       EngagementModel = doc.db.model('Engagement');
     } catch (error) {
+      console.log(error);
       EngagementModel = doc.db.model('Engagement', EngagementSchema);
     }
 
@@ -78,29 +80,23 @@ async function updateSchoolNeedStatus(schoolNeedId: Types.ObjectId, doc: any) {
       schoolNeedId: schoolNeedId,
     }).exec();
 
-    // Sum all engagement quantities
     const totalEngagementQuantity = engagements.reduce(
       (sum, engagement) => sum + (engagement.quantity || 0),
       0,
     );
 
-    // Calculate the fulfillment ratio and percentage
     const fulfillmentRatio = totalEngagementQuantity / schoolNeed.quantity;
     const percentage = fulfillmentRatio * 100;
 
-    // Update school need implementation status based on the ratio
     if (totalEngagementQuantity === 0) {
-      // No engagements linked, set to LOOKING_FOR_PARTNER
       await SchoolNeedModel.findByIdAndUpdate(schoolNeedId, {
         implementationStatus: ImplementationStatus.LOOKING_FOR_PARTNER,
       });
     } else if (fulfillmentRatio >= 1) {
-      // Fully fulfilled or overfulfilled, set to COMPLETED
       await SchoolNeedModel.findByIdAndUpdate(schoolNeedId, {
         implementationStatus: ImplementationStatus.COMPLETED,
       });
     } else {
-      // Partially fulfilled, set percentage complete (e.g., "45% Complete")
       await SchoolNeedModel.findByIdAndUpdate(schoolNeedId, {
         implementationStatus: getPercentageComplete(percentage),
       });
@@ -111,7 +107,10 @@ async function updateSchoolNeedStatus(schoolNeedId: Types.ObjectId, doc: any) {
       schoolNeed.projectId.length > 0
     ) {
       for (const aipId of schoolNeed.projectId) {
-        await updateAipStatus(aipId, doc, { SchoolNeedSchema });
+        await updateAipStatus(aipId, doc, {
+          SchoolNeedSchema,
+          EngagementSchema,
+        });
       }
     }
   } catch (error) {

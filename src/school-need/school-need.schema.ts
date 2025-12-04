@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, HydratedDocument } from 'mongoose';
 import { AipSchema } from '../aip/aip.schema';
+import { EngagementSchema } from '../engagement/engagement.schema';
 import { updateAipStatus } from './update-aip-status.helper';
 
 export class Image {
@@ -81,7 +82,11 @@ SchoolNeedSchema.index({ schoolYear: 1 });
 SchoolNeedSchema.post('save', async function (doc) {
   if (doc.projectId && doc.projectId.length > 0) {
     for (const aipId of doc.projectId) {
-      await updateAipStatus(aipId, doc, { SchoolNeedSchema, AipSchema });
+      await updateAipStatus(aipId, doc, {
+        SchoolNeedSchema,
+        AipSchema,
+        EngagementSchema,
+      });
     }
   }
 });
@@ -90,7 +95,11 @@ SchoolNeedSchema.post('save', async function (doc) {
 SchoolNeedSchema.post('findOneAndUpdate', async function (doc) {
   if (doc?.projectId && doc.projectId.length > 0) {
     for (const aipId of doc.projectId) {
-      await updateAipStatus(aipId, doc, { SchoolNeedSchema, AipSchema });
+      await updateAipStatus(aipId, doc, {
+        SchoolNeedSchema,
+        AipSchema,
+        EngagementSchema,
+      });
     }
   }
 });
@@ -99,7 +108,11 @@ SchoolNeedSchema.post('findOneAndUpdate', async function (doc) {
 SchoolNeedSchema.post('findOneAndDelete', async function (doc) {
   if (doc?.projectId && doc.projectId.length > 0) {
     for (const aipId of doc.projectId) {
-      await updateAipStatus(aipId, doc, { SchoolNeedSchema, AipSchema });
+      await updateAipStatus(aipId, doc, {
+        SchoolNeedSchema,
+        AipSchema,
+        EngagementSchema,
+      });
     }
   }
 });

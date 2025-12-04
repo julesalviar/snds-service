@@ -31,7 +31,7 @@ export class User extends Document {
   @Prop({ required: true, select: false })
   password: string;
 
-  @Prop({ required: true, enum: UserRole })
+  @Prop({ enum: UserRole })
   role: UserRole;
 
   @Prop()

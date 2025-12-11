@@ -101,6 +101,10 @@ export class EngagementService {
             path: 'schoolId',
             select: 'schoolName division districtOrCluster',
           })
+          .populate({
+            path: 'stakeholderUserId',
+            select: 'name firstName lastName email userName role activeRole',
+          })
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)

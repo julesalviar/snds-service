@@ -2,6 +2,7 @@ import mongoose, { Model, Types } from 'mongoose';
 import { PROVIDER } from 'src/common/constants/providers';
 import { COUNTER } from 'src/common/constants/counters';
 import { CounterService } from 'src/common/counter/counter.services';
+import { getCurrentSchoolYear } from 'src/common/utils/school-year.util';
 import {
   BadRequestException,
   Inject,
@@ -24,25 +25,6 @@ import { SchoolNeedStatus } from './school-need.enums';
 @Injectable()
 export class SchoolNeedService {
   private readonly logger = new Logger(SchoolNeedService.name);
-
-  /**
-   * Get current school year based on current date
-   * School year runs from June to May, so if current month is May or later,
-   * we're in the school year that started the previous calendar year
-   */
-  private getCurrentSchoolYear(): string {
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth(); // 0 = January
-
-    // Determine the base school year
-    // If current month is May (4) or later, we're in the school year that started last calendar year
-    // Calculate the school year range
-    const startYear = currentMonth >= 4 ? currentYear : currentYear - 1;
-    const endYear = startYear + 1;
-
-    return `${startYear}-${endYear}`;
-  }
 
   constructor(
     @Inject(PROVIDER.AIP_MODEL)
@@ -262,7 +244,7 @@ export class SchoolNeedService {
       if (/^\d{4}-\d{4}$/.test(schoolYear || '')) {
         queryFilter.schoolYear = schoolYear;
       } else {
-        queryFilter.schoolYear = this.getCurrentSchoolYear();
+        queryFilter.schoolYear = getCurrentSchoolYear();
       }
 
       if (specificContribution) {

@@ -1,5 +1,6 @@
 import { Model, Types } from 'mongoose';
 import { PROVIDER } from 'src/common/constants/providers';
+import { getCurrentSchoolYear } from 'src/common/utils/school-year.util';
 import {
   BadRequestException,
   Inject,
@@ -16,20 +17,6 @@ import { School } from 'src/schools/school.schema';
 @Injectable()
 export class EngagementService {
   private readonly logger = new Logger(EngagementService.name);
-
-  private getCurrentSchoolYear(): string {
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth(); // 0 = January
-
-    // Determine the base school year
-    // If current month is May (4) or later, we're in the school year that started last calendar year
-    // Calculate the school year range
-    const startYear = currentMonth >= 4 ? currentYear : currentYear - 1;
-    const endYear = startYear + 1;
-
-    return `${startYear}-${endYear}`;
-  }
 
   constructor(
     @Inject(PROVIDER.ENGAGEMENT_MODEL)
@@ -68,13 +55,10 @@ export class EngagementService {
         queryFilter.stakeholderUserId = new Types.ObjectId(stakeholderUserId);
       }
 
-      // Determine the school year to filter by
-      const filterSchoolYear = /^\d{4}-\d{4}$/.test(schoolYear || '')
-        ? schoolYear
-        : this.getCurrentSchoolYear();
-
       // Filter directly on engagement.schoolYear (denormalized field)
-      queryFilter.schoolYear = filterSchoolYear;
+      queryFilter.schoolYear = /^\d{4}-\d{4}$/.test(schoolYear || '')
+        ? schoolYear
+        : getCurrentSchoolYear();
 
       // Filter by specificContribution if provided
       if (specificContribution) {
@@ -278,11 +262,9 @@ export class EngagementService {
       }
 
       // Filter by school year if provided, otherwise use current school year
-      const filterSchoolYear = /^\d{4}-\d{4}$/.test(schoolYear || '')
+      matchStage.schoolYear = /^\d{4}-\d{4}$/.test(schoolYear || '')
         ? schoolYear
-        : this.getCurrentSchoolYear();
-
-      matchStage.schoolYear = filterSchoolYear;
+        : getCurrentSchoolYear();
 
       const pipeline: any[] = [
         { $match: matchStage },
@@ -393,17 +375,14 @@ export class EngagementService {
 
       this.logger.log(`Attempting to delete Engagement with ID: ${id}`);
 
-      const deletedEngagement = await this.engagementModel.findByIdAndDelete(
-        objectId,
-      );
+      const deletedEngagement =
+        await this.engagementModel.findByIdAndDelete(objectId);
       if (!deletedEngagement) {
         this.logger.warn(`No Engagement found with ID: ${objectId}`);
         throw new NotFoundException(`Engagement with ID ${objectId} not found`);
       }
 
-      this.logger.log(
-        `Engagement deleted successfully with ID: ${objectId}`,
-      );
+      this.logger.log(`Engagement deleted successfully with ID: ${objectId}`);
 
       return {
         success: true,

@@ -43,6 +43,21 @@ export class User extends Document {
 
   @Prop({ required: true, type: [String], enum: UserRole })
   roles: UserRole[];
+
+  @Prop({ default: false })
+  emailVerified: boolean;
+
+  @Prop()
+  emailConfirmationToken?: string;
+
+  @Prop()
+  emailConfirmationTokenExpires?: Date;
+
+  @Prop()
+  passwordResetToken?: string;
+
+  @Prop()
+  passwordResetTokenExpires?: Date;
 }
 
 export type UserDocument = HydratedDocument<User>;

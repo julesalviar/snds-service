@@ -8,7 +8,9 @@ export const TenantConnectionProvider = {
   provide: PROVIDER.TENANT_CONNECTION,
   useFactory: async (request, connection: Connection) => {
     if (!request.tenantCode) {
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(
+        'Tenant code is required. Please ensure TenantValidationMiddleware is applied and tenant header is provided.',
+      );
     }
     return connection.useDb(`snds_${request.tenantCode}`);
   },

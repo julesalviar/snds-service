@@ -218,4 +218,80 @@ export class UserService {
       )
       .exec();
   }
+
+  async findByEmailConfirmationToken(token: string): Promise<User | null> {
+    return await this.userModel
+      .findOne({ emailConfirmationToken: token })
+      .exec();
+  }
+
+  async findByPasswordResetToken(token: string): Promise<User | null> {
+    return await this.userModel.findOne({ passwordResetToken: token }).exec();
+  }
+
+  async confirmEmail(userId: string): Promise<User> {
+    return await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          emailVerified: true,
+          $unset: {
+            emailConfirmationToken: '',
+            emailConfirmationTokenExpires: '',
+          },
+        },
+        { new: true, runValidators: true },
+      )
+      .exec();
+  }
+
+  async resetPassword(userId: string, hashedPassword: string): Promise<User> {
+    return await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          password: hashedPassword,
+          $unset: {
+            passwordResetToken: '',
+            passwordResetTokenExpires: '',
+          },
+        },
+        { new: true, runValidators: true },
+      )
+      .exec();
+  }
+
+  async setEmailConfirmationToken(
+    userId: string,
+    token: string,
+    expiresAt: Date,
+  ): Promise<User> {
+    return await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          emailConfirmationToken: token,
+          emailConfirmationTokenExpires: expiresAt,
+        },
+        { new: true, runValidators: true },
+      )
+      .exec();
+  }
+
+  async setPasswordResetToken(
+    userId: string,
+    token: string,
+    expiresAt: Date,
+  ): Promise<User> {
+    return await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          passwordResetToken: token,
+          passwordResetTokenExpires: expiresAt,
+        },
+        { new: true, runValidators: true },
+      )
+      .exec();
+  }
 }

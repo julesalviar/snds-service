@@ -23,6 +23,7 @@ import { ShsImmersionController } from './shs-immersion/shs-immersion.controller
 import { ShsImmersionService } from './shs-immersion/shs-immersion.service';
 import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
 import { EngagementModule } from './engagement/engagement.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { EngagementModule } from './engagement/engagement.module';
     ShsImmersionModule,
     ClusterModule,
     EngagementModule,
+    MailModule,
   ],
   controllers: [AppController, ShsImmersionController],
   providers: [AppService, ShsImmersionService],

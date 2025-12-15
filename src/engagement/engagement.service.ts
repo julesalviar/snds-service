@@ -39,6 +39,8 @@ export class EngagementService {
     schoolYear?: string,
     specificContribution?: string,
     schoolId?: string,
+    startDate?: string,
+    endDate?: string,
   ): Promise<any> {
     try {
       this.logger.log('Attempting to retrieve all engagements');
@@ -73,7 +75,49 @@ export class EngagementService {
         queryFilter.schoolId = new Types.ObjectId(schoolId);
       }
 
-      const [engagements, total] = await Promise.all([
+      // Filter by date range if provided
+      // Find engagements where startDate falls within the requested date range
+      // Query dates are in plain string format but represent UTC+8 timezone
+      // Since startDate/endDate are stored as ISO strings, we compare them as strings
+      if (startDate || endDate) {
+        const startDateFilter: any = { $exists: true };
+
+        if (startDate) {
+          // Parse date string as UTC+8 (e.g., "2025-01-01" means "2025-01-01 00:00:00 +08:00")
+          // Create date string with explicit UTC+8 timezone
+          const dateStr = startDate.includes('T')
+            ? startDate
+            : `${startDate}T00:00:00+08:00`;
+          const start = new Date(dateStr);
+          if (isNaN(start.getTime())) {
+            throw new BadRequestException(
+              `Invalid startDate format: ${startDate}. Expected date string (YYYY-MM-DD).`,
+            );
+          }
+          // Date is now in UTC, convert to ISO string
+          startDateFilter.$gte = start.toISOString();
+        }
+
+        if (endDate) {
+          // Parse date string as UTC+8 (e.g., "2025-12-15" means "2025-12-15 23:59:59 +08:00")
+          // Create date string with explicit UTC+8 timezone
+          const dateStr = endDate.includes('T')
+            ? endDate
+            : `${endDate}T23:59:59+08:00`;
+          const end = new Date(dateStr);
+          if (isNaN(end.getTime())) {
+            throw new BadRequestException(
+              `Invalid endDate format: ${endDate}. Expected date string (YYYY-MM-DD).`,
+            );
+          }
+          // Date is now in UTC, convert to ISO string
+          startDateFilter.$lte = end.toISOString();
+        }
+
+        queryFilter.startDate = startDateFilter;
+      }
+
+      const [engagements, total, totalAmountResult] = await Promise.all([
         this.engagementModel
           .find(queryFilter)
           .populate({
@@ -89,11 +133,20 @@ export class EngagementService {
             path: 'stakeholderUserId',
             select: 'name firstName lastName email userName role activeRole',
           })
-          .sort({ createdAt: -1 })
+          .sort({ startDate: -1 })
           .skip(skip)
           .limit(limit)
           .exec(),
         this.engagementModel.countDocuments(queryFilter),
+        this.engagementModel.aggregate([
+          { $match: queryFilter },
+          {
+            $group: {
+              _id: null,
+              totalAmount: { $sum: '$amount' },
+            },
+          },
+        ]),
       ]);
 
       const transformedEngagements = engagements.map((engagement) => {
@@ -104,12 +157,16 @@ export class EngagementService {
         };
       });
 
+      const totalAmount =
+        totalAmountResult.length > 0 ? totalAmountResult[0].totalAmount : 0;
+
       return {
         success: true,
         data: transformedEngagements,
         meta: {
           count: engagements.length,
           totalItems: total,
+          totalAmount: totalAmount,
           currentPage: page,
           totalPages: Math.ceil(total / limit),
           timestamp: new Date(),

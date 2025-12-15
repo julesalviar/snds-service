@@ -35,7 +35,9 @@ export class UserService {
   }
 
   async getUserByUserEmail(email: string): Promise<User | null> {
-    return await this.userModel.findOne({ email }).exec();
+    return await this.userModel
+      .findOne({ email: new RegExp(`^${email}$`, 'i') })
+      .exec();
   }
 
   async getUsers(): Promise<User[]> {

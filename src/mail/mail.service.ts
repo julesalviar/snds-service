@@ -38,7 +38,7 @@ export class MailService {
     body: string,
   ): Promise<SendEmailCommandOutput> {
     const tenantCode = this.clsService.get<string>('tenantCode');
-    
+
     this.logger.log(`Sending email to: ${to}`, {
       to,
       subject,
@@ -56,7 +56,7 @@ export class MailService {
 
     try {
       const result = await this.sesClient.send(command);
-      
+
       this.logger.log(`Email sent successfully to: ${to}`, {
         to,
         subject,
@@ -87,37 +87,52 @@ export class MailService {
     const frontendUrl = process.env.FRONTEND_URL;
     const isProduction = process.env.NODE_ENV === 'production';
 
-    // If no tenant code, use default URL
     if (!tenantCode) {
       return `${frontendUrl || 'http://localhost:4200'}${path}`;
     }
 
-    // Build tenant-aware URL
+    // Common multi-level public suffixes in PH
+    const publicSuffixesPH = new Set([
+      'com.ph',
+      'net.ph',
+      'org.ph',
+      'gov.ph',
+      'edu.ph',
+      'mil.ph',
+    ]);
+
+    const extractBaseDomain = (hostname: string): string => {
+      const parts = hostname.split('.');
+      const lastTwo = parts.slice(-2).join('.');
+      const lastThree = parts.slice(-3).join('.');
+
+      // If the last two labels form a known public suffix, keep the last three
+      if (publicSuffixesPH.has(lastTwo)) {
+        return lastThree;
+      }
+      return lastTwo;
+    };
+
     if (isProduction) {
-      // Production: subdomain-based (e.g., https://dev.mysnds.com, https://gensan.mysnds.com)
       if (frontendUrl) {
         try {
           const url = new URL(frontendUrl);
-          const baseDomain =
-            url.hostname.replace(/^[^.]+\./, '') || url.hostname;
+          const baseDomain = extractBaseDomain(url.hostname);
           const protocol = url.protocol || 'https:';
           return `${protocol}//${tenantCode}.${baseDomain}${path}`;
         } catch {
-          // If FRONTEND_URL is not a valid URL, assume it's just a domain
-          return `https://${tenantCode}.${frontendUrl}${path}`;
+          const baseDomain = extractBaseDomain(frontendUrl);
+          return `https://${tenantCode}.${baseDomain}${path}`;
         }
       }
-      // Fallback for production without FRONTEND_URL
       return `https://${tenantCode}.mysnds.com${path}`;
     } else {
-      // Localhost: subdomain with .local (e.g., http://dev.local:4200, http://gensan.local:4200))
       const port = frontendUrl
         ? (() => {
             try {
               const url = new URL(frontendUrl);
               return url.port || '4200';
             } catch {
-              // Extract port from string like "localhost:4200"
               const match = frontendUrl.match(/:(\d+)/);
               return match ? match[1] : '4200';
             }

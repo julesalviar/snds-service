@@ -117,6 +117,13 @@ export async function updateAipStatus(
         schoolNeedId: { $in: schoolNeedIds },
       }).exec();
 
+      if (completedCount === totalCount) {
+        await AipModel.findByIdAndUpdate(aipId, {
+          status: AipStatus.COMPLETED,
+        });
+        return;
+      }
+
       if (engagements && engagements.length > 0) {
         await AipModel.findByIdAndUpdate(aipId, {
           status: AipStatus.ONGOING,

@@ -19,11 +19,18 @@ export class TenantValidationMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
-      this.logger.debug('Tenant validation middleware called', {
+      const isUploadRequest = req.url.startsWith('/upload');
+      const logData: any = {
         url: req.url,
         method: req.method,
         headers: req.headers,
-      });
+      };
+      
+      if (!isUploadRequest) {
+        logData.body = req.body;
+      }
+
+      this.logger.debug('Tenant validation middleware called', logData);
 
       // Skip tenant validation for truly public routes that don't need database access
       const isPublicRoute = req.url.startsWith('/status');

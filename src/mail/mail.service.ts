@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import {
   SendEmailCommand,
@@ -15,6 +16,8 @@ import * as crypto from 'node:crypto';
 
 @Injectable()
 export class MailService {
+  private readonly logger = new Logger(MailService.name);
+
   private sesClient = new SESClient({
     region: 'ap-southeast-1',
     credentials: {
@@ -34,6 +37,14 @@ export class MailService {
     subject: string,
     body: string,
   ): Promise<SendEmailCommandOutput> {
+    const tenantCode = this.clsService.get<string>('tenantCode');
+    
+    this.logger.log(`Sending email to: ${to}`, {
+      to,
+      subject,
+      tenantCode: tenantCode || 'N/A',
+    });
+
     const command = new SendEmailCommand({
       Source: 'no-reply@mysnds.com',
       Destination: { ToAddresses: [to] },
@@ -43,7 +54,27 @@ export class MailService {
       },
     });
 
-    return await this.sesClient.send(command);
+    try {
+      const result = await this.sesClient.send(command);
+      
+      this.logger.log(`Email sent successfully to: ${to}`, {
+        to,
+        subject,
+        messageId: result.MessageId,
+        tenantCode: tenantCode || 'N/A',
+      });
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to send email to: ${to}`, {
+        to,
+        subject,
+        tenantCode: tenantCode || 'N/A',
+        error: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
   }
 
   /**
@@ -106,6 +137,12 @@ export class MailService {
       confirmationUrl ||
       this.buildTenantUrl(`/confirm-email?token=${confirmationToken || ''}`);
 
+    this.logger.log(`Sending email confirmation to: ${to}`, {
+      to,
+      hasToken: !!confirmationToken,
+      confirmationUrl: confirmationLink,
+    });
+
     const body = `Thank you for signing up! Please confirm your email address by clicking the link below:\n\n${confirmationLink}\n\nIf you did not create an account, please ignore this email.`;
 
     return await this.sendEmail(to, subject, body);
@@ -120,6 +157,12 @@ export class MailService {
     const resetLink =
       resetUrl ||
       this.buildTenantUrl(`/reset-password?token=${resetToken || ''}`);
+
+    this.logger.log(`Sending password reset email to: ${to}`, {
+      to,
+      hasToken: !!resetToken,
+      resetUrl: resetLink,
+    });
 
     const body = `You requested to reset your password. Click the link below to reset it:\n\n${resetLink}\n\nThis link will expire in 1 hour. If you did not request a password reset, please ignore this email.`;
 

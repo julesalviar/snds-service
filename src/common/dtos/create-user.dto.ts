@@ -36,7 +36,7 @@ export class CreateUserDto {
   sector: string;
 
   @IsOptional()
-  selectedOption: string;
+  subsector: string;
 
   @IsNotEmpty()
   @IsOptional()

@@ -26,7 +26,7 @@ export class User extends Document {
   sector: string;
 
   @Prop()
-  selectedOption: string;
+  subsector: string;
 
   @Prop({ required: true, select: false })
   password: string;

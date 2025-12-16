@@ -41,6 +41,7 @@ export class EngagementService {
     schoolId?: string,
     startDate?: string,
     endDate?: string,
+    sector?: string,
   ): Promise<any> {
     try {
       this.logger.log('Attempting to retrieve all engagements');
@@ -55,6 +56,62 @@ export class EngagementService {
           );
         }
         queryFilter.stakeholderUserId = new Types.ObjectId(stakeholderUserId);
+      }
+
+      // Filter by sector if provided
+      // Sector can be multiple values (comma-separated)
+      if (sector) {
+        const sectors = sector
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (sectors.length > 0) {
+          // Find users with matching sectors
+          const usersWithSector = await this.userModel
+            .find({ sector: { $in: sectors } })
+            .select('_id')
+            .exec();
+
+          const userIds = usersWithSector.map((user) => user._id);
+
+          if (userIds.length === 0) {
+            // No users found with the specified sectors, return empty result
+            return {
+              success: true,
+              data: [],
+              meta: {
+                count: 0,
+                totalItems: 0,
+                totalAmount: 0,
+                currentPage: page,
+                totalPages: 0,
+                timestamp: new Date(),
+              },
+            };
+          }
+
+          // If stakeholderUserId is already set, intersect with sector filter
+          if (queryFilter.stakeholderUserId) {
+            if (!userIds.includes(queryFilter.stakeholderUserId)) {
+              // The specified stakeholderUserId doesn't match the sector filter
+              return {
+                success: true,
+                data: [],
+                meta: {
+                  count: 0,
+                  totalItems: 0,
+                  totalAmount: 0,
+                  currentPage: page,
+                  totalPages: 0,
+                  timestamp: new Date(),
+                },
+              };
+            }
+          } else {
+            // Filter engagements by stakeholder user IDs that match the sectors
+            queryFilter.stakeholderUserId = { $in: userIds };
+          }
+        }
       }
 
       // Filter directly on engagement.schoolYear (denormalized field)
@@ -131,7 +188,8 @@ export class EngagementService {
           })
           .populate({
             path: 'stakeholderUserId',
-            select: 'name firstName lastName email userName role activeRole',
+            select:
+              'name firstName lastName email userName role activeRole sector',
           })
           .sort({ startDate: -1 })
           .skip(skip)

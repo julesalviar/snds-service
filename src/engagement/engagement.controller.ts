@@ -37,6 +37,7 @@ export class EngagementController {
     @Query('schoolId') schoolId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
+    @Query('sector') sector?: string,
   ) {
     return this.engagementService.getAllEngagements(
       Number(page),
@@ -47,6 +48,7 @@ export class EngagementController {
       schoolId,
       startDate,
       endDate,
+      sector,
     );
   }
 

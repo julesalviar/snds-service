@@ -125,11 +125,14 @@ export class EngagementService {
       }
 
       // Filter by schoolId if provided
+      // Handle both string and ObjectId formats in the database
       if (schoolId) {
         if (!Types.ObjectId.isValid(schoolId)) {
           throw new BadRequestException(`Invalid School ID: ${schoolId}`);
         }
-        queryFilter.schoolId = new Types.ObjectId(schoolId);
+        queryFilter.schoolId = {
+          $in: [schoolId, new Types.ObjectId(schoolId)],
+        };
       }
 
       // Filter by date range if provided

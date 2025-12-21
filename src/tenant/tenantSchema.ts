@@ -8,6 +8,18 @@ export class Tenant {
 
   @Prop({ required: true })
   tenantName: string;
+
+  @Prop()
+  url?: string;
+
+  @Prop()
+  active?: boolean;
+
+  @Prop()
+  logo?: string;
+
+  @Prop()
+  production?: boolean;
 }
 
 export type TenantDocument = HydratedDocument<Tenant>;

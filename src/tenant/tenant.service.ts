@@ -25,6 +25,10 @@ export class TenantService {
     return this.tenantModel.find().lean().exec();
   }
 
+  async findAllProduction(): Promise<Tenant[]> {
+    return this.tenantModel.find({ production: true }).lean().exec();
+  }
+
   async createTenant(tenantData: Partial<Tenant>): Promise<TenantDocument> {
     const existingTenant = await this.tenantModel
       .findOne({ tenantCode: tenantData.tenantCode })

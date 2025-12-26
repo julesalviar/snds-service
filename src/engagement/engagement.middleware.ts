@@ -6,6 +6,7 @@ import {
 } from 'src/school-need/implementation-status.enum';
 import { updateAipStatus } from 'src/school-need/update-aip-status.helper';
 import { EngagementSchema } from 'src/engagement/engagement.schema';
+import { AipSchema } from 'src/aip/aip.schema';
 
 // Helper function to update school need implementation status based on engagement quantities
 async function updateSchoolNeedStatus(schoolNeedId: Types.ObjectId, doc: any) {
@@ -67,6 +68,7 @@ async function updateSchoolNeedStatus(schoolNeedId: Types.ObjectId, doc: any) {
         await updateAipStatus(aipId, doc, {
           SchoolNeedSchema,
           EngagementSchema,
+          AipSchema,
         });
       }
     }

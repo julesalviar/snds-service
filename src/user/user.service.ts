@@ -8,7 +8,7 @@ import { PROVIDER } from '../common/constants/providers';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { UserRole } from './enums/user-role.enum';
-import { Tenant } from '../tenant/tenantSchema';
+import { Tenant } from '../tenant/tenant.schema';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { School } from 'src/schools/school.schema';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';

@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { TenantService } from './tenant.service';
 import { TenantController } from './tenant.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Tenant, TenantSchema } from './tenantSchema';
+import { Tenant, TenantSchema } from './tenant.schema';
 import { TenantConnectionProvider } from '../providers/tenant-connection/tenant-connection';
 
 @Global()

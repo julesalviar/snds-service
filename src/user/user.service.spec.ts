@@ -2,7 +2,7 @@ import { TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
-import { Tenant } from 'src/tenant/tenantSchema';
+import { Tenant } from 'src/tenant/tenant.schema';
 import { PROVIDER } from 'src/common/constants/providers';
 import {
   createTestingModule,

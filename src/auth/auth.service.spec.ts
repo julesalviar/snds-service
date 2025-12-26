@@ -5,7 +5,7 @@ import { createTestingModule, createMockModel } from '../../test/test-utils';
 import { PROVIDER } from '../common/constants/providers';
 import { Model } from 'mongoose';
 import { User } from '../user/schemas/user.schema';
-import { Tenant } from '../tenant/tenantSchema';
+import { Tenant } from '../tenant/tenant.schema';
 
 describe('AuthService', () => {
   let authService: AuthService;

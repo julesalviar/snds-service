@@ -25,7 +25,7 @@ export class TenantValidationMiddleware implements NestMiddleware {
         method: req.method,
         headers: req.headers,
       };
-      
+
       if (!isUploadRequest) {
         logData.body = req.body;
       }

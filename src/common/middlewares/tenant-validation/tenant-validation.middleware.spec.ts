@@ -3,7 +3,7 @@ import { TenantService } from 'src/tenant/tenant.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { TenantDocument } from 'src/tenant/tenantSchema';
+import { TenantDocument } from 'src/tenant/tenant.schema';
 
 describe('TenantValidationMiddleware', () => {
   let middleware: TenantValidationMiddleware;

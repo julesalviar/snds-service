@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TenantService } from './tenant.service';
 import { getModelToken, getConnectionToken } from '@nestjs/mongoose';
 import { Model, Connection } from 'mongoose';
-import { Tenant, TenantDocument } from './tenantSchema';
+import { Tenant, TenantDocument } from './tenant.schema';
 import { NotFoundException } from '@nestjs/common';
 
 describe('TenantService', () => {

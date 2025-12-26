@@ -4,6 +4,8 @@ import { EngagementService } from './engagement.service';
 import { TenantModels } from 'src/providers/tenant-models/tenant-models.provider';
 import { TenantValidationMiddleware } from 'src/common/middlewares/tenant-validation/tenant-validation.middleware';
 import { UserModule } from 'src/user/user.module';
+// Need to import middleware to register schema hooks
+import './engagement.middleware';
 
 @Module({
   imports: [UserModule],

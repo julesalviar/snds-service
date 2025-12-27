@@ -9,10 +9,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateEngagementDto, EngagementResponseDto } from './engagement.dto';
-import { Engagement } from 'src/engagement/engagement.schema';
-import { User } from 'src/user/schemas/user.schema';
-import { SchoolNeed } from 'src/school-need/school-need.schema';
-import { School } from 'src/schools/school.schema';
+import { EngagementDocument } from 'src/engagement/engagement.schema';
+import { UserDocument } from 'src/user/schemas/user.schema';
+import {
+  SchoolNeed,
+  SchoolNeedDocument,
+} from 'src/school-need/school-need.schema';
+import { SchoolDocument } from 'src/schools/school.schema';
 
 @Injectable()
 export class EngagementService {
@@ -20,16 +23,16 @@ export class EngagementService {
 
   constructor(
     @Inject(PROVIDER.ENGAGEMENT_MODEL)
-    private readonly engagementModel: Model<Engagement>,
+    private readonly engagementModel: Model<EngagementDocument>,
 
     @Inject(PROVIDER.USER_MODEL)
-    private readonly userModel: Model<User>,
+    private readonly userModel: Model<UserDocument>,
 
     @Inject(PROVIDER.SCHOOL_NEED_MODEL)
-    private readonly schoolNeedModel: Model<SchoolNeed>,
+    private readonly schoolNeedModel: Model<SchoolNeedDocument>,
 
     @Inject(PROVIDER.SCHOOL_MODEL)
-    private readonly schoolModel: Model<School>,
+    private readonly schoolModel: Model<SchoolDocument>,
   ) {}
 
   async getAllEngagements(

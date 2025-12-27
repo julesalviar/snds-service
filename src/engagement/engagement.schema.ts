@@ -39,6 +39,30 @@ export class Engagement extends Document {
 
   @Prop({ required: true })
   specificContribution: string;
+
+  @Prop()
+  stakeholderRepCount: number;
+
+  @Prop()
+  agreementType: string;
+
+  @Prop()
+  signatoryName: string;
+
+  @Prop()
+  signatoryDesignation: string;
+
+  @Prop()
+  projectCategory: string;
+
+  @Prop()
+  projectName: string;
+
+  @Prop()
+  agreementStatus: string;
+
+  @Prop()
+  initiatedBy: string;
 }
 
 export type EngagementDocument = HydratedDocument<Engagement>;

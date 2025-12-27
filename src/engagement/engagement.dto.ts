@@ -55,6 +55,32 @@ export class EngagementDto {
   schoolNeedCode?: number;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  stakeholderRepCount?: number;
+
+  @IsOptional()
+  agreementType?: string;
+
+  @IsOptional()
+  signatoryName?: string;
+
+  @IsOptional()
+  signatoryDesignation?: string;
+
+  @IsOptional()
+  projectCategory?: string;
+
+  @IsOptional()
+  projectName?: string;
+
+  @IsOptional()
+  agreementStatus?: string;
+
+  @IsOptional()
+  initiatedBy?: string;
+
+  @IsOptional()
   createdAt?: Date;
 
   @IsOptional()

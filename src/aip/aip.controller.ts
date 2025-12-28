@@ -17,6 +17,7 @@ import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator'
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { UserInfo } from 'src/user/user.decorator';
+import { UserRole } from 'src/user/enums/user-role.enum';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
 @Controller('aips')
@@ -39,12 +40,16 @@ export class AipController {
   @Get()
   async getAll(
     @UserInfo('schoolId') userSchoolId: string,
+    @UserInfo('activeRole') activeRole: UserRole,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('schoolYear') schoolYear?: string,
     @Query('schoolId') querySchoolId?: string,
   ) {
-    const schoolId = userSchoolId || querySchoolId;
+    const schoolId =
+      activeRole === UserRole.SCHOOL_ADMIN
+        ? userSchoolId || querySchoolId
+        : querySchoolId;
 
     const isSchoolYearValid = schoolYear && /^\d{4}-\d{4}$/.test(schoolYear);
     const normalizedSchoolYear = isSchoolYearValid ? schoolYear : undefined;

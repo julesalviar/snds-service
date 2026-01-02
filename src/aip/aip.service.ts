@@ -13,7 +13,6 @@ import { Aip, AipDocument } from './aip.schema';
 import { School } from 'src/schools/school.schema';
 import { SchoolNeed } from 'src/school-need/school-need.schema';
 import { CounterService } from 'src/common/counter/counter.services';
-import { User } from 'src/user/schemas/user.schema';
 
 @Injectable()
 export class AipService {

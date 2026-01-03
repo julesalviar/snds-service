@@ -24,6 +24,7 @@ import { ShsImmersionService } from './shs-immersion/shs-immersion.service';
 import { ShsImmersionModule } from './shs-immersion/shs-immersion.module';
 import { EngagementModule } from './engagement/engagement.module';
 import { MailModule } from './mail/mail.module';
+import { ReportService } from './report/report.service';
 
 @Module({
   imports: [
@@ -57,7 +58,7 @@ import { MailModule } from './mail/mail.module';
     MailModule,
   ],
   controllers: [AppController, ShsImmersionController],
-  providers: [AppService, ShsImmersionService],
+  providers: [AppService, ShsImmersionService, ReportService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

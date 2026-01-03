@@ -25,8 +25,12 @@ export class TenantService {
     return this.tenantModel.find().lean().exec();
   }
 
-  async findAllProduction(): Promise<Tenant[]> {
-    return this.tenantModel.find({ production: true }).lean().exec();
+  async findAllPublicTenants(region?: string): Promise<Tenant[]> {
+    const query: any = { production: true };
+    if (region) {
+      query.region = region;
+    }
+    return this.tenantModel.find(query).lean().exec();
   }
 
   async createTenant(tenantData: Partial<Tenant>): Promise<TenantDocument> {

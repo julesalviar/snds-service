@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { TenantService } from './tenant.service';
 import { BasicAuthGuard } from 'src/common/guards/basic-auth.guard';
 import { PublicTenantDto } from './tenant.dto';
@@ -9,12 +9,15 @@ export class TenantController {
 
   @UseGuards(BasicAuthGuard)
   @Get('public')
-  async getAllTenants(): Promise<PublicTenantDto[]> {
-    const tenants = await this.tenantService.findAllProduction();
+  async getAllTenants(
+    @Query('region') region?: string,
+  ): Promise<PublicTenantDto[]> {
+    const tenants = await this.tenantService.findAllPublicTenants(region);
     return tenants.map((tenant) => ({
       tenantName: tenant.tenantName,
       url: tenant.url,
       logo: tenant.logo,
+      region: tenant.region,
     }));
   }
 }

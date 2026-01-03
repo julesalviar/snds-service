@@ -3,4 +3,3 @@ export class PublicTenantDto {
   url?: string;
   logo?: string;
 }
-

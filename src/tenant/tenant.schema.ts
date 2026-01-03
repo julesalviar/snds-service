@@ -20,6 +20,9 @@ export class Tenant {
 
   @Prop()
   production?: boolean;
+
+  @Prop()
+  region?: string;
 }
 
 export type TenantDocument = HydratedDocument<Tenant>;

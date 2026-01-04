@@ -19,7 +19,10 @@ export abstract class BaseReferenceDataService<
 
     const entries = await this.model.find(filter).lean();
     return entries.reduce((acc: Record<string, any>, item) => {
-      acc[item.key] = item.value;
+      const filteredValue = this.filterValueByStatus(item.value, status);
+      if (filteredValue !== null) {
+        acc[item.key] = filteredValue;
+      }
       return acc;
     }, {});
   }
@@ -37,6 +40,47 @@ export abstract class BaseReferenceDataService<
     }
 
     const entry = (await this.model.findOne(filter).lean()) as T | null;
-    return entry ? entry.value : null;
+    if (!entry) {
+      return null;
+    }
+
+    const value = entry.value;
+    return this.filterValueByStatus(value, status);
+  }
+
+  private filterValueByStatus(value: any, status: ReferenceStatus): any {
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    if (Array.isArray(value)) {
+      return value.filter((item) => {
+        if (typeof item === 'object' && item !== null && 'active' in item) {
+          if (status === 'active') {
+            return item.active === true;
+          } else if (status === 'inactive') {
+            return item.active === false;
+          }
+          // status === 'all', include all
+          return true;
+        }
+        // Item doesn't have active property, include it
+        return true;
+      });
+    }
+
+    if (typeof value === 'object' && 'active' in value) {
+      if (status === 'active' && value.active !== true) {
+        return null;
+      }
+      if (status === 'inactive' && value.active !== false) {
+        return null;
+      }
+      // status === 'all' or matches the status, return the value
+      return value;
+    }
+
+    // Value doesn't have active property, return as is
+    return value;
   }
 }

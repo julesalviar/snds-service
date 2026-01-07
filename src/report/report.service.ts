@@ -6,31 +6,63 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { PROVIDER } from 'src/common/constants/providers';
-import { ReportDocument } from 'src/report/report.schema';
+import { InjectModel, getConnectionToken } from '@nestjs/mongoose';
+import { ClsService } from 'nestjs-cls';
+import { Report, ReportDocument } from 'src/report/report.schema';
 import { Connection, Model } from 'mongoose';
-import { ReportTemplateDocument } from 'src/report/report-template/report-template.schema';
-import { ReportQueryDocument } from 'src/report/report-query/report-query.schema';
+import {
+  ReportTemplate,
+  ReportTemplateDocument,
+} from 'src/report/report-template/report-template.schema';
+import {
+  ReportQuery,
+  ReportQueryDocument,
+} from 'src/report/report-query/report-query.schema';
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { expandPermissions } from 'src/common/guards/permission-hierarchy';
 import { toReportResponseDto, ReportResponseDto } from 'src/report/report.dto';
+import { TenantService } from 'src/tenant/tenant.service';
+import { User, UserSchema } from 'src/user/schemas/user.schema';
+import { Aip, AipSchema } from 'src/aip/aip.schema';
+import {
+  ImmersionInfo,
+  ImmersionInfoSchema,
+} from 'src/shs-immersion/shs-immersion-info.schema';
+import {
+  SchoolNeed,
+  SchoolNeedSchema,
+} from 'src/school-need/school-need.schema';
+import { School, SchoolSchema } from 'src/schools/school.schema';
+import {
+  ImageUpload,
+  ImageUploadSchema,
+} from 'src/upload/schemas/image-upload.schema';
+import { Cluster, ClusterSchema } from 'src/cluster/cluster.schema';
+import {
+  InternalReferenceData,
+  InternalReferenceDataSchema,
+} from 'src/internal-reference-data/internal-reference-data.schema';
+import { Engagement, EngagementSchema } from 'src/engagement/engagement.schema';
 
 @Injectable()
 export class ReportService {
   private readonly logger = new Logger(ReportService.name);
 
   constructor(
-    @Inject(PROVIDER.REPORT_MODEL)
+    @InjectModel(Report.name)
     private readonly reportModel: Model<ReportDocument>,
 
-    @Inject(PROVIDER.REPORT_TEMPLATE_MODEL)
+    @InjectModel(ReportTemplate.name)
     private readonly reportTemplateModel: Model<ReportTemplateDocument>,
 
-    @Inject(PROVIDER.REPORT_QUERY_MODEL)
+    @InjectModel(ReportQuery.name)
     private readonly reportQueryModel: Model<ReportQueryDocument>,
 
-    @Inject(PROVIDER.TENANT_CONNECTION)
-    private readonly tenantConnection: Connection,
+    @Inject(getConnectionToken())
+    private readonly defaultConnection: Connection,
+
+    private readonly tenantService: TenantService,
+    private readonly clsService: ClsService,
   ) {}
 
   async getAllReports(
@@ -63,6 +95,7 @@ export class ReportService {
     params: Record<string, any>,
     userRole?: string,
     userPermissions?: PermissionsEnum[],
+    tenantCode?: string,
   ) {
     this.logger.log(`Running report with ID: ${reportId}`);
     const report = await this.reportModel.findById(reportId);
@@ -83,11 +116,30 @@ export class ReportService {
     const queryDef = await this.reportQueryModel.findById(report.reportQueryId);
     if (!template || !queryDef)
       throw new BadRequestException('Report template or query not found');
+    const resolvedTenantCode = tenantCode || this.clsService.get('tenantCode');
 
-    // Resolve target model dynamically using model name from queryDef
-    const targetModel = this.tenantConnection.model(
+    if (!resolvedTenantCode) {
+      throw new BadRequestException(
+        'Tenant code is required to run reports that query tenant data. Please provide tenant header or ensure tenant context is available.',
+      );
+    }
+
+    const tenant = await this.tenantService.getTenantById(resolvedTenantCode);
+    if (!tenant) {
+      throw new NotFoundException(
+        `Tenant with code ${resolvedTenantCode} not found`,
+      );
+    }
+
+    const tenantConnection = this.defaultConnection.useDb(
+      `snds_${resolvedTenantCode}`,
+    );
+    this.registerTenantModels(tenantConnection);
+
+    const targetModel = this.getTenantModel(
+      tenantConnection,
       queryDef.modelName,
-    ) as Model<any>;
+    );
 
     const results = await Promise.all(
       queryDef.queries.map(async (q) => {
@@ -185,5 +237,56 @@ export class ReportService {
     }
 
     return false;
+  }
+
+  /**
+   * Register all tenant models on the connection
+   * This ensures models are available when querying tenant data
+   */
+  private registerTenantModels(connection: Connection): void {
+    // Register all tenant models (model() will return existing if already registered)
+    connection.model(User.name, UserSchema);
+    connection.model(Aip.name, AipSchema);
+    connection.model(ImmersionInfo.name, ImmersionInfoSchema);
+    connection.model(SchoolNeed.name, SchoolNeedSchema);
+    connection.model(School.name, SchoolSchema);
+    connection.model(ImageUpload.name, ImageUploadSchema);
+    connection.model(Cluster.name, ClusterSchema);
+    connection.model(
+      InternalReferenceData.name,
+      InternalReferenceDataSchema,
+    );
+    connection.model(Engagement.name, EngagementSchema);
+  }
+
+  /**
+   * Get a tenant model by name, registering it if necessary
+   */
+  private getTenantModel(connection: Connection, modelName: string): Model<any> {
+    // Map of model names to their schemas
+    const modelMap: Record<string, any> = {
+      User: { name: User.name, schema: UserSchema },
+      Aip: { name: Aip.name, schema: AipSchema },
+      ImmersionInfo: { name: ImmersionInfo.name, schema: ImmersionInfoSchema },
+      SchoolNeed: { name: SchoolNeed.name, schema: SchoolNeedSchema },
+      School: { name: School.name, schema: SchoolSchema },
+      ImageUpload: { name: ImageUpload.name, schema: ImageUploadSchema },
+      Cluster: { name: Cluster.name, schema: ClusterSchema },
+      InternalReferenceData: {
+        name: InternalReferenceData.name,
+        schema: InternalReferenceDataSchema,
+      },
+      Engagement: { name: Engagement.name, schema: EngagementSchema },
+    };
+
+    const modelInfo = modelMap[modelName];
+    if (!modelInfo) {
+      throw new BadRequestException(
+        `Unknown model name: ${modelName}. Supported models: ${Object.keys(modelMap).join(', ')}`,
+      );
+    }
+
+    // Get or register the model (model() returns existing if registered, or registers new one)
+    return connection.model(modelInfo.name, modelInfo.schema);
   }
 }

@@ -1,17 +1,42 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { TenantValidationMiddleware } from 'src/common/middlewares/tenant-validation/tenant-validation.middleware';
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from 'src/user/user.module';
 import { ReportService } from 'src/report/report.service';
-import { TenantModels } from 'src/providers/tenant-models/tenant-models.provider';
 import { ReportController } from './report.controller';
-import { EngagementModule } from 'src/engagement/engagement.module';
 import { ReportTemplateService } from './report-template/report-template.service';
 import { ReportTemplateController } from './report-template/report-template.controller';
 import { ReportQueryService } from './report-query/report-query.service';
 import { ReportQueryController } from './report-query/report-query.controller';
+import { Report, ReportSchema } from './report.schema';
+import {
+  ReportTemplate,
+  ReportTemplateSchema,
+} from './report-template/report-template.schema';
+import {
+  ReportQuery,
+  ReportQuerySchema,
+} from './report-query/report-query.schema';
+import { TenantModule } from 'src/tenant/tenant.module';
 
 @Module({
-  imports: [UserModule, EngagementModule],
+  imports: [
+    UserModule,
+    TenantModule,
+    MongooseModule.forFeature([
+      {
+        name: Report.name,
+        schema: ReportSchema,
+      },
+      {
+        name: ReportTemplate.name,
+        schema: ReportTemplateSchema,
+      },
+      {
+        name: ReportQuery.name,
+        schema: ReportQuerySchema,
+      },
+    ]),
+  ],
   controllers: [
     ReportController,
     ReportTemplateController,
@@ -19,20 +44,9 @@ import { ReportQueryController } from './report-query/report-query.controller';
   ],
   providers: [
     ReportService,
-    ...Object.values(TenantModels),
     ReportTemplateService,
     ReportQueryService,
   ],
-  exports: [ReportService, ...Object.values(TenantModels)],
+  exports: [ReportService],
 })
-export class ReportModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TenantValidationMiddleware)
-      .forRoutes(
-        ReportController,
-        ReportTemplateController,
-        ReportQueryController,
-      );
-  }
-}
+export class ReportModule {}

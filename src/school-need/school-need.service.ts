@@ -21,6 +21,7 @@ import { School } from 'src/schools/school.schema';
 import { Engagement } from 'src/engagement/engagement.schema';
 import { User } from 'src/user/schemas/user.schema';
 import { SchoolNeedStatus } from './school-need.enums';
+import { ReferenceDataService } from 'src/reference-data/reference-data.service';
 
 @Injectable()
 export class SchoolNeedService {
@@ -43,6 +44,7 @@ export class SchoolNeedService {
     private readonly userModel: Model<User>,
 
     private readonly counterService: CounterService,
+    private readonly referenceDataService: ReferenceDataService,
   ) {}
 
   async createSchoolNeed(needDto: SchoolNeedDto): Promise<any> {
@@ -742,6 +744,144 @@ export class SchoolNeedService {
       }
 
       this.logger.error('Error updating SchoolNeed', error.stack);
+      throw error;
+    }
+  }
+
+  async fillContributionType(): Promise<any> {
+    try {
+      this.logger.log('Starting to fill contributionType for school-needs');
+
+      // Find all school-needs without contributionType
+      const schoolNeedsWithoutContributionType = await this.schoolNeedModel
+        .find({
+          $or: [
+            { contributionType: { $exists: false } },
+            { contributionType: null },
+            { contributionType: '' },
+          ],
+          $and: [
+            { specificContribution: { $exists: true } },
+            { specificContribution: { $ne: null } },
+            { specificContribution: { $ne: '' } },
+          ],
+        })
+        .exec();
+
+      this.logger.log(
+        `Found ${schoolNeedsWithoutContributionType.length} school-needs without contributionType`,
+      );
+
+      if (schoolNeedsWithoutContributionType.length === 0) {
+        return {
+          success: true,
+          data: {
+            message: 'No school-needs found without contributionType',
+            updated: 0,
+          },
+          meta: {
+            timestamp: new Date(),
+          },
+        };
+      }
+
+      // Get contribution tree from referenceData
+      const contributionTree =
+        await this.referenceDataService.getByKey('contributionTree');
+
+      if (!contributionTree || !Array.isArray(contributionTree)) {
+        throw new BadRequestException(
+          'Contribution tree not found or invalid format in referenceData',
+        );
+      }
+
+      // Create a map for a quick lookup: specificContribution -> contributionType
+      const contributionMap = new Map<string, string>();
+      for (const parent of contributionTree) {
+        if (parent.children && Array.isArray(parent.children)) {
+          for (const child of parent.children) {
+            if (child.name) {
+              // Store both exact match and trimmed/lowercase for fuzzy matching
+              contributionMap.set(child.name.trim(), parent.name);
+              contributionMap.set(child.name.trim().toLowerCase(), parent.name);
+            }
+          }
+        }
+      }
+
+      let updatedCount = 0;
+      let notFoundCount = 0;
+      const notFoundItems: string[] = [];
+
+      // Update each school-need
+      for (const schoolNeed of schoolNeedsWithoutContributionType) {
+        const specificContribution = schoolNeed.specificContribution?.trim();
+
+        if (!specificContribution) {
+          continue;
+        }
+
+        // Try to find the contributionType
+        let contributionType =
+          contributionMap.get(specificContribution) ||
+          contributionMap.get(specificContribution.toLowerCase());
+
+        // If not found, try case-insensitive partial match
+        if (!contributionType) {
+          for (const parent of contributionTree) {
+            if (parent.children && Array.isArray(parent.children)) {
+              const found = parent.children.find(
+                (child) =>
+                  child.name &&
+                  child.name.trim().toLowerCase() ===
+                    specificContribution.toLowerCase(),
+              );
+              if (found) {
+                contributionType = parent.name;
+                break;
+              }
+            }
+          }
+        }
+
+        if (contributionType) {
+          await this.schoolNeedModel.findByIdAndUpdate(
+            schoolNeed._id,
+            { $set: { contributionType } },
+            { new: true },
+          );
+          updatedCount++;
+          this.logger.log(
+            `Updated school-need ${schoolNeed._id}: ${specificContribution} -> ${contributionType}`,
+          );
+        } else {
+          notFoundCount++;
+          notFoundItems.push(specificContribution);
+          this.logger.warn(
+            `Could not find contributionType for specificContribution: ${specificContribution} (school-need ID: ${schoolNeed._id})`,
+          );
+        }
+      }
+
+      this.logger.log(
+        `Completed filling contributionType. Updated: ${updatedCount}, Not found: ${notFoundCount}`,
+      );
+
+      return {
+        success: true,
+        data: {
+          message: 'ContributionType filling completed',
+          totalProcessed: schoolNeedsWithoutContributionType.length,
+          updated: updatedCount,
+          notFound: notFoundCount,
+          notFoundItems: notFoundItems.length > 0 ? notFoundItems : undefined,
+        },
+        meta: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      this.logger.error('Error filling contributionType', error.stack);
       throw error;
     }
   }

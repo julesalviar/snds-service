@@ -18,6 +18,7 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { BasicAuthGuard } from 'src/common/guards/basic-auth.guard';
 import { UserInfo } from 'src/user/user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
@@ -35,12 +36,6 @@ export class SchoolNeedController {
   @Delete(':param')
   async deleteSchoolNeed(@Param('param') param: string) {
     return this.schoolNeedService.deleteSchoolNeed(param);
-  }
-
-  @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_VIEW)
-  @Get(':param')
-  async getSchoolNeed(@Param('param') param: string) {
-    return this.schoolNeedService.getSchoolNeed(param);
   }
 
   @Public()
@@ -88,5 +83,22 @@ export class SchoolNeedController {
       id,
       updateNeedStatusDto,
     );
+  }
+
+  // This endpoint uses BasicAuthGuard instead of the class-level JWT/Roles/Permissions guards
+  // All other endpoints in this controller use the class-level guards (JwtAuthGuard, RolesGuard, PermissionsGuard)
+  // @Public() bypasses the class-level guards; then BasicAuthGuard is applied
+  // IMPORTANT: This route must come before @Get(':param') to avoid route conflicts
+  @Public()
+  @UseGuards(BasicAuthGuard)
+  @Post('fill-contribution-type')
+  async fillContributionType() {
+    return this.schoolNeedService.fillContributionType();
+  }
+
+  @PermissionsAllowed(PermissionsEnum.SCHOOL_NEED_VIEW)
+  @Get(':param')
+  async getSchoolNeed(@Param('param') param: string) {
+    return this.schoolNeedService.getSchoolNeed(param);
   }
 }

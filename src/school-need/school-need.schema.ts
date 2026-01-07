@@ -1,8 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, HydratedDocument } from 'mongoose';
-import { AipSchema } from '../aip/aip.schema';
-import { EngagementSchema } from '../engagement/engagement.schema';
-import { updateAipStatus } from './update-aip-status.helper';
 
 export class Image {
   @Prop({ required: true })

@@ -365,5 +365,4 @@ export class SchoolService {
       throw error;
     }
   }
-
 }

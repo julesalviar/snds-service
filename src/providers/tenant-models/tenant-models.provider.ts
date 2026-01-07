@@ -22,6 +22,15 @@ import {
   InternalReferenceDataSchema,
 } from 'src/internal-reference-data/internal-reference-data.schema';
 import { Engagement, EngagementSchema } from 'src/engagement/engagement.schema';
+import { Report, ReportSchema } from 'src/report/report.schema';
+import {
+  ReportTemplate,
+  ReportTemplateSchema,
+} from 'src/report/report-template/report-template.schema';
+import {
+  ReportQuery,
+  ReportQuerySchema,
+} from 'src/report/report-query/report-query.schema';
 
 export const TenantModels = {
   userModel: {
@@ -117,6 +126,36 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<Engagement>> => {
       return tenantConnection.model(Engagement.name, EngagementSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  reportModel: {
+    provide: PROVIDER.REPORT_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<Report>> => {
+      return tenantConnection.model(Report.name, ReportSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  reportTemplateModel: {
+    provide: PROVIDER.REPORT_TEMPLATE_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<ReportTemplate>> => {
+      return tenantConnection.model(ReportTemplate.name, ReportTemplateSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  reportQueryModel: {
+    provide: PROVIDER.REPORT_QUERY_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<ReportQuery>> => {
+      return tenantConnection.model(ReportQuery.name, ReportQuerySchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

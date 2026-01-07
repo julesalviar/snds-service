@@ -14,7 +14,8 @@ export class InternalReferenceData {
   active: boolean;
 }
 
-export type InternalReferenceDataDocument = HydratedDocument<InternalReferenceData>;
+export type InternalReferenceDataDocument =
+  HydratedDocument<InternalReferenceData>;
 export const InternalReferenceDataSchema = SchemaFactory.createForClass(
   InternalReferenceData,
 );

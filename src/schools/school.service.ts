@@ -3,6 +3,7 @@ import { Model, Types } from 'mongoose';
 import { School, SchoolDocument } from './school.schema';
 import { SchoolNeed } from '../school-need/school-need.schema';
 import { Aip } from '../aip/aip.schema';
+import { Engagement, EngagementDocument } from '../engagement/engagement.schema';
 import { PROVIDER } from '../common/constants/providers';
 import { getCurrentSchoolYear } from '../common/utils/school-year.util';
 import {
@@ -24,6 +25,8 @@ export class SchoolService {
     private readonly schoolNeedModel: Model<SchoolNeed>,
     @Inject(PROVIDER.AIP_MODEL)
     private readonly aipModel: Model<Aip>,
+    @Inject(PROVIDER.ENGAGEMENT_MODEL)
+    private readonly engagementModel: Model<EngagementDocument>,
   ) {}
 
   // Create school
@@ -137,10 +140,11 @@ export class SchoolService {
     withNeedCount: boolean = false,
     withAipCount: boolean = false,
     schoolYear?: string,
+    withGeneratedResources: boolean = false,
   ) {
     try {
       this.logger.log(
-        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}, district = ${district || 'all'}, search = ${search || 'none'}, withNeedCount = ${withNeedCount}, withAipCount = ${withAipCount}, schoolYear = ${schoolYear || 'none'}`,
+        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}, district = ${district || 'all'}, search = ${search || 'none'}, withNeedCount = ${withNeedCount}, withAipCount = ${withAipCount}, withGeneratedResources = ${withGeneratedResources}, schoolYear = ${schoolYear || 'none'}`,
       );
 
       const skip = (page - 1) * limit;
@@ -285,6 +289,47 @@ export class SchoolService {
         });
       }
 
+      // Add generated resources (sum of engagement amounts) if requested
+      if (withGeneratedResources && schools.length > 0) {
+        const schoolIds = schools.map((school) => school._id.toString());
+
+        const engagementAmounts = await this.engagementModel.aggregate([
+          {
+            $match: {
+              schoolId: { $in: schoolIds },
+            },
+          },
+          {
+            $group: {
+              _id: '$schoolId',
+              totalGeneratedResources: { $sum: '$amount' },
+            },
+          },
+        ]);
+
+        this.logger.log(engagementAmounts);
+
+        const amountMap = new Map();
+        engagementAmounts.forEach((item) => {
+          amountMap.set(item._id.toString(), {
+            totalGeneratedResources: item.totalGeneratedResources,
+          });
+        });
+
+        schoolsWithNeeds = schoolsWithNeeds.map((school) => {
+          const amountData = amountMap.get(school._id.toString()) ?? {
+            totalGeneratedResources: 0,
+          };
+          return {
+            ...school,
+            additionalInfo: {
+              ...(school.additionalInfo ?? {}),
+              totalGeneratedResources: amountData.totalGeneratedResources,
+            },
+          };
+        });
+      }
+
       return {
         success: true,
         data: schoolsWithNeeds,
@@ -297,6 +342,7 @@ export class SchoolService {
           search: search || 'none',
           withNeedCount,
           withAipCount,
+          withGeneratedResources,
           schoolYear: schoolYear || 'none',
           timestamp: new Date(),
         },

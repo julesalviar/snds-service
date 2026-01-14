@@ -55,6 +55,7 @@ export class SchoolController {
     @Query('withNeed') withNeed?: string,
     @Query('withAip') withAip?: string,
     @Query('schoolYear') schoolYear?: string,
+    @Query('withGeneratedResources') withGeneratedResources?: string,
   ) {
     return this.schoolService.getAll(
       Number(page),
@@ -64,6 +65,7 @@ export class SchoolController {
       withNeed === 'true',
       withAip === 'true',
       schoolYear,
+      withGeneratedResources === 'true',
     );
   }
 

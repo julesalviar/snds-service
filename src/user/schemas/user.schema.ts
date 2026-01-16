@@ -58,6 +58,9 @@ export class User extends Document {
 
   @Prop()
   passwordResetTokenExpires?: Date;
+
+  @Prop()
+  contactNumber?: string;
 }
 
 export type UserDocument = HydratedDocument<User>;

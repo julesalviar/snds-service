@@ -55,6 +55,9 @@ export class CreateUserDto {
   @IsDefined()
   @IsEnum(UserRole)
   activeRole: UserRole;
+
+  @IsString()
+  contactNumber: string;
 }
 
 export class UpdateUserDto extends PartialType(

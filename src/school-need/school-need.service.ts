@@ -249,7 +249,7 @@ export class SchoolNeedService {
 
       if (specificContribution) {
         queryFilter.specificContribution = {
-          $regex: specificContribution,
+          $regex: `^${specificContribution}$`,
           $options: 'i',
         };
       }

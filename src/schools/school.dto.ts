@@ -65,6 +65,9 @@ export class SchoolDto {
   @IsDefined()
   @IsEmail()
   officialEmailAddress: string;
+
+  @IsString()
+  location: string;
 }
 
 export class UpdateSchoolDto extends PartialType(SchoolDto) {}

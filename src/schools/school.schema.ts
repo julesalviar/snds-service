@@ -32,6 +32,9 @@ export class School extends Document {
 
   @Prop({ required: true })
   officialEmailAddress: string;
+
+  @Prop()
+  location: string;
 }
 
 export type SchoolDocument = HydratedDocument<School>;

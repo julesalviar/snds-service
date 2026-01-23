@@ -265,7 +265,7 @@ export class SchoolNeedService {
             .populate({
               path: 'schoolId',
               select:
-                'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress',
+                'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress location',
             })
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -283,7 +283,7 @@ export class SchoolNeedService {
             ? this.schoolModel
                 .findById(schoolId)
                 .select(
-                  'schoolName division districtOrCluster schoolOffering officialEmailAddress',
+                  'schoolName division districtOrCluster schoolOffering officialEmailAddress location',
                 )
                 .lean()
             : null,
@@ -426,7 +426,7 @@ export class SchoolNeedService {
         .populate({
           path: 'schoolId',
           select:
-            'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress accountablePerson contactNumber designation',
+            'schoolName division schoolName districtOrCluster schoolOffering officialEmailAddress accountablePerson contactNumber designation location',
         })
         .exec();
 

@@ -6,6 +6,8 @@ import {
   IsString,
   Matches,
   IsEnum,
+  IsOptional,
+  IsUrl,
 } from 'class-validator';
 import { schoolOffering } from './school.enums';
 
@@ -68,6 +70,11 @@ export class SchoolDto {
 
   @IsString()
   location: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  profileDocUrl?: string;
 }
 
 export class UpdateSchoolDto extends PartialType(SchoolDto) {}

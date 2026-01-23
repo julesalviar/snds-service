@@ -119,6 +119,107 @@ export class UploadController {
     }
   }
 
+  @Post('document')
+  @UseInterceptors(FileInterceptor('file', multerOptions))
+  async uploadDocument(@UploadedFile() file: Express.Multer.File) {
+    const requestId = Math.random().toString(36).substring(7);
+    const category = 'school';
+    const requestContext = {
+      requestId,
+      fileName: file?.originalname,
+      category,
+      fileSize: file?.size,
+      mimetype: file?.mimetype,
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      this.logger.log('Document upload request received', requestContext);
+
+      if (!file) {
+        this.logger.warn('Upload failed: No file provided', requestContext);
+        throw new BadRequestException('File is required');
+      }
+
+      if (!file.buffer) {
+        this.logger.warn(
+          'Upload failed: File buffer is missing',
+          requestContext,
+        );
+        throw new BadRequestException('File buffer is missing');
+      }
+
+      // Validate document file types
+      const allowedMimeTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/rtf',
+        'text/plain',
+        'application/vnd.oasis.opendocument.text',
+      ];
+
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        this.logger.warn('Upload failed: Invalid file type', requestContext);
+        throw new BadRequestException(
+          'Invalid file type. Only PDF, DOC, DOCX, RTF, TXT, and ODT files are allowed.',
+        );
+      }
+
+      this.logger.log('Starting document upload process', requestContext);
+
+      const result = await this.uploadService.uploadDocument(file, category);
+
+      this.logger.log('Document upload successful', {
+        ...requestContext,
+        uploadId: result.id,
+        originalUrl: result.originalUrl,
+      });
+
+      return {
+        id: result.id,
+        category,
+        originalUrl: result.originalUrl,
+      };
+    } catch (error) {
+      const errorContext = {
+        ...requestContext,
+        errorName: error.constructor.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        errorCode: error.code,
+        errorStatus: error.status,
+      };
+
+      this.logger.error(
+        'Document upload failed with detailed error information',
+        errorContext,
+      );
+
+      if (error instanceof BadRequestException) {
+        this.logger.warn('Bad request error (400)', errorContext);
+        throw error;
+      }
+
+      // Log additional context for 500 errors
+      this.logger.error(
+        'Internal server error (500) - Document upload failed',
+        {
+          ...errorContext,
+          additionalInfo: {
+            fileProvided: !!file,
+            bufferExists: !!file?.buffer,
+            bufferLength: file?.buffer?.length || 0,
+          },
+        },
+      );
+
+      throw new InternalServerErrorException(
+        `Document upload failed: ${error.message ?? 'Unknown error'}`,
+      );
+    }
+  }
+
   @Delete('image/:uuid/cancel')
   async cancelImage(@Param('uuid') uuid: string) {
     const requestId = Math.random().toString(36).substring(7);

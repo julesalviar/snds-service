@@ -38,6 +38,9 @@ export class School extends Document {
 
   @Prop()
   profileDocUrl: string;
+
+  @Prop()
+  logoUrl: string;
 }
 
 export type SchoolDocument = HydratedDocument<School>;

@@ -75,6 +75,11 @@ export class SchoolDto {
   @IsString()
   @IsUrl()
   profileDocUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  logoUrl?: string;
 }
 
 export class UpdateSchoolDto extends PartialType(SchoolDto) {}

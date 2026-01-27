@@ -13,6 +13,7 @@ import { EncryptionService } from 'src/encryption/encryption.service';
 import { School } from 'src/schools/school.schema';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
 import { CreateSchoolAdminDto } from 'src/common/dtos/create-school-admin.dto';
+import { InternalReferenceDataService } from 'src/internal-reference-data/internal-reference-data.service';
 
 @Injectable()
 export class UserService {
@@ -23,6 +24,7 @@ export class UserService {
     @Inject(PROVIDER.TENANT_MODEL) private readonly tenantModel: Model<Tenant>,
     @Inject(PROVIDER.SCHOOL_MODEL) private readonly schoolModel: Model<School>,
     private readonly encryptionService: EncryptionService, // Inject EncryptionService
+    private readonly internalReferenceDataService: InternalReferenceDataService,
   ) {
     this.logger = new Logger(UserService.name);
   }
@@ -88,6 +90,21 @@ export class UserService {
         schoolId = existingSchool._id.toString();
         this.logger.log(`Using existing school: ${existingSchool.schoolName}`);
       } else {
+        let regionForSchool: string | undefined;
+
+        if ('region' in userData) {
+          regionForSchool = String(userData.region);
+        } else {
+          const regionRef =
+            await this.internalReferenceDataService.getByKey('region');
+          const code = Array.isArray(regionRef)
+            ? regionRef[0]?.code
+            : regionRef?.code;
+          if (typeof code === 'string') {
+            regionForSchool = code;
+          }
+        }
+
         const schoolData = {
           schoolId: userData.schoolId,
           schoolName: schoolName,
@@ -99,6 +116,7 @@ export class UserService {
           contactNumber: userData.contactNumber,
           officialEmailAddress: userData.email, // Use user's email as school's official email
           createdByUserId: null, // Will be updated after user creation
+          ...(regionForSchool != null && { region: regionForSchool }),
         };
 
         const newSchool = new this.schoolModel(schoolData);

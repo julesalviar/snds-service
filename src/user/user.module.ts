@@ -4,9 +4,10 @@ import { UsersController } from './users.controller';
 import { TenantValidationMiddleware } from '../common/middlewares/tenant-validation/tenant-validation.middleware';
 import { TenantModels } from '../providers/tenant-models/tenant-models.provider';
 import { EncryptionModule } from 'src/encryption/encryption.module';
+import { InternalReferenceDataModule } from 'src/internal-reference-data/internal-reference-data.module';
 
 @Module({
-  imports: [EncryptionModule],
+  imports: [EncryptionModule, InternalReferenceDataModule],
   providers: [UserService, ...Object.values(TenantModels)],
   controllers: [UsersController],
   exports: [UserService, ...Object.values(TenantModels)],

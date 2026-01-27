@@ -10,7 +10,7 @@ export enum Region {
   Region8 = 'Region8',
   Region9 = 'Region9',
   Region10 = 'Region10',
-  Region11 = 'Region11',
+  Region11 = 'Region XI',
   Region12 = 'Region XII',
   Region13 = 'Region13',
   NCR = 'NCR',

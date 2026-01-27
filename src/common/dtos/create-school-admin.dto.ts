@@ -1,11 +1,11 @@
-import { IsDefined, IsEnum, IsString, Validate } from 'class-validator';
+import { IsDefined, IsString, Validate } from 'class-validator';
 import { Region } from 'src/common/enums/region.enum';
 import { DivisionRegionMatchConstraint } from 'src/common/validators/division-region-match-constraint.validator';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
 
 export class CreateSchoolAdminDto extends CreateUserDto {
   @IsDefined()
-  @IsEnum(Region)
+  @IsString()
   region: Region;
 
   @Validate(DivisionRegionMatchConstraint)

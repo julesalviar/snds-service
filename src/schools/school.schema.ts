@@ -13,6 +13,9 @@ export class School extends Document {
   schoolName: string;
 
   @Prop()
+  region: string;
+
+  @Prop()
   division: string;
 
   @Prop()

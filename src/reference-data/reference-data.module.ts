@@ -19,5 +19,6 @@ import { ReferenceDataController } from 'src/reference-data/reference-data.contr
   ],
   providers: [ReferenceDataService],
   controllers: [ReferenceDataController],
+  exports: [ReferenceDataService],
 })
 export class ReferenceDataModule {}

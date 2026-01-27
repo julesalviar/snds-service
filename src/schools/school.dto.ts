@@ -5,11 +5,11 @@ import {
   IsDefined,
   IsString,
   Matches,
-  IsEnum,
   IsOptional,
   IsUrl,
 } from 'class-validator';
-import { schoolOffering } from './school.enums';
+
+/** Validated against reference data key "schoolOffering" via SchoolOfferingRefDataValidationPipe. */
 
 export class SchoolDto {
   @IsDefined()
@@ -39,11 +39,10 @@ export class SchoolDto {
   })
   schoolId: string;
 
+  /** Must be one of the values from reference data (key: "schoolOffering"). */
   @IsDefined()
   @IsNotEmpty()
-  @IsEnum(schoolOffering, {
-    message: 'schoolOffering data is not a valid School Offering value',
-  })
+  @IsString()
   schoolOffering: string;
 
   @IsDefined()

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { SchoolService } from './school.service';
 import { SchoolDto, UpdateSchoolDto } from './school.dto';
+import { SchoolOfferingRefDataValidationPipe } from './school-offering-ref-data.validation.pipe';
 
 import { PermissionsEnum } from 'src/user/enums/user-permission.enum';
 import { PermissionsAllowed } from 'src/common/decorators/permissions.decorator';
@@ -26,7 +27,9 @@ export class SchoolController {
 
   @PermissionsAllowed(PermissionsEnum.SCHOOL_PROFILE_MANAGE)
   @Post()
-  async createSchool(@Body() schoolRegistrationDto: SchoolDto) {
+  async createSchool(
+    @Body(SchoolOfferingRefDataValidationPipe) schoolRegistrationDto: SchoolDto,
+  ) {
     return this.schoolService.create(schoolRegistrationDto);
   }
 
@@ -40,7 +43,7 @@ export class SchoolController {
   @Put(':id')
   async updateSchool(
     @Param('id') id: string,
-    @Body() updateSchoolDto: UpdateSchoolDto,
+    @Body(SchoolOfferingRefDataValidationPipe) updateSchoolDto: UpdateSchoolDto,
   ) {
     return this.schoolService.updateSchool(id, updateSchoolDto);
   }

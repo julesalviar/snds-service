@@ -4,10 +4,12 @@ import { SchoolController } from './school.controller';
 import { TenantValidationMiddleware } from '../common/middlewares/tenant-validation/tenant-validation.middleware';
 import { TenantModels } from '../providers/tenant-models/tenant-models.provider';
 import { EncryptionModule } from 'src/encryption/encryption.module';
+import { ReferenceDataModule } from 'src/reference-data/reference-data.module';
+import { SchoolOfferingRefDataValidationPipe } from './school-offering-ref-data.validation.pipe';
 
 @Module({
-  imports: [EncryptionModule],
-  providers: [SchoolService, ...Object.values(TenantModels)],
+  imports: [EncryptionModule, ReferenceDataModule],
+  providers: [SchoolService, SchoolOfferingRefDataValidationPipe, ...Object.values(TenantModels)],
   controllers: [SchoolController],
   exports: [SchoolService, ...Object.values(TenantModels)],
 })

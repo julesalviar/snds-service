@@ -51,15 +51,18 @@ export class UploadService {
         mimetype: file.mimetype,
       });
 
-      if (!file.buffer || file.buffer.length === 0) {
-        throw new Error('File buffer is empty');
+      // Document upload uses disk storage (file.path); no buffer in memory
+      if (!file.path) {
+        throw new Error(
+          'File path is missing (document upload expects disk storage)',
+        );
       }
 
       const documentKey = `${category}/${dateBucket}/${shortUuid}.${ext}`;
 
-      this.logger.log('Uploading document', { key: documentKey });
-      const documentUrl = await this.r2Service.uploadFile(
-        file.buffer,
+      this.logger.log('Uploading document from disk', { key: documentKey });
+      const documentUrl = await this.r2Service.uploadFileFromPath(
+        file.path,
         documentKey,
         file.mimetype,
       );
@@ -86,7 +89,8 @@ export class UploadService {
     const mimeToExt: Record<string, string> = {
       'application/pdf': 'pdf',
       'application/msword': 'doc',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        'docx',
       'application/rtf': 'rtf',
       'text/plain': 'txt',
       'application/vnd.oasis.opendocument.text': 'odt',
@@ -96,7 +100,7 @@ export class UploadService {
       return mimeToExt[mimetype];
     }
 
-    // Fallback to filename extension or default to 'bin'
+    // Fallback to the filename extension or default to 'bin'
     return filenameExt || 'bin';
   }
 

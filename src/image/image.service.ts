@@ -27,13 +27,13 @@ export class ImageService {
       }
 
       this.logger.log('Creating compressed image');
-      const compressed = await sharp(file.buffer)
+      let compressed = await sharp(file.buffer)
         .resize(1024)
         .jpeg({ quality: 80 })
         .toBuffer();
 
       this.logger.log('Creating thumbnail');
-      const thumbnail = await sharp(file.buffer)
+      let thumbnail = await sharp(file.buffer)
         .resize(300)
         .jpeg({ quality: 60 })
         .toBuffer();
@@ -47,6 +47,8 @@ export class ImageService {
         originalKey,
         file.mimetype,
       );
+      // Release compressed buffer after upload to reduce peak memory
+      compressed = null;
 
       this.logger.log('Uploading thumbnail', { key: thumbnailKey });
       const thumbnailUrl = await this.r2Service.uploadFile(
@@ -54,6 +56,7 @@ export class ImageService {
         thumbnailKey,
         file.mimetype,
       );
+      thumbnail = null;
 
       this.logger.log('Image processing completed', {
         originalUrl,

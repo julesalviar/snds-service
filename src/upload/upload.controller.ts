@@ -12,9 +12,13 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
+import * as fs from 'node:fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
-import { multerOptions } from 'src/config/multer-options';
+import {
+  multerOptions,
+  multerDocumentOptions,
+} from 'src/config/multer-options';
 import { PROVIDER } from 'src/common/constants/providers';
 import { Model } from 'mongoose';
 import { ImageUpload } from 'src/upload/schemas/image-upload.schema';
@@ -116,11 +120,16 @@ export class UploadController {
       throw new InternalServerErrorException(
         `Upload failed: ${error.message ?? 'Unknown error'}`,
       );
+    } finally {
+      // Release file buffer on success or error to avoid memory retention
+      if (file?.buffer) {
+        (file as { buffer?: Buffer }).buffer = undefined;
+      }
     }
   }
 
   @Post('document')
-  @UseInterceptors(FileInterceptor('file', multerOptions))
+  @UseInterceptors(FileInterceptor('file', multerDocumentOptions))
   async uploadDocument(@UploadedFile() file: Express.Multer.File) {
     const requestId = Math.random().toString(36).substring(7);
     const category = 'school';
@@ -141,12 +150,12 @@ export class UploadController {
         throw new BadRequestException('File is required');
       }
 
-      if (!file.buffer) {
+      if (!file.path) {
         this.logger.warn(
-          'Upload failed: File buffer is missing',
+          'Upload failed: File path is missing (disk storage)',
           requestContext,
         );
-        throw new BadRequestException('File buffer is missing');
+        throw new BadRequestException('File path is missing');
       }
 
       // Validate document file types
@@ -208,8 +217,7 @@ export class UploadController {
           ...errorContext,
           additionalInfo: {
             fileProvided: !!file,
-            bufferExists: !!file?.buffer,
-            bufferLength: file?.buffer?.length || 0,
+            pathExists: !!file?.path,
           },
         },
       );
@@ -217,6 +225,16 @@ export class UploadController {
       throw new InternalServerErrorException(
         `Document upload failed: ${error.message ?? 'Unknown error'}`,
       );
+    } finally {
+      // Unlink temp file from disk storage to free space
+      if (file?.path) {
+        fs.promises.unlink(file.path).catch((err) => {
+          this.logger.warn('Failed to unlink document temp file', {
+            path: file.path,
+            error: err?.message,
+          });
+        });
+      }
     }
   }
 

@@ -2,6 +2,9 @@ export enum UserRole {
   // System level
   SYSTEM = 'system',
 
+  // System Admin
+  SYSTEM_ADMIN = 'systemAdmin',
+
   // Top-Level Roles
   SUPER_ADMIN = 'superAdmin', // Full access to all system-wide resources
   STAKEHOLDER = 'stakeholder',

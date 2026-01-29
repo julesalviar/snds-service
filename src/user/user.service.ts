@@ -42,8 +42,51 @@ export class UserService {
       .exec();
   }
 
-  async getUsers(): Promise<User[]> {
-    return await this.userModel.find().exec();
+  async getUsers(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+  ): Promise<{
+    data: User[];
+    meta: {
+      count: number;
+      totalItems: number;
+      currentPage: number;
+      totalPages: number;
+      search?: string;
+    };
+  }> {
+    const filter: any = {};
+
+    if (search?.trim()) {
+      const searchRegex = { $regex: search.trim(), $options: 'i' };
+      filter.$or = [
+        { userName: searchRegex },
+        { name: searchRegex },
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+        { email: searchRegex },
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+    const maxLimit = Math.min(Math.max(1, limit), 100);
+
+    const [users, total] = await Promise.all([
+      this.userModel.find(filter).skip(skip).limit(maxLimit).exec(),
+      this.userModel.countDocuments(filter),
+    ]);
+
+    return {
+      data: users,
+      meta: {
+        count: users.length,
+        totalItems: total,
+        currentPage: page,
+        totalPages: Math.ceil(total / maxLimit) || 1,
+        ...(search?.trim() && { search: search.trim() }),
+      },
+    };
   }
 
   async getUsersWithRole(

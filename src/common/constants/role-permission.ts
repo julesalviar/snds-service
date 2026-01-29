@@ -10,6 +10,11 @@ export const RolePermissions = {
     PermissionsEnum.USER_MANAGE,
     PermissionsEnum.USER_ASSIGN_ROLE,
   ],
+  [UserRole.SYSTEM_ADMIN]: [
+    PermissionsEnum.PROJECT_VIEW,
+    PermissionsEnum.SCHOOL_NEED_VIEW,
+    PermissionsEnum.SCHOOL_PROFILE_VIEW,
+  ],
   [UserRole.STAKEHOLDER]: [
     PermissionsEnum.PROJECT_VIEW,
     PermissionsEnum.SCHOOL_NEED_VIEW,

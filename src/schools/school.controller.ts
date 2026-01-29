@@ -20,6 +20,15 @@ import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
+function normalizeDistrictQuery(
+  district?: string | string[],
+): string[] | undefined {
+  if (district == null || district === '') return undefined;
+  const raw = Array.isArray(district) ? district : [district];
+  const filtered = raw.filter((d) => typeof d === 'string' && d.trim() !== '');
+  return filtered.length > 0 ? filtered : undefined;
+}
+
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('schools')
 export class SchoolController {
@@ -53,17 +62,18 @@ export class SchoolController {
   async getAll(
     @Query('page') page = 1,
     @Query('limit') limit = 10,
-    @Query('district') district?: string,
+    @Query('district') district?: string | string[],
     @Query('search') search?: string,
     @Query('withNeed') withNeed?: string,
     @Query('withAip') withAip?: string,
     @Query('schoolYear') schoolYear?: string,
     @Query('withGeneratedResources') withGeneratedResources?: string,
   ) {
+    const districts = normalizeDistrictQuery(district);
     return this.schoolService.getAll(
       Number(page),
       Number(limit),
-      district,
+      districts,
       search,
       withNeed === 'true',
       withAip === 'true',

@@ -1,5 +1,6 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import { Controller, Get, Put, Query, Param, Body } from '@nestjs/common';
 import { InternalReferenceDataService } from 'src/internal-reference-data/internal-reference-data.service';
+import { InternalReferenceDataByKeyQueryDto } from 'src/internal-reference-data/internal-reference-data-by-key-query.dto';
 import { StatusQueryDto } from 'src/reference-data/status-query.dto';
 
 @Controller('internal-reference-data')
@@ -17,9 +18,17 @@ export class InternalReferenceDataController {
   @Get(':key')
   async getInternalReferenceDataByKey(
     @Param('key') key: string,
-    @Query() query: StatusQueryDto,
+    @Query() query: InternalReferenceDataByKeyQueryDto,
   ) {
     const status = query.status ?? 'active';
-    return this.internalReferenceDataService.getByKey(key, status);
+    return this.internalReferenceDataService.getByKey(key, status, query.sort);
+  }
+
+  @Put(':key')
+  async updateInternalReferenceDataByKey(
+    @Param('key') key: string,
+    @Body() value: any,
+  ) {
+    return this.internalReferenceDataService.updateByKey(key, value);
   }
 }

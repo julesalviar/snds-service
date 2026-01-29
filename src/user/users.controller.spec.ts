@@ -8,7 +8,15 @@ describe('UsersController', () => {
 
   beforeEach(async () => {
     userService = {
-      getUsers: jest.fn().mockResolvedValue([]),
+      getUsers: jest.fn().mockResolvedValue({
+        data: [],
+        meta: {
+          count: 0,
+          totalItems: 0,
+          currentPage: 1,
+          totalPages: 1,
+        },
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -23,7 +31,16 @@ describe('UsersController', () => {
     expect(usersController).toBeDefined();
   });
 
-  it('should return an empty array when no users exist', async () => {
-    expect(await usersController.getUsers()).toEqual([]);
+  it('should return paginated result when no users exist', async () => {
+    const result = await usersController.getUsers();
+    expect(result).toEqual({
+      data: [],
+      meta: {
+        count: 0,
+        totalItems: 0,
+        currentPage: 1,
+        totalPages: 1,
+      },
+    });
   });
 });

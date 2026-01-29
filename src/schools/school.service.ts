@@ -135,7 +135,7 @@ export class SchoolService {
   async getAll(
     page: number,
     limit: number,
-    district?: string,
+    districts?: string[],
     search?: string,
     withNeedCount: boolean = false,
     withAipCount: boolean = false,
@@ -144,33 +144,50 @@ export class SchoolService {
   ) {
     try {
       this.logger.log(
-        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}, district = ${district || 'all'}, search = ${search || 'none'}, withNeedCount = ${withNeedCount}, withAipCount = ${withAipCount}, withGeneratedResources = ${withGeneratedResources}, schoolYear = ${schoolYear || 'none'}`,
+        `Attempting to retrieve all paginated schools: page = ${page}, limit = ${limit}, districts = ${districts?.length ? districts.join(', ') : 'all'}, search = ${search || 'none'}, withNeedCount = ${withNeedCount}, withAipCount = ${withAipCount}, withGeneratedResources = ${withGeneratedResources}, schoolYear = ${schoolYear || 'none'}`,
       );
 
       const skip = (page - 1) * limit;
 
       const filter: any = {};
 
-      // District filter
-      if (district) {
-        filter.districtOrCluster = { $regex: new RegExp(`^${district}$`, 'i') };
-      }
+      // District filter (supports multiple)
+      const districtFilter =
+        districts && districts.length > 0
+          ? districts.length === 1
+            ? {
+                districtOrCluster: {
+                  $regex: new RegExp(`^${districts[0]}$`, 'i'),
+                },
+              }
+            : {
+                $or: districts.map((d) => ({
+                  districtOrCluster: { $regex: new RegExp(`^${d}$`, 'i') },
+                })),
+              }
+          : null;
 
       // Search filter - searches across multiple fields
+      let searchFilter: any = null;
       if (search) {
         const searchRegex = { $regex: search, $options: 'i' };
         const searchConditions: any[] = [
           { schoolName: searchRegex },
           { accountablePerson: searchRegex },
         ];
-
-        // Only search schoolId if the search term is numeric
         const numericSearch = Number(search);
         if (!isNaN(numericSearch) && isFinite(numericSearch)) {
           searchConditions.push({ schoolId: numericSearch });
         }
+        searchFilter = { $or: searchConditions };
+      }
 
-        filter.$or = searchConditions;
+      if (districtFilter && searchFilter) {
+        filter.$and = [districtFilter, searchFilter];
+      } else if (districtFilter) {
+        Object.assign(filter, districtFilter);
+      } else if (searchFilter) {
+        Object.assign(filter, searchFilter);
       }
 
       const [schools, total] = await Promise.all([
@@ -338,7 +355,7 @@ export class SchoolService {
           totalItems: total,
           currentPage: page,
           totalPages: Math.ceil(total / limit),
-          district: district || 'all',
+          district: districts?.length ? districts.join(', ') : 'all',
           search: search || 'none',
           withNeedCount,
           withAipCount,

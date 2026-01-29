@@ -30,6 +30,7 @@ export abstract class BaseReferenceDataService<
   async getByKey(
     key: string,
     status: ReferenceStatus = 'active',
+    sort?: string,
   ): Promise<any> {
     const filter: Record<string, any> = { key };
 
@@ -44,8 +45,31 @@ export abstract class BaseReferenceDataService<
       return null;
     }
 
-    const value = entry.value;
-    return this.filterValueByStatus(value, status);
+    let value = this.filterValueByStatus(entry.value, status);
+    if (
+      (sort === 'asc' || sort === 'desc') &&
+      this.isArrayOfStrings(value)
+    ) {
+      value = [...value].sort(
+        sort === 'asc'
+          ? (a, b) => a.localeCompare(b)
+          : (a, b) => b.localeCompare(a),
+      );
+    }
+    return value;
+  }
+
+  private isArrayOfStrings(value: any): value is string[] {
+    return (
+      Array.isArray(value) && value.every((item) => typeof item === 'string')
+    );
+  }
+
+  async updateByKey(key: string, value: any): Promise<T | null> {
+    return this.model
+      .findOneAndUpdate({ key }, { value }, { new: true })
+      .lean()
+      .exec() as Promise<T | null>;
   }
 
   private filterValueByStatus(value: any, status: ReferenceStatus): any {

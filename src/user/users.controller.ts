@@ -21,9 +21,15 @@ export class UsersController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getUsers(): Promise<User[]> {
+  async getUsers(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('search') search?: string,
+  ) {
     try {
-      return await this.userService.getUsers();
+      const pageNum = Math.max(1, Number(page) || 1);
+      const limitNum = Math.min(100, Math.max(1, Number(limit) || 10));
+      return await this.userService.getUsers(pageNum, limitNum, search);
     } catch (error) {
       throw new HttpException(
         error.message,

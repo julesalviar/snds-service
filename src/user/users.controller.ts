@@ -25,17 +25,31 @@ export class UsersController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('search') search?: string,
+    @Query('roles') roles?: string | string[],
   ) {
     try {
       const pageNum = Math.max(1, Number(page) || 1);
       const limitNum = Math.min(100, Math.max(1, Number(limit) || 10));
-      return await this.userService.getUsers(pageNum, limitNum, search);
+      const rolesList = this.parseRolesQuery(roles);
+      return await this.userService.getUsers(
+        pageNum,
+        limitNum,
+        search,
+        rolesList,
+      );
     } catch (error) {
       throw new HttpException(
         error.message,
         error.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  private parseRolesQuery(roles?: string | string[]): UserRole[] | undefined {
+    if (roles == null || roles === '') return undefined;
+    const raw = Array.isArray(roles) ? roles : roles.split(',').map((r) => r.trim());
+    const valid = raw.filter((r) => r && Object.values(UserRole).includes(r as UserRole));
+    return valid.length > 0 ? (valid as UserRole[]) : undefined;
   }
 
   @Get('by-role/:role')

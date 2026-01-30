@@ -46,6 +46,7 @@ export class UserService {
     page: number = 1,
     limit: number = 10,
     search?: string,
+    roles?: UserRole[],
   ): Promise<{
     data: User[];
     meta: {
@@ -54,9 +55,14 @@ export class UserService {
       currentPage: number;
       totalPages: number;
       search?: string;
+      roles?: UserRole[];
     };
   }> {
     const filter: any = {};
+
+    if (roles?.length) {
+      filter.roles = { $in: roles };
+    }
 
     if (search?.trim()) {
       const searchRegex = { $regex: search.trim(), $options: 'i' };
@@ -85,6 +91,7 @@ export class UserService {
         currentPage: page,
         totalPages: Math.ceil(total / maxLimit) || 1,
         ...(search?.trim() && { search: search.trim() }),
+        ...(roles?.length && { roles }),
       },
     };
   }

@@ -3,16 +3,22 @@ import {
   BadRequestException,
   NotFoundException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import {
   SendEmailCommand,
   SendEmailCommandOutput,
   SESClient,
 } from '@aws-sdk/client-ses';
+import { Model } from 'mongoose';
 import { UserService } from 'src/user/user.service';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { ClsService } from 'nestjs-cls';
+import { PROVIDER } from 'src/common/constants/providers';
+import { UserInviteDocument } from './user-invite.schema';
 import * as crypto from 'node:crypto';
+
+const SCHOOL_ADMIN_REGISTRATION_PATH = '/school-admin-registration';
 
 @Injectable()
 export class MailService {
@@ -30,6 +36,8 @@ export class MailService {
     private readonly userService: UserService,
     private readonly encryptionService: EncryptionService,
     private readonly clsService: ClsService,
+    @Inject(PROVIDER.USER_INVITE_MODEL)
+    private readonly userInviteModel: Model<UserInviteDocument>,
   ) {}
 
   async sendEmail(
@@ -161,6 +169,83 @@ export class MailService {
     const body = `Thank you for signing up! Please confirm your email address by clicking the link below:\n\n${confirmationLink}\n\nIf you did not create an account, please ignore this email.`;
 
     return await this.sendEmail(to, subject, body);
+  }
+
+  async sendInvite(to: string): Promise<{ messageId?: string; sentAt: Date }> {
+    const registrationUrl = this.buildTenantUrl(SCHOOL_ADMIN_REGISTRATION_PATH);
+
+    this.logger.log(`Sending invite to: ${to}`, {
+      to,
+      registrationUrl,
+    });
+
+    const subject = "You're invited to register as a School Admin";
+    const body = `You have been invited to register as a school admin. Click the link below to complete your registration:\n\n${registrationUrl}\n\nIf you did not expect this invite, you can ignore this email.`;
+
+    const result = await this.sendEmail(to, subject, body);
+    const sentAt = new Date();
+
+    await this.userInviteModel.create({
+      email: to.toLowerCase(),
+      sentAt,
+      status: 'sent',
+    });
+
+    return {
+      messageId: result.MessageId,
+      sentAt,
+    };
+  }
+
+  /**
+   * Send school admin registration invites to one or more email addresses.
+   * Each invite is sent and recorded; failures for one address do not stop others.
+   */
+  async sendInvites(
+    toAddresses: string[],
+  ): Promise<
+    Array<{ email: string; messageId?: string; sentAt: Date; error?: string }>
+  > {
+    const registrationUrl = this.buildTenantUrl(SCHOOL_ADMIN_REGISTRATION_PATH);
+    const subject = "You're invited to register as a School Admin";
+    const body = `You have been invited to register as a school admin. Click the link below to complete your registration:\n\n${registrationUrl}\n\nIf you did not expect this invite, you can ignore this email.`;
+
+    const results: Array<{
+      email: string;
+      messageId?: string;
+      sentAt: Date;
+      error?: string;
+    }> = [];
+
+    for (const to of toAddresses) {
+      const normalized = to?.trim?.()?.toLowerCase?.();
+      if (!normalized) continue;
+
+      try {
+        const result = await this.sendEmail(normalized, subject, body);
+        const sentAt = new Date();
+        await this.userInviteModel.create({
+          email: normalized,
+          sentAt,
+          status: 'sent',
+        });
+        results.push({
+          email: normalized,
+          messageId: result.MessageId,
+          sentAt,
+        });
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`Invite failed for ${normalized}: ${errorMessage}`);
+        results.push({
+          email: normalized,
+          sentAt: new Date(),
+          error: errorMessage,
+        });
+      }
+    }
+
+    return results;
   }
 
   async sendResetPasswordEmail(

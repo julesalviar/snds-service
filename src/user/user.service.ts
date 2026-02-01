@@ -1,7 +1,9 @@
 import {
+  ConflictException,
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PROVIDER } from '../common/constants/providers';
@@ -14,6 +16,8 @@ import { School } from 'src/schools/school.schema';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
 import { CreateSchoolAdminDto } from 'src/common/dtos/create-school-admin.dto';
 import { InternalReferenceDataService } from 'src/internal-reference-data/internal-reference-data.service';
+import { Aip } from 'src/aip/aip.schema';
+import { Engagement } from 'src/engagement/engagement.schema';
 
 @Injectable()
 export class UserService {
@@ -23,6 +27,8 @@ export class UserService {
     @Inject(PROVIDER.USER_MODEL) private readonly userModel: Model<User>,
     @Inject(PROVIDER.TENANT_MODEL) private readonly tenantModel: Model<Tenant>,
     @Inject(PROVIDER.SCHOOL_MODEL) private readonly schoolModel: Model<School>,
+    @Inject(PROVIDER.AIP_MODEL) private readonly aipModel: Model<Aip>,
+    @Inject(PROVIDER.ENGAGEMENT_MODEL) private readonly engagementModel: Model<Engagement>,
     private readonly encryptionService: EncryptionService, // Inject EncryptionService
     private readonly internalReferenceDataService: InternalReferenceDataService,
   ) {
@@ -47,6 +53,7 @@ export class UserService {
     limit: number = 10,
     search?: string,
     roles?: UserRole[],
+    includeReferenceAccounts: boolean = false,
   ): Promise<{
     data: User[];
     meta: {
@@ -59,6 +66,16 @@ export class UserService {
     };
   }> {
     const filter: any = {};
+    const andConditions: any[] = [];
+
+    if (!includeReferenceAccounts) {
+      andConditions.push({
+        $or: [
+          { created: { $ne: 'system' } },
+          { created: { $exists: false } },
+        ],
+      });
+    }
 
     if (roles?.length) {
       filter.roles = { $in: roles };
@@ -66,13 +83,19 @@ export class UserService {
 
     if (search?.trim()) {
       const searchRegex = { $regex: search.trim(), $options: 'i' };
-      filter.$or = [
-        { userName: searchRegex },
-        { name: searchRegex },
-        { firstName: searchRegex },
-        { lastName: searchRegex },
-        { email: searchRegex },
-      ];
+      andConditions.push({
+        $or: [
+          { userName: searchRegex },
+          { name: searchRegex },
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+          { email: searchRegex },
+        ],
+      });
+    }
+
+    if (andConditions.length > 0) {
+      filter.$and = andConditions;
     }
 
     const skip = (page - 1) * limit;
@@ -363,5 +386,31 @@ export class UserService {
         { new: true, runValidators: true },
       )
       .exec();
+  }
+
+  async deleteUserById(userId: string): Promise<{ deleted: boolean }> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    const [aipCount, engagementCount] = await Promise.all([
+      this.aipModel.countDocuments({ createdBy: userId }).exec(),
+      this.engagementModel.countDocuments({ stakeholderUserId: userId }).exec(),
+    ]);
+
+    if (aipCount > 0) {
+      throw new ConflictException(
+        `Cannot delete user: ${aipCount} AIP(s) reference this user (createdBy).`,
+      );
+    }
+    if (engagementCount > 0) {
+      throw new ConflictException(
+        `Cannot delete user: ${engagementCount} engagement(s) reference this user (stakeholderUserId).`,
+      );
+    }
+
+    await this.userModel.findByIdAndDelete(userId).exec();
+    return { deleted: true };
   }
 }

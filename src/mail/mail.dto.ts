@@ -4,6 +4,8 @@ import {
   IsString,
   IsOptional,
   MinLength,
+  IsArray,
+  ArrayMinSize,
 } from 'class-validator';
 
 export class ConfirmEmailDto {
@@ -49,4 +51,23 @@ export class ProcessPasswordResetDto {
   @IsString()
   @MinLength(6, { message: 'Password must be at least 6 characters long' })
   newPassword: string;
+}
+
+export class SendInviteRequestDto {
+  @IsArray()
+  @ArrayMinSize(1, { message: 'emails must contain at least one address' })
+  @IsEmail({}, { each: true })
+  emails: string[];
+}
+
+export class SendInviteResponseDto {
+  message: string;
+  messageId?: string;
+  sentAt?: string;
+  results?: Array<{
+    email: string;
+    messageId?: string;
+    sentAt: string;
+    error?: string;
+  }>;
 }

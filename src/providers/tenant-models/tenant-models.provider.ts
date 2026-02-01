@@ -31,6 +31,10 @@ import {
   ReportQuery,
   ReportQuerySchema,
 } from 'src/report/report-query/report-query.schema';
+import {
+  UserInvite,
+  UserInviteSchema,
+} from 'src/mail/user-invite.schema';
 
 export const TenantModels = {
   userModel: {
@@ -156,6 +160,16 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<ReportQuery>> => {
       return tenantConnection.model(ReportQuery.name, ReportQuerySchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  userInviteModel: {
+    provide: PROVIDER.USER_INVITE_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<UserInvite>> => {
+      return tenantConnection.model(UserInvite.name, UserInviteSchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

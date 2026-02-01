@@ -61,6 +61,10 @@ export class User extends Document {
 
   @Prop()
   contactNumber?: string;
+
+  /** 'system' for reference/seed accounts; omitted for normal users */
+  @Prop()
+  created?: string;
 }
 
 export type UserDocument = HydratedDocument<User>;

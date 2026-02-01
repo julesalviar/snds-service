@@ -5,12 +5,58 @@ import {
   ResetPasswordEmailDto,
   ProcessEmailConfirmationDto,
   ProcessPasswordResetDto,
+  SendInviteRequestDto,
+  SendInviteResponseDto,
 } from './mail.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('mail')
 export class MailController {
   constructor(private readonly mailService: MailService) {}
+
+  @Post('invite')
+  @HttpCode(HttpStatus.OK)
+  async sendInvite(
+    @Body() dto: SendInviteRequestDto,
+  ): Promise<SendInviteResponseDto> {
+    const addresses = dto.emails
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (addresses.length === 0) {
+      return {
+        message: 'No valid email address provided',
+        results: [],
+      };
+    }
+
+    if (addresses.length === 1) {
+      const result = await this.mailService.sendInvite(addresses[0]);
+      return {
+        message: 'Invite sent successfully',
+        messageId: result.messageId,
+        sentAt: result.sentAt.toISOString(),
+        results: [
+          {
+            email: addresses[0],
+            messageId: result.messageId,
+            sentAt: result.sentAt.toISOString(),
+          },
+        ],
+      };
+    }
+
+    const results = await this.mailService.sendInvites(addresses);
+    return {
+      message: 'Invites processed',
+      results: results.map((r) => ({
+        email: r.email,
+        messageId: r.messageId,
+        sentAt: r.sentAt.toISOString(),
+        ...(r.error && { error: r.error }),
+      })),
+    };
+  }
 
   @Public()
   @Post('confirm-email')

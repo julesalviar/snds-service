@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Patch,
   Body,
@@ -26,16 +27,19 @@ export class UsersController {
     @Query('limit') limit = 10,
     @Query('search') search?: string,
     @Query('roles') roles?: string | string[],
+    @Query('includeReferenceAccounts') includeReferenceAccounts?: string,
   ) {
     try {
       const pageNum = Math.max(1, Number(page) || 1);
       const limitNum = Math.min(100, Math.max(1, Number(limit) || 10));
       const rolesList = this.parseRolesQuery(roles);
+      const includeRefAccounts = includeReferenceAccounts === 'true';
       return await this.userService.getUsers(
         pageNum,
         limitNum,
         search,
         rolesList,
+        includeRefAccounts,
       );
     } catch (error) {
       throw new HttpException(
@@ -47,8 +51,12 @@ export class UsersController {
 
   private parseRolesQuery(roles?: string | string[]): UserRole[] | undefined {
     if (roles == null || roles === '') return undefined;
-    const raw = Array.isArray(roles) ? roles : roles.split(',').map((r) => r.trim());
-    const valid = raw.filter((r) => r && Object.values(UserRole).includes(r as UserRole));
+    const raw = Array.isArray(roles)
+      ? roles
+      : roles.split(',').map((r) => r.trim());
+    const valid = raw.filter(
+      (r) => r && Object.values(UserRole).includes(r as UserRole),
+    );
     return valid.length > 0 ? (valid as UserRole[]) : undefined;
   }
 
@@ -91,6 +99,18 @@ export class UsersController {
   ): Promise<any> {
     try {
       return await this.userService.updateProfile(userName, updatedProfileInfo);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete(':id')
+  async deleteUserById(@Param('id') id: string): Promise<{ deleted: boolean }> {
+    try {
+      return await this.userService.deleteUserById(id);
     } catch (error) {
       throw new HttpException(
         error.message,

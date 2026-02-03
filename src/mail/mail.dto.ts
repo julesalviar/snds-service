@@ -66,6 +66,7 @@ export class SendInviteResponseDto {
   sentAt?: string;
   results?: Array<{
     email: string;
+    status?: 'pending' | 'sent';
     messageId?: string;
     sentAt: string;
     error?: string;

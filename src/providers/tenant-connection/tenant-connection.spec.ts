@@ -3,22 +3,24 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TenantConnectionProvider } from './tenant-connection';
 import { PROVIDER } from 'src/common/constants/providers';
 import { REQUEST } from '@nestjs/core';
-import { getConnectionToken } from '@nestjs/mongoose';
+import { TenantConnectionResolverService } from './tenant-connection-resolver.service';
 
 describe('TenantConnectionProvider', () => {
   let provider: Connection;
+  const mockTenantConnection = {};
 
-  // Mock Connection
-  const mockConnection = {
-    useDb: jest.fn().mockReturnValue({}),
-  } as Partial<Connection>;
+  const mockResolver = {
+    getConnectionForTenant: jest.fn().mockReturnValue(mockTenantConnection),
+  };
 
-  // Mock Request with tenantCode
   const mockRequest = {
     tenantCode: 'testTenant',
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    mockResolver.getConnectionForTenant.mockReturnValue(mockTenantConnection);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TenantConnectionProvider,
@@ -27,8 +29,8 @@ describe('TenantConnectionProvider', () => {
           useValue: mockRequest,
         },
         {
-          provide: getConnectionToken(),
-          useValue: mockConnection,
+          provide: TenantConnectionResolverService,
+          useValue: mockResolver,
         },
       ],
     }).compile();
@@ -40,7 +42,7 @@ describe('TenantConnectionProvider', () => {
     expect(provider).toBeDefined();
   });
 
-  it('should call useDb with the correct database name', async () => {
-    expect(mockConnection.useDb).toHaveBeenCalledWith('snds_testTenant');
+  it('should call getConnectionForTenant with the correct tenant code', () => {
+    expect(mockResolver.getConnectionForTenant).toHaveBeenCalledWith('testTenant');
   });
 });

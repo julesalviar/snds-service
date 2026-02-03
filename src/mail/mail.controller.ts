@@ -1,4 +1,5 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { MailService } from './mail.service';
 import {
   ConfirmEmailDto,
@@ -12,16 +13,22 @@ import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('mail')
 export class MailController {
-  constructor(private readonly mailService: MailService) {}
+  constructor(
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('invite')
   @HttpCode(HttpStatus.OK)
   async sendInvite(
     @Body() dto: SendInviteRequestDto,
   ): Promise<SendInviteResponseDto> {
+    const maxEmails =
+      this.configService.get<number>('MAX_EMAIL_INVITE_PER_REQUEST') ?? 10;
     const addresses = dto.emails
       .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
+      .filter(Boolean)
+      .slice(0, maxEmails);
 
     if (addresses.length === 0) {
       return {
@@ -30,29 +37,15 @@ export class MailController {
       };
     }
 
-    if (addresses.length === 1) {
-      const result = await this.mailService.sendInvite(addresses[0]);
-      return {
-        message: 'Invite sent successfully',
-        messageId: result.messageId,
-        sentAt: result.sentAt.toISOString(),
-        results: [
-          {
-            email: addresses[0],
-            messageId: result.messageId,
-            sentAt: result.sentAt.toISOString(),
-          },
-        ],
-      };
-    }
-
-    const results = await this.mailService.sendInvites(addresses);
+    const results = await this.mailService.queueInvites(addresses);
+    const hasPending = results.some((r) => r.status === 'pending');
     return {
-      message: 'Invites processed',
+      message: hasPending ? 'Invites queued for delivery' : 'Invites processed',
       results: results.map((r) => ({
         email: r.email,
-        messageId: r.messageId,
-        sentAt: r.sentAt.toISOString(),
+        status: r.status,
+        sentAt: r.sentAt,
+        ...(r.messageId && { messageId: r.messageId }),
         ...(r.error && { error: r.error }),
       })),
     };
@@ -69,14 +62,14 @@ export class MailController {
         confirmEmailDto.to,
       );
     } else {
-      // If token is provided, ensure it's stored in the database
+      // If a token is provided, ensure it's stored in the database
       await this.mailService.ensureEmailConfirmationToken(
         confirmEmailDto.to,
         token,
       );
     }
 
-    return await this.mailService.sendConfirmEmail(
+    return await this.mailService.queueConfirmEmail(
       confirmEmailDto.to,
       token,
       confirmEmailDto.confirmationUrl,
@@ -101,7 +94,7 @@ export class MailController {
       );
     }
 
-    return await this.mailService.sendResetPasswordEmail(
+    return await this.mailService.queueResetPasswordEmail(
       resetPasswordEmailDto.to,
       token,
       resetPasswordEmailDto.resetUrl,

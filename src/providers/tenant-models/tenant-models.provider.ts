@@ -34,7 +34,11 @@ import {
 import {
   UserInvite,
   UserInviteSchema,
-} from 'src/mail/user-invite.schema';
+} from 'src/user-invite/user-invite.schema';
+import {
+  RegistrationToken,
+  RegistrationTokenSchema,
+} from 'src/user-invite/registration-token.schema';
 
 export const TenantModels = {
   userModel: {
@@ -170,6 +174,19 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<UserInvite>> => {
       return tenantConnection.model(UserInvite.name, UserInviteSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  registrationTokenModel: {
+    provide: PROVIDER.REGISTRATION_TOKEN_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<RegistrationToken>> => {
+      return tenantConnection.model(
+        RegistrationToken.name,
+        RegistrationTokenSchema,
+      );
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

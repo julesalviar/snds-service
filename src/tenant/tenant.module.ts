@@ -4,6 +4,7 @@ import { TenantController } from './tenant.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Tenant, TenantSchema } from './tenant.schema';
 import { TenantConnectionProvider } from '../providers/tenant-connection/tenant-connection';
+import { TenantConnectionResolverService } from '../providers/tenant-connection/tenant-connection-resolver.service';
 
 @Global()
 @Module({
@@ -16,7 +17,7 @@ import { TenantConnectionProvider } from '../providers/tenant-connection/tenant-
     ]),
   ],
   controllers: [TenantController],
-  providers: [TenantService, TenantConnectionProvider],
-  exports: [TenantService, TenantConnectionProvider],
+  providers: [TenantService, TenantConnectionProvider, TenantConnectionResolverService],
+  exports: [TenantService, TenantConnectionProvider, TenantConnectionResolverService],
 })
 export class TenantModule {}

@@ -5,6 +5,7 @@ import {
   Logger,
   Inject,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   SendEmailCommand,
   SendEmailCommandOutput,
@@ -15,7 +16,8 @@ import { UserService } from 'src/user/user.service';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { ClsService } from 'nestjs-cls';
 import { PROVIDER } from 'src/common/constants/providers';
-import { UserInviteDocument } from './user-invite.schema';
+import { UserInviteDocument } from 'src/user-invite/user-invite.schema';
+import { InviteQueueService } from 'src/queue/invite-queue.service';
 import * as crypto from 'node:crypto';
 
 const SCHOOL_ADMIN_REGISTRATION_PATH = '/school-admin-registration';
@@ -36,6 +38,8 @@ export class MailService {
     private readonly userService: UserService,
     private readonly encryptionService: EncryptionService,
     private readonly clsService: ClsService,
+    private readonly inviteQueueService: InviteQueueService,
+    private readonly configService: ConfigService,
     @Inject(PROVIDER.USER_INVITE_MODEL)
     private readonly userInviteModel: Model<UserInviteDocument>,
   ) {}
@@ -150,6 +154,31 @@ export class MailService {
     }
   }
 
+  /**
+   * Queue confirm-email for SQS delivery, or send synchronously when SQS not configured.
+   * Token must already be generated and stored (caller responsibility).
+   */
+  async queueConfirmEmail(
+    to: string,
+    confirmationToken?: string,
+    confirmationUrl?: string,
+  ): Promise<SendEmailCommandOutput | { queued: true }> {
+    const tenantCode = this.clsService.get<string>('tenantCode');
+    if (!tenantCode) {
+      throw new BadRequestException('Tenant context is required');
+    }
+
+    if (this.inviteQueueService.isConfigured()) {
+      await this.inviteQueueService.enqueueConfirmEmail(
+        to.toLowerCase(),
+        tenantCode,
+      );
+      return { queued: true };
+    }
+
+    return this.sendConfirmEmail(to, confirmationToken, confirmationUrl);
+  }
+
   async sendConfirmEmail(
     to: string,
     confirmationToken?: string,
@@ -171,44 +200,85 @@ export class MailService {
     return await this.sendEmail(to, subject, body);
   }
 
-  async sendInvite(to: string): Promise<{ messageId?: string; sentAt: Date }> {
-    const registrationUrl = this.buildTenantUrl(SCHOOL_ADMIN_REGISTRATION_PATH);
+  /**
+   * Queue school admin registration invites. Creates UserInvite with status 'pending'
+   * for each email and adds them to SQS. Consumer processes at 10 emails/sec.
+   * Falls back to synchronous sendInvites when SQS is not configured.
+   */
+  async queueInvites(toAddresses: string[]): Promise<
+    Array<{
+      email: string;
+      status: 'pending' | 'sent';
+      sentAt: string;
+      messageId?: string;
+      error?: string;
+    }>
+  > {
+    const tenantCode = this.clsService.get<string>('tenantCode');
+    if (!tenantCode) {
+      throw new BadRequestException('Tenant context is required for invites');
+    }
 
-    this.logger.log(`Sending invite to: ${to}`, {
-      to,
-      registrationUrl,
-    });
+    if (!this.inviteQueueService.isConfigured()) {
+      this.logger.warn(
+        'SQS not configured, falling back to synchronous invite sending',
+      );
+      const syncResults = await this.sendInvites(toAddresses);
+      return syncResults.map((r) => ({
+        email: r.email,
+        status: 'sent' as const,
+        sentAt: r.sentAt.toISOString(),
+        ...(r.messageId && { messageId: r.messageId }),
+        ...(r.error && { error: r.error }),
+      }));
+    }
 
-    const subject = "You're invited to register as a School Admin";
-    const body = `You have been invited to register as a school admin. Click the link below to complete your registration:\n\n${registrationUrl}\n\nIf you did not expect this invite, you can ignore this email.`;
-
-    const result = await this.sendEmail(to, subject, body);
+    const results: Array<{ email: string; status: 'pending'; sentAt: string }> =
+      [];
     const sentAt = new Date();
+    const expiresAt = new Date();
+    const defaultExpirationDays =
+      this.configService.get<number>('DEFAULT_INVITE_EXPIRATION_DAYS') ?? 7;
+    expiresAt.setDate(expiresAt.getDate() + defaultExpirationDays);
 
-    await this.userInviteModel.create({
-      email: to.toLowerCase(),
-      sentAt,
-      status: 'sent',
-    });
+    for (const to of toAddresses) {
+      const normalized = to?.trim?.()?.toLowerCase?.();
+      if (!normalized) continue;
 
-    return {
-      messageId: result.MessageId,
-      sentAt,
-    };
+      await this.createInviteWithUniqueToken({
+        email: normalized,
+        sentAt,
+        status: 'pending',
+        processingMethod: 'sqs',
+        expiresAt,
+      });
+
+      await this.inviteQueueService.enqueueInvite(normalized, tenantCode);
+      results.push({
+        email: normalized,
+        status: 'pending',
+        sentAt: sentAt.toISOString(),
+      });
+    }
+
+    return results;
   }
 
   /**
    * Send school admin registration invites to one or more email addresses.
    * Each invite is sent and recorded; failures for one address do not stop others.
+   * @deprecated Use queueInvites for rate-limited processing via SQS
    */
   async sendInvites(
     toAddresses: string[],
   ): Promise<
     Array<{ email: string; messageId?: string; sentAt: Date; error?: string }>
   > {
-    const registrationUrl = this.buildTenantUrl(SCHOOL_ADMIN_REGISTRATION_PATH);
-    const subject = "You're invited to register as a School Admin";
-    const body = `You have been invited to register as a school admin. Click the link below to complete your registration:\n\n${registrationUrl}\n\nIf you did not expect this invite, you can ignore this email.`;
+    const sentAt = new Date();
+    const expiresAt = new Date();
+    const defaultExpirationDays =
+      this.configService.get<number>('DEFAULT_INVITE_EXPIRATION_DAYS') ?? 7;
+    expiresAt.setDate(expiresAt.getDate() + defaultExpirationDays);
 
     const results: Array<{
       email: string;
@@ -221,14 +291,25 @@ export class MailService {
       const normalized = to?.trim?.()?.toLowerCase?.();
       if (!normalized) continue;
 
+      const token = this.generateInviteToken();
+      const registrationUrl = this.buildTenantUrl(
+        `${SCHOOL_ADMIN_REGISTRATION_PATH}?token=${token}`,
+      );
+      const subject = "You're invited to register as a School Admin";
+      const body = `You have been invited to register as a school admin. Click the link below to complete your registration:\n\n${registrationUrl}\n\nIf you did not expect this invite, you can ignore this email.`;
+
       try {
         const result = await this.sendEmail(normalized, subject, body);
-        const sentAt = new Date();
-        await this.userInviteModel.create({
-          email: normalized,
-          sentAt,
-          status: 'sent',
-        });
+        await this.createInviteWithUniqueToken(
+          {
+            email: normalized,
+            sentAt,
+            status: 'sent',
+            processingMethod: 'synchronous',
+            expiresAt,
+          },
+          token,
+        );
         results.push({
           email: normalized,
           messageId: result.MessageId,
@@ -246,6 +327,31 @@ export class MailService {
     }
 
     return results;
+  }
+
+  /**
+   * Queue reset-password for SQS delivery, or send synchronously when SQS not configured.
+   * Token must already be generated and stored (caller responsibility).
+   */
+  async queueResetPasswordEmail(
+    to: string,
+    resetToken?: string,
+    resetUrl?: string,
+  ): Promise<SendEmailCommandOutput | { queued: true }> {
+    const tenantCode = this.clsService.get<string>('tenantCode');
+    if (!tenantCode) {
+      throw new BadRequestException('Tenant context is required');
+    }
+
+    if (this.inviteQueueService.isConfigured()) {
+      await this.inviteQueueService.enqueueResetPassword(
+        to.toLowerCase(),
+        tenantCode,
+      );
+      return { queued: true };
+    }
+
+    return this.sendResetPasswordEmail(to, resetToken, resetUrl);
   }
 
   async sendResetPasswordEmail(
@@ -270,10 +376,54 @@ export class MailService {
   }
 
   /**
-   * Generate a secure random token
+   * Generate a secure random token (16 bytes = 32 hex chars, 128-bit entropy)
    */
   private generateToken(): string {
     return crypto.randomBytes(32).toString('hex');
+  }
+
+  /**
+   * Generate a shorter invite token (16 bytes = 32 hex chars).
+   * 128-bit entropy avoids collisions; unique index on token catches any duplicate.
+   */
+  private generateInviteToken(): string {
+    return crypto.randomBytes(16).toString('hex');
+  }
+
+  /**
+   * Create invite with retry on token collision (extremely rare with 16 bytes).
+   * If token provided, uses it; otherwise generates. Returns the token used.
+   */
+  private async createInviteWithUniqueToken(
+    doc: {
+      email: string;
+      sentAt: Date;
+      status: 'pending' | 'sent';
+      processingMethod: 'sqs' | 'synchronous';
+      expiresAt: Date;
+    },
+    token?: string,
+  ): Promise<string> {
+    const maxRetries = 3;
+    for (let i = 0; i < maxRetries; i++) {
+      const t = token ?? this.generateInviteToken();
+      try {
+        await this.userInviteModel.create({ ...doc, token: t });
+        return t;
+      } catch (err: unknown) {
+        const isDuplicate =
+          err &&
+          typeof err === 'object' &&
+          'code' in err &&
+          (err as { code?: number }).code === 11000;
+        if (isDuplicate && i < maxRetries - 1) {
+          token = undefined;
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw new Error('Failed to create invite after token retries');
   }
 
   /**

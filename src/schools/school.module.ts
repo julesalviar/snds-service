@@ -9,7 +9,11 @@ import { SchoolOfferingRefDataValidationPipe } from './school-offering-ref-data.
 
 @Module({
   imports: [EncryptionModule, ReferenceDataModule],
-  providers: [SchoolService, SchoolOfferingRefDataValidationPipe, ...Object.values(TenantModels)],
+  providers: [
+    SchoolService,
+    SchoolOfferingRefDataValidationPipe,
+    ...Object.values(TenantModels),
+  ],
   controllers: [SchoolController],
   exports: [SchoolService, ...Object.values(TenantModels)],
 })

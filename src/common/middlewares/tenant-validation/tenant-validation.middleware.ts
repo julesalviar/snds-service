@@ -33,7 +33,11 @@ export class TenantValidationMiddleware implements NestMiddleware {
       this.logger.debug('Tenant validation middleware called', logData);
 
       // Skip tenant validation for truly public routes that don't need database access
-      const isPublicRoute = req.url.startsWith('/status');
+      // This should be removed once we have a decorator for public routes that skips tenant validation
+      const isPublicRoute =
+        req.url.startsWith('/status') ||
+        req.url.startsWith('/health') ||
+        req.url.startsWith('/docs');
 
       if (isPublicRoute) {
         this.logger.debug('Skipping tenant validation for public route', {

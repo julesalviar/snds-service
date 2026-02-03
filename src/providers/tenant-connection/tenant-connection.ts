@@ -1,18 +1,20 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { PROVIDER } from 'src/common/constants/providers';
-import { Connection } from 'mongoose';
 import { REQUEST } from '@nestjs/core';
-import { getConnectionToken } from '@nestjs/mongoose';
+import { TenantConnectionResolverService } from './tenant-connection-resolver.service';
 
 export const TenantConnectionProvider = {
   provide: PROVIDER.TENANT_CONNECTION,
-  useFactory: async (request, connection: Connection) => {
+  useFactory: (
+    request: { tenantCode?: string },
+    resolver: TenantConnectionResolverService,
+  ) => {
     if (!request.tenantCode) {
       throw new InternalServerErrorException(
         'Tenant code is required. Please ensure TenantValidationMiddleware is applied and tenant header is provided.',
       );
     }
-    return connection.useDb(`snds_${request.tenantCode}`);
+    return resolver.getConnectionForTenant(request.tenantCode);
   },
-  inject: [REQUEST, getConnectionToken()],
+  inject: [REQUEST, TenantConnectionResolverService],
 };

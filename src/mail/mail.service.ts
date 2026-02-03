@@ -20,7 +20,7 @@ import { UserInviteDocument } from 'src/user-invite/user-invite.schema';
 import { InviteQueueService } from 'src/queue/invite-queue.service';
 import * as crypto from 'node:crypto';
 
-const SCHOOL_ADMIN_REGISTRATION_PATH = '/school-admin-registration';
+const SCHOOL_ADMIN_REGISTRATION_PATH = '/close-registration';
 
 @Injectable()
 export class MailService {

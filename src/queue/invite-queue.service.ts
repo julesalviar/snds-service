@@ -12,7 +12,7 @@ import { UserInvite, UserInviteSchema } from 'src/user-invite/user-invite.schema
 import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { TenantConnectionResolverService } from 'src/providers/tenant-connection/tenant-connection-resolver.service';
 
-const SCHOOL_ADMIN_REGISTRATION_PATH = '/school-admin-registration';
+const SCHOOL_ADMIN_REGISTRATION_PATH = '/close-registration';
 const CONFIRM_EMAIL_PATH = '/confirm-email';
 const RESET_PASSWORD_PATH = '/reset-password';
 const EMAILS_PER_SECOND = 10;

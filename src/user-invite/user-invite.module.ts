@@ -15,8 +15,6 @@ import { TenantModels } from 'src/providers/tenant-models/tenant-models.provider
 })
 export class UserInviteModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TenantValidationMiddleware)
-      .forRoutes(UserInviteController);
+    consumer.apply(TenantValidationMiddleware).forRoutes(UserInviteController);
   }
 }

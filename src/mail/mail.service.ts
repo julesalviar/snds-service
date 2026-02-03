@@ -131,13 +131,13 @@ export class MailService {
           const url = new URL(frontendUrl);
           const baseDomain = extractBaseDomain(url.hostname);
           const protocol = url.protocol || 'https:';
-          return `${protocol}//${tenantCode}.${baseDomain}${path}`;
+          return `${protocol}//sdo${tenantCode}.${baseDomain}${path}`;
         } catch {
           const baseDomain = extractBaseDomain(frontendUrl);
-          return `https://${tenantCode}.${baseDomain}${path}`;
+          return `https://sdo${tenantCode}.${baseDomain}${path}`;
         }
       }
-      return `https://${tenantCode}.mysnds.com${path}`;
+      return `https://sdo${tenantCode}.mysnds.com${path}`;
     } else {
       const port = frontendUrl
         ? (() => {

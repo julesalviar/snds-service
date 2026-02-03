@@ -8,7 +8,10 @@ import {
 } from '@aws-sdk/client-sqs';
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { Model } from 'mongoose';
-import { UserInvite, UserInviteSchema } from 'src/user-invite/user-invite.schema';
+import {
+  UserInvite,
+  UserInviteSchema,
+} from 'src/user-invite/user-invite.schema';
 import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { TenantConnectionResolverService } from 'src/providers/tenant-connection/tenant-connection-resolver.service';
 

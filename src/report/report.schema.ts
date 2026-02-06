@@ -6,7 +6,7 @@ export class Report extends Document {
   @Prop({ type: Types.ObjectId, ref: 'ReportTemplate', _id: false })
   reportTemplateId: Types.ObjectId;
 
-  @Prop()
+  @Prop({ type: Types.ObjectId, ref: 'ReportQuery', _id: false })
   reportQueryId: Types.ObjectId;
 
   @Prop()

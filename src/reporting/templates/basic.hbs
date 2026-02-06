@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <style>
+
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  td, th {
+    border: 1px solid #333;
+    padding: 8px;
+    text-align: left;
+  }
+
+  .page-break {
+    page-break-before: always;
+  } </style>
+</head>
+<body>
+<table>
+  <thead>
+  <tr>
+    {{#each template.table.columns}}
+      <th>{{header}}</th>
+    {{/each}}
+  </tr>
+  </thead>
+  <tbody>
+  {{#each data}}
+    <tr>
+      {{#each ../template.table.columns}}
+        <td>{{getField ../this field}}</td>
+      {{/each}}
+    </tr>
+  {{/each}}
+  </tbody>
+  <tfoot>
+  <tr>
+    <!--    <td colspan="{{columns.length}}">End of Report</td>-->
+  </tr>
+  </tfoot>
+</table>
+</body>
+</html>

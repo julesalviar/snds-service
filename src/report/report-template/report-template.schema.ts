@@ -1,6 +1,24 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument } from 'mongoose';
 
+// Centralize the paper sizes in a const array
+const paperSizes = [
+  'a0',
+  'a1',
+  'a2',
+  'a3',
+  'a4',
+  'a5',
+  'a6',
+  'letter',
+  'legal',
+  'tabloid',
+  'ledger',
+] as const;
+
+// Infer the union type from the array
+type PaperSize = (typeof paperSizes)[number];
+
 @Schema({ timestamps: true, collection: 'report_templates' })
 export class ReportTemplate extends Document {
   @Prop()
@@ -9,8 +27,11 @@ export class ReportTemplate extends Document {
   @Prop({ enum: ['portrait', 'landscape'], default: 'portrait' })
   orientation: string;
 
-  @Prop({ enum: ['A4', 'Letter', 'Legal'], default: 'A4' })
-  paperSize: string;
+  @Prop({
+    enum: paperSizes,
+    default: 'a4',
+  })
+  paperSize: PaperSize;
 
   @Prop({ type: Array, default: [] })
   parameters: {
@@ -22,6 +43,9 @@ export class ReportTemplate extends Document {
 
   @Prop()
   reportType: string;
+
+  @Prop({ default: 1 })
+  scale: number;
 
   @Prop({ type: Object })
   table: {

@@ -17,6 +17,22 @@ import {
   ReportQuerySchema,
 } from './report-query/report-query.schema';
 import { TenantModule } from 'src/tenant/tenant.module';
+import fs from 'node:fs';
+import path from 'node:path';
+import HandleBars from 'handlebars';
+import { registerHelpers } from 'src/report/handlebars-helper';
+
+const basicTemplateProvider = {
+  provide: 'BASIC_TEMPLATE',
+  useFactory: async () => {
+    registerHelpers();
+    const source = await fs.promises.readFile(
+      path.join(process.cwd(), 'src', 'reporting', 'templates', 'basic.hbs'),
+      'utf8',
+    );
+    return HandleBars.compile(source);
+  },
+};
 
 @Module({
   imports: [
@@ -46,6 +62,7 @@ import { TenantModule } from 'src/tenant/tenant.module';
     ReportService,
     ReportTemplateService,
     ReportQueryService,
+    basicTemplateProvider,
   ],
   exports: [ReportService],
 })

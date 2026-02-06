@@ -88,7 +88,7 @@ export abstract class BaseReferenceDataService<
           // status === 'all', include all
           return true;
         }
-        // Item doesn't have active property, include it
+        // Item doesn't have an active property, include it
         return true;
       });
     }

@@ -69,7 +69,7 @@ export class ReportService {
     userRole?: string,
     userPermissions?: PermissionsEnum[],
   ): Promise<{ success: boolean; data: ReportResponseDto[] }> {
-    this.logger.log('Retrieving all reports');
+    this.logger.log('Retrieving all reporting');
     const reports = await this.reportModel
       .find()
       .populate({
@@ -103,7 +103,7 @@ export class ReportService {
       throw new NotFoundException('Report not found');
     }
 
-    // Check if user has access to this report
+    // Check if a user has access to this report
     if (!this.hasAccessToReport(report, userRole, userPermissions)) {
       throw new ForbiddenException(
         'Access denied: You do not have permission to access this report',
@@ -120,7 +120,7 @@ export class ReportService {
 
     if (!resolvedTenantCode) {
       throw new BadRequestException(
-        'Tenant code is required to run reports that query tenant data. Please provide tenant header or ensure tenant context is available.',
+        'Tenant code is required to run reporting that query tenant data. Please provide tenant header or ensure tenant context is available.',
       );
     }
 
@@ -180,6 +180,7 @@ export class ReportService {
     );
 
     return {
+      title: report.title,
       template,
       data: results[0], // TODO: Only one query is supported for now
     };
@@ -252,17 +253,17 @@ export class ReportService {
     connection.model(School.name, SchoolSchema);
     connection.model(ImageUpload.name, ImageUploadSchema);
     connection.model(Cluster.name, ClusterSchema);
-    connection.model(
-      InternalReferenceData.name,
-      InternalReferenceDataSchema,
-    );
+    connection.model(InternalReferenceData.name, InternalReferenceDataSchema);
     connection.model(Engagement.name, EngagementSchema);
   }
 
   /**
    * Get a tenant model by name, registering it if necessary
    */
-  private getTenantModel(connection: Connection, modelName: string): Model<any> {
+  private getTenantModel(
+    connection: Connection,
+    modelName: string,
+  ): Model<any> {
     // Map of model names to their schemas
     const modelMap: Record<string, any> = {
       User: { name: User.name, schema: UserSchema },

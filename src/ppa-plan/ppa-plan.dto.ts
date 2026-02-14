@@ -1,0 +1,108 @@
+import {
+  IsArray,
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
+import mongoose from 'mongoose';
+import { PlanClassification } from './plan-classification.enum';
+import { PlanImplementationStatus } from './plan-implementation-status.enum';
+import { PlanParticipant } from './plan-participant.enum';
+
+export class CreatePpaPlanDto {
+  @IsNotEmpty()
+  @IsString()
+  kra: string;
+
+  @IsNotEmpty()
+  @IsString()
+  title: string;
+
+  @IsNotEmpty()
+  @IsString()
+  activity: string;
+
+  @IsNotEmpty()
+  @IsString()
+  objective: string;
+
+  @IsNotEmpty()
+  @IsEnum(PlanClassification, {
+    message: `classification must be one of: ${Object.values(PlanClassification).join(', ')}`,
+  })
+  classification: PlanClassification;
+
+  @IsNotEmpty()
+  @IsString()
+  expectedOutput: string;
+
+  @IsOptional()
+  @IsString()
+  implementationStartDate?: string;
+
+  @IsOptional()
+  @IsString()
+  implementationEndDate?: string;
+
+  @IsOptional()
+  @IsNumber()
+  budgetaryRequirement?: number;
+
+  @IsOptional()
+  @IsString()
+  materialsAndSupplies?: string;
+
+  @IsOptional()
+  @IsString()
+  fundSource?: string;
+
+  @IsNotEmpty()
+  @IsArray()
+  @IsEnum(PlanParticipant, {
+    each: true,
+    message: `participants must be valid values: ${Object.values(PlanParticipant).join(', ')}`,
+  })
+  participants: PlanParticipant[];
+
+  @IsOptional()
+  @IsString()
+  supportNeed?: string;
+
+  @IsOptional()
+  @IsNumber()
+  supportReceivedValue?: number;
+
+  @IsNotEmpty()
+  @IsMongoId({ message: 'stakeholderUserId must be a valid user id' })
+  stakeholderUserId: string | mongoose.Types.ObjectId;
+
+  @IsOptional()
+  @IsNumber()
+  amountUtilized?: number;
+
+  @IsNotEmpty()
+  @IsEnum(PlanImplementationStatus, {
+    message: `implementationStatus must be one of: ${Object.values(PlanImplementationStatus).join(', ')}`,
+  })
+  implementationStatus: PlanImplementationStatus;
+
+  @IsOptional()
+  @IsString()
+  factors?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  reportUrls?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  allowedRoles?: string[];
+}
+
+export class UpdatePpaPlanDto extends PartialType(CreatePpaPlanDto) {}

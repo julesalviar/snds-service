@@ -12,6 +12,7 @@ const PERMISSION_HIERARCHY: Record<PermissionsEnum, PermissionsEnum[]> = {
   ],
   [PermissionsEnum.CLUSTER_MANAGE]: [PermissionsEnum.CLUSTER_VIEW],
   [PermissionsEnum.SHS_IMMERSION_MANAGE]: [PermissionsEnum.SHS_IMMERSION_VIEW],
+  [PermissionsEnum.PPA_PLAN_MANAGE]: [PermissionsEnum.PPA_PLAN_VIEW],
 
   [PermissionsEnum.SCHOOL_PROFILE_VIEW]: [],
   [PermissionsEnum.PROJECT_VIEW]: [],
@@ -20,6 +21,7 @@ const PERMISSION_HIERARCHY: Record<PermissionsEnum, PermissionsEnum[]> = {
   [PermissionsEnum.USER_ASSIGN_ROLE]: [],
   [PermissionsEnum.CLUSTER_VIEW]: [],
   [PermissionsEnum.SHS_IMMERSION_VIEW]: [],
+  [PermissionsEnum.PPA_PLAN_VIEW]: [],
 };
 
 export function expandPermissions(perms: PermissionsEnum[]): PermissionsEnum[] {

@@ -19,6 +19,12 @@ export enum UserRole {
   SCHOOL_STAFF = 'schoolStaff', // Supports school admin, limited actions
   SCHOOL_GUEST = 'schoolGuest', // Read-only access to school-level data
 
+  // Program Holder Roles
+  PROGRAM_HOLDER = 'programHolder',
+
+  // Office Admin Roles
+  OFFICE_ADMIN = 'officeAdmin',
+
   // Global Guests
   GENERAL_GUEST = 'guest', // Minimal access, public data only
 }

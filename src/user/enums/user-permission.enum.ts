@@ -23,4 +23,8 @@ export enum PermissionsEnum {
   USER_VIEW = 'user.view',
   USER_MANAGE = 'user.manage',
   USER_ASSIGN_ROLE = 'user.assignRole',
+
+  // Ppa Plan
+  PPA_PLAN_VIEW = 'ppaPlan.view',
+  PPA_PLAN_MANAGE = 'ppaPlan.manage',
 }

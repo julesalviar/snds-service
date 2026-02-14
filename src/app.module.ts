@@ -26,6 +26,7 @@ import { EngagementModule } from './engagement/engagement.module';
 import { MailModule } from './mail/mail.module';
 import { UserInviteModule } from './user-invite/user-invite.module';
 import { ReportModule } from 'src/report/report.module';
+import { PpaPlanModule } from './ppa-plan/ppa-plan.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { ReportModule } from 'src/report/report.module';
     MailModule,
     UserInviteModule,
     ReportModule,
+    PpaPlanModule,
   ],
   controllers: [AppController, ShsImmersionController],
   providers: [AppService, ShsImmersionService],

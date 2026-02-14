@@ -39,6 +39,7 @@ import {
   RegistrationToken,
   RegistrationTokenSchema,
 } from 'src/user-invite/registration-token.schema';
+import { PpaPlan, PpaPlanSchema } from 'src/ppa-plan/ppa-plan.schema';
 
 export const TenantModels = {
   userModel: {
@@ -187,6 +188,16 @@ export const TenantModels = {
         RegistrationToken.name,
         RegistrationTokenSchema,
       );
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  ppaPlanModel: {
+    provide: PROVIDER.PPA_PLAN_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<PpaPlan>> => {
+      return tenantConnection.model(PpaPlan.name, PpaPlanSchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

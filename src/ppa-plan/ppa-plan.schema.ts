@@ -59,6 +59,12 @@ export class PpaPlan {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   stakeholderUserId: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  assignedUserId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Office' })
+  officeId: Types.ObjectId;
+
   @Prop()
   amountUtilized: number;
 

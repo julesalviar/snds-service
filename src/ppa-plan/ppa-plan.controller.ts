@@ -15,6 +15,7 @@ import { UpdatePpaPlanDto } from './ppa-plan.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { UserInfo } from 'src/user/user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('ppa-plan')
@@ -31,6 +32,8 @@ export class PpaPlanController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('stakeholderUserId') stakeholderUserId?: string,
+    @Query('assignedUserId') assignedUserId?: string,
+    @Query('officeId') officeId?: string,
     @Query('implementationStatus') implementationStatus?: string,
     @Query('classification') classification?: string,
     @Query('startDateFrom') startDateFrom?: string,
@@ -40,6 +43,8 @@ export class PpaPlanController {
   ) {
     return this.ppaPlanService.findAll(Number(page), Number(limit), {
       stakeholderUserId,
+      assignedUserId,
+      officeId,
       implementationStatus,
       classification,
       startDateFrom,

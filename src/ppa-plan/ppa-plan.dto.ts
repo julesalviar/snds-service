@@ -81,6 +81,14 @@ export class CreatePpaPlanDto {
   stakeholderUserId: string | mongoose.Types.ObjectId;
 
   @IsOptional()
+  @IsMongoId({ message: 'assignedUserId must be a valid user id' })
+  assignedUserId?: string | mongoose.Types.ObjectId;
+
+  @IsOptional()
+  @IsMongoId({ message: 'officeId must be a valid office id' })
+  officeId?: string | mongoose.Types.ObjectId;
+
+  @IsOptional()
   @IsNumber()
   amountUtilized?: number;
 

@@ -27,6 +27,7 @@ import { MailModule } from './mail/mail.module';
 import { UserInviteModule } from './user-invite/user-invite.module';
 import { ReportModule } from 'src/report/report.module';
 import { PpaPlanModule } from './ppa-plan/ppa-plan.module';
+import { OfficeModule } from './office/office.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { PpaPlanModule } from './ppa-plan/ppa-plan.module';
     UserInviteModule,
     ReportModule,
     PpaPlanModule,
+    OfficeModule,
   ],
   controllers: [AppController, ShsImmersionController],
   providers: [AppService, ShsImmersionService],

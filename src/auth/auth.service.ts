@@ -60,7 +60,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const { role, activeRole, roles, schoolId } = user;
+    const { role, activeRole, roles, schoolId, officeIds } = user;
     const perms = RolePermissions[activeRole ?? role] ?? [];
 
     const payload = {
@@ -72,10 +72,20 @@ export class AuthService {
       roles,
       perms,
       sid: schoolId ?? '',
+      oids: officeIds ?? '',
     };
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { access_token: accessToken };
+  }
+
+  async assignRoles(
+    userId: string,
+    roles: UserRole[],
+    schoolId?: string,
+    officeIds?: string[],
+  ): Promise<User> {
+    return this.userService.assignRoles(userId, roles, schoolId, officeIds);
   }
 
   async switchRole(
@@ -99,7 +109,7 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    const { role, activeRole, roles, schoolId } = user;
+    const { role, activeRole, roles, schoolId, officeIds } = user;
     const perms = RolePermissions[activeRole ?? role] ?? [];
 
     const payload = {
@@ -111,6 +121,7 @@ export class AuthService {
       roles,
       perms,
       sid: schoolId ?? '',
+      oids: officeIds ?? '',
     };
     const accessToken = await this.jwtService.signAsync(payload);
 

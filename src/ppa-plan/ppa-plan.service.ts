@@ -9,6 +9,7 @@ import { PpaPlanDocument } from './ppa-plan.schema';
 import { CreatePpaPlanDto } from './ppa-plan.dto';
 import { UpdatePpaPlanDto } from './ppa-plan.dto';
 import { User } from 'src/user/schemas/user.schema';
+import { Office } from 'src/office/office.schema';
 
 @Injectable()
 export class PpaPlanService {
@@ -18,15 +19,31 @@ export class PpaPlanService {
     @Inject(PROVIDER.PPA_PLAN_MODEL)
     private readonly ppaPlanModel: Model<PpaPlanDocument>,
     @Inject(PROVIDER.USER_MODEL) private readonly userModel: Model<User>,
+    @Inject(PROVIDER.OFFICE_MODEL) private readonly officeModel: Model<Office>,
   ) {}
 
   async create(dto: CreatePpaPlanDto) {
     if (!Types.ObjectId.isValid(dto.stakeholderUserId as string)) {
       throw new BadRequestException('Invalid stakeholderUserId');
     }
+    if (
+      dto.assignedUserId &&
+      !Types.ObjectId.isValid(dto.assignedUserId as string)
+    ) {
+      throw new BadRequestException('Invalid assignedUserId');
+    }
+    if (dto.officeId && !Types.ObjectId.isValid(dto.officeId as string)) {
+      throw new BadRequestException('Invalid officeId');
+    }
     const created = await this.ppaPlanModel.create({
       ...dto,
       stakeholderUserId: new Types.ObjectId(dto.stakeholderUserId as string),
+      assignedUserId: dto.assignedUserId
+        ? new Types.ObjectId(dto.assignedUserId as string)
+        : undefined,
+      officeId: dto.officeId
+        ? new Types.ObjectId(dto.officeId as string)
+        : undefined,
       reportUrls: dto.reportUrls ?? [],
       allowedRoles: dto.allowedRoles ?? [],
     });
@@ -38,6 +55,8 @@ export class PpaPlanService {
     limit = 10,
     filters?: {
       stakeholderUserId?: string;
+      assignedUserId?: string;
+      officeId?: string;
       implementationStatus?: string;
       classification?: string;
       startDateFrom?: string;
@@ -54,6 +73,18 @@ export class PpaPlanService {
         throw new BadRequestException('Invalid stakeholderUserId');
       }
       query.stakeholderUserId = new Types.ObjectId(filters.stakeholderUserId);
+    }
+    if (filters?.assignedUserId) {
+      if (!Types.ObjectId.isValid(filters.assignedUserId)) {
+        throw new BadRequestException('Invalid assignedUserId');
+      }
+      query.assignedUserId = new Types.ObjectId(filters.assignedUserId);
+    }
+    if (filters?.officeId) {
+      if (!Types.ObjectId.isValid(filters.officeId)) {
+        throw new BadRequestException('Invalid officeId');
+      }
+      query.officeId = new Types.ObjectId(filters.officeId);
     }
     if (filters?.implementationStatus) {
       query.implementationStatus = filters.implementationStatus;
@@ -88,6 +119,8 @@ export class PpaPlanService {
       this.ppaPlanModel
         .find(query)
         .populate('stakeholderUserId', 'name firstName lastName email userName')
+        .populate('assignedUserId', 'name firstName lastName email userName')
+        .populate('officeId', 'name division')
         .sort({ implementationStartDate: 1, createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -116,6 +149,8 @@ export class PpaPlanService {
     const doc = await this.ppaPlanModel
       .findById(new Types.ObjectId(id))
       .populate('stakeholderUserId', 'name firstName lastName email userName')
+      .populate('assignedUserId', 'name firstName lastName email userName')
+      .populate('officeId', 'name division')
       .lean()
       .exec();
     if (!doc) {
@@ -137,6 +172,18 @@ export class PpaPlanService {
         dto.stakeholderUserId as string,
       );
     }
+    if (dto.assignedUserId !== undefined) {
+      if (!Types.ObjectId.isValid(dto.assignedUserId as string)) {
+        throw new BadRequestException('Invalid assignedUserId');
+      }
+      update.assignedUserId = new Types.ObjectId(dto.assignedUserId as string);
+    }
+    if (dto.officeId !== undefined) {
+      if (!Types.ObjectId.isValid(dto.officeId as string)) {
+        throw new BadRequestException('Invalid officeId');
+      }
+      update.officeId = new Types.ObjectId(dto.officeId as string);
+    }
     const updated = await this.ppaPlanModel
       .findByIdAndUpdate(
         new Types.ObjectId(id),
@@ -144,6 +191,8 @@ export class PpaPlanService {
         { new: true, runValidators: true },
       )
       .populate('stakeholderUserId', 'name firstName lastName email userName')
+      .populate('assignedUserId', 'name firstName lastName email userName')
+      .populate('officeId', 'name division')
       .lean()
       .exec();
     if (!updated) {

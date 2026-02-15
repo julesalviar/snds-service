@@ -19,6 +19,10 @@ export enum PermissionsEnum {
   CLUSTER_VIEW = 'cluster.view',
   CLUSTER_MANAGE = 'cluster.manage',
 
+  // Office
+  OFFICE_PROFILE_VIEW = 'officeProfile.view',
+  OFFICE_PROFILE_MANAGE = 'officeProfile.manage',
+
   // Users
   USER_VIEW = 'user.view',
   USER_MANAGE = 'user.manage',

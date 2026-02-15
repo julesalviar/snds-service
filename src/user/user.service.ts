@@ -290,6 +290,46 @@ export class UserService {
     }
   }
 
+  async assignRoles(
+    userId: string,
+    roles: UserRole[],
+    schoolId?: string,
+    officeIds?: string[],
+  ): Promise<User> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    const updateData: Record<string, unknown> = {
+      roles,
+      activeRole: roles[0],
+      role: roles[0],
+    };
+    const unsetData: Record<string, string> = {};
+
+    if (roles.includes(UserRole.SCHOOL_ADMIN) && schoolId !== undefined) {
+      updateData.schoolId = schoolId;
+    } else if (!roles.includes(UserRole.SCHOOL_ADMIN)) {
+      unsetData.schoolId = '';
+    }
+
+    if (roles.includes(UserRole.PROGRAM_HOLDER) && officeIds !== undefined) {
+      updateData.officeIds = officeIds;
+    } else if (!roles.includes(UserRole.PROGRAM_HOLDER)) {
+      unsetData.officeIds = '';
+    }
+
+    const update: Record<string, unknown> = { $set: updateData };
+    if (Object.keys(unsetData).length > 0) {
+      update.$unset = unsetData;
+    }
+
+    return await this.userModel
+      .findByIdAndUpdate(userId, update, { new: true })
+      .exec();
+  }
+
   async updateActiveRole(
     userId: string,
     newActiveRole: UserRole,

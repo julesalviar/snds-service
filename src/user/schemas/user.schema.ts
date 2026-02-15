@@ -37,6 +37,9 @@ export class User extends Document {
   @Prop()
   schoolId?: string;
 
+  @Prop()
+  officeIds?: string[];
+
   // Transition to multiple roles per user
   @Prop({ required: true, enum: UserRole })
   activeRole: UserRole;

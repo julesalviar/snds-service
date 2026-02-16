@@ -120,7 +120,7 @@ export class PpaPlanService {
         .find(query)
         .populate('stakeholderUserId', 'name firstName lastName email userName')
         .populate('assignedUserId', 'name firstName lastName email userName')
-        .populate('officeId', 'name division')
+        .populate('officeId', 'name code division')
         .sort({ implementationStartDate: 1, createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -150,7 +150,7 @@ export class PpaPlanService {
       .findById(new Types.ObjectId(id))
       .populate('stakeholderUserId', 'name firstName lastName email userName')
       .populate('assignedUserId', 'name firstName lastName email userName')
-      .populate('officeId', 'name division')
+      .populate('officeId', 'name code division')
       .lean()
       .exec();
     if (!doc) {
@@ -192,7 +192,7 @@ export class PpaPlanService {
       )
       .populate('stakeholderUserId', 'name firstName lastName email userName')
       .populate('assignedUserId', 'name firstName lastName email userName')
-      .populate('officeId', 'name division')
+      .populate('officeId', 'name code division')
       .lean()
       .exec();
     if (!updated) {

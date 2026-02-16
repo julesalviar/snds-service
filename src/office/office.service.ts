@@ -142,6 +142,7 @@ export class OfficeService {
       if (search) {
         filter.$or = [
           { name: { $regex: search, $options: 'i' } },
+          { code: { $regex: search, $options: 'i' } },
           { division: { $regex: search, $options: 'i' } },
         ];
       }

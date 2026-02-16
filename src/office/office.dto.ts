@@ -8,6 +8,10 @@ export class OfficeDto {
 
   @IsNotEmpty()
   @IsString()
+  code: string;
+
+  @IsNotEmpty()
+  @IsString()
   division: string;
 }
 

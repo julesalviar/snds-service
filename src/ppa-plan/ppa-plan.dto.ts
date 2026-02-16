@@ -76,9 +76,9 @@ export class CreatePpaPlanDto {
   @IsNumber()
   supportReceivedValue?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsMongoId({ message: 'stakeholderUserId must be a valid user id' })
-  stakeholderUserId: string | mongoose.Types.ObjectId;
+  stakeholderUserId?: string | mongoose.Types.ObjectId;
 
   @IsOptional()
   @IsMongoId({ message: 'assignedUserId must be a valid user id' })
@@ -101,6 +101,10 @@ export class CreatePpaPlanDto {
   @IsOptional()
   @IsString()
   factors?: string;
+
+  @IsOptional()
+  @IsString()
+  timeliness?: string;
 
   @IsOptional()
   @IsArray()

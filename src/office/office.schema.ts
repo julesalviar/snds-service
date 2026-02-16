@@ -7,6 +7,9 @@ export class Office extends Document {
   name: string;
 
   @Prop({ required: true })
+  code: string;
+
+  @Prop({ required: true })
   division: string;
 }
 

@@ -60,7 +60,6 @@ export class OfficeController {
     );
   }
 
-  @PermissionsAllowed(PermissionsEnum.OFFICE_PROFILE_MANAGE)
   @Get(':id')
   async getOfficeById(@Param('id') id: string) {
     return this.officeService.getOfficeById(id);

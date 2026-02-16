@@ -20,6 +20,11 @@ const CONFIRM_EMAIL_PATH = '/confirm-email';
 const RESET_PASSWORD_PATH = '/reset-password';
 const EMAILS_PER_SECOND = 10;
 const POLL_INTERVAL_MS = 1000;
+/** Max SQS long poll - reduces ReceiveMessage calls when queue is empty */
+const SQS_WAIT_TIME_SECONDS = 20;
+/** Backoff when queue empty: min 2s, max 60s */
+const EMPTY_QUEUE_BACKOFF_MS = 2000;
+const MAX_EMPTY_QUEUE_BACKOFF_MS = 60000;
 
 export type MailQueueMessageType =
   | 'invite'
@@ -35,9 +40,9 @@ export interface InviteQueueMessage {
 @Injectable()
 export class InviteQueueService implements OnModuleInit {
   private readonly logger = new Logger(InviteQueueService.name);
-  private sqsClient: SQSClient;
-  private sesClient: SESClient;
-  private queueUrl: string;
+  private readonly sqsClient: SQSClient;
+  private readonly sesClient: SESClient;
+  private readonly queueUrl: string;
   private isPolling = false;
 
   constructor(
@@ -121,21 +126,33 @@ export class InviteQueueService implements OnModuleInit {
   }
 
   private async poll() {
+    let emptyBackoffMs = EMPTY_QUEUE_BACKOFF_MS;
     while (this.isPolling) {
       try {
-        await this.processBatch();
+        const messageCount = await this.processBatch();
+        if (messageCount > 0) {
+          emptyBackoffMs = EMPTY_QUEUE_BACKOFF_MS;
+          await this.sleep(POLL_INTERVAL_MS);
+        } else {
+          await this.sleep(emptyBackoffMs);
+          emptyBackoffMs = Math.min(
+            emptyBackoffMs * 2,
+            MAX_EMPTY_QUEUE_BACKOFF_MS,
+          );
+        }
       } catch (err) {
         this.logger.error('Invite queue poll error', err);
+        emptyBackoffMs = EMPTY_QUEUE_BACKOFF_MS;
+        await this.sleep(POLL_INTERVAL_MS);
       }
-      await this.sleep(POLL_INTERVAL_MS);
     }
   }
 
-  private async processBatch() {
+  private async processBatch(): Promise<number> {
     const command = new ReceiveMessageCommand({
       QueueUrl: this.queueUrl,
       MaxNumberOfMessages: EMAILS_PER_SECOND,
-      WaitTimeSeconds: 1,
+      WaitTimeSeconds: SQS_WAIT_TIME_SECONDS,
     });
 
     const response = await this.sqsClient.send(command);
@@ -168,6 +185,7 @@ export class InviteQueueService implements OnModuleInit {
         await this.sleep(1000 / EMAILS_PER_SECOND);
       }
     }
+    return messages.length;
   }
 
   private async deleteMessage(receiptHandle: string) {

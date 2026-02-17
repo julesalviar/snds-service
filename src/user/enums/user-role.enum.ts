@@ -24,7 +24,8 @@ export enum UserRole {
 
   // Office Admin Roles
   OFFICE_ADMIN = 'officeAdmin',
+  OFFICE_ADMIN_ASSISTANT = 'officeAdminAssistant',
 
-  // Global Guests
+  // Global Guests,
   GENERAL_GUEST = 'guest', // Minimal access, public data only
 }

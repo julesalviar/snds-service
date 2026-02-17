@@ -80,6 +80,11 @@ export const RolePermissions = {
     PermissionsEnum.USER_ASSIGN_ROLE,
     PermissionsEnum.USER_VIEW,
   ],
+  [UserRole.OFFICE_ADMIN_ASSISTANT]: [
+    PermissionsEnum.OFFICE_PROFILE_VIEW,
+    PermissionsEnum.PPA_PLAN_VIEW,
+    PermissionsEnum.USER_VIEW,
+  ],
 
   // Global guest
   [UserRole.GENERAL_GUEST]: [PermissionsEnum.SCHOOL_NEED_VIEW],

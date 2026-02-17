@@ -7,11 +7,12 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/mapped-types';
 import mongoose from 'mongoose';
 import { PlanClassification } from './plan-classification.enum';
 import { PlanImplementationStatus } from './plan-implementation-status.enum';
 import { PlanParticipant } from './plan-participant.enum';
+import { Transform } from 'class-transformer';
 
 export class CreatePpaPlanDto {
   @IsNotEmpty()
@@ -60,7 +61,7 @@ export class CreatePpaPlanDto {
   @IsString()
   fundSource?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsArray()
   @IsEnum(PlanParticipant, {
     each: true,
@@ -76,6 +77,7 @@ export class CreatePpaPlanDto {
   @IsNumber()
   supportReceivedValue?: number;
 
+  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsOptional()
   @IsMongoId({ message: 'stakeholderUserId must be a valid user id' })
   stakeholderUserId?: string | mongoose.Types.ObjectId;

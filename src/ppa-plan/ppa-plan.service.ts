@@ -1,13 +1,14 @@
 import { Model, Types } from 'mongoose';
-import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   BadRequestException,
   NotFoundException,
+  Inject,
+  Injectable,
+  Logger,
 } from '@nestjs/common';
 import { PROVIDER } from 'src/common/constants/providers';
 import { PpaPlanDocument } from './ppa-plan.schema';
-import { CreatePpaPlanDto } from './ppa-plan.dto';
-import { UpdatePpaPlanDto } from './ppa-plan.dto';
+import { CreatePpaPlanDto, UpdatePpaPlanDto } from './ppa-plan.dto';
 import { User } from 'src/user/schemas/user.schema';
 import { Office } from 'src/office/office.schema';
 
@@ -23,9 +24,12 @@ export class PpaPlanService {
   ) {}
 
   async create(dto: CreatePpaPlanDto) {
-    if (!Types.ObjectId.isValid(dto.stakeholderUserId as string)) {
-      throw new BadRequestException('Invalid stakeholderUserId');
+    if (dto.stakeholderUserId) {
+      if (!Types.ObjectId.isValid(dto.stakeholderUserId)) {
+        throw new BadRequestException('Invalid stakeholderUserId');
+      }
     }
+
     if (
       dto.assignedUserId &&
       !Types.ObjectId.isValid(dto.assignedUserId as string)
@@ -222,8 +226,21 @@ export class PpaPlanService {
     doc: PpaPlanDocument | Record<string, unknown>,
   ): Record<string, unknown> {
     const obj =
-      doc && typeof (doc as { toObject?: (opts?: { versionKey?: boolean }) => Record<string, unknown> }).toObject === 'function'
-        ? (doc as { toObject: (opts?: { versionKey?: boolean }) => Record<string, unknown> }).toObject({ versionKey: false })
+      doc &&
+      typeof (
+        doc as {
+          toObject?: (opts?: {
+            versionKey?: boolean;
+          }) => Record<string, unknown>;
+        }
+      ).toObject === 'function'
+        ? (
+            doc as {
+              toObject: (opts?: {
+                versionKey?: boolean;
+              }) => Record<string, unknown>;
+            }
+          ).toObject({ versionKey: false })
         : { ...(doc as Record<string, unknown>) };
     const id = obj._id;
     return {

@@ -64,8 +64,17 @@ export class InviteQueueService implements OnModuleInit {
       this.configService.get<string>('AWS_SQS_INVITE_QUEUE_URL') ?? '';
   }
 
+  /**
+   * SQS is enabled when SQS_ENABLED is "true", "1", or "yes" (case-insensitive).
+   * Default: disabled (when unset or any other value).
+   */
+  private isSqsEnabled(): boolean {
+    const val = this.configService.get<string>('SQS_ENABLED')?.toLowerCase();
+    return val === 'true' || val === '1' || val === 'yes';
+  }
+
   isConfigured(): boolean {
-    return !!this.queueUrl?.trim();
+    return !!this.queueUrl?.trim() && this.isSqsEnabled();
   }
 
   private async enqueue(
@@ -109,6 +118,12 @@ export class InviteQueueService implements OnModuleInit {
   }
 
   onModuleInit() {
+    if (!this.isSqsEnabled()) {
+      this.logger.log(
+        'SQS_ENABLED is false or unset, invite queue consumer disabled',
+      );
+      return;
+    }
     if (this.queueUrl) {
       this.startConsumer();
     } else {

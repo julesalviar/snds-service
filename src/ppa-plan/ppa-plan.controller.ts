@@ -10,12 +10,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PpaPlanService } from './ppa-plan.service';
-import { CreatePpaPlanDto } from './ppa-plan.dto';
-import { UpdatePpaPlanDto } from './ppa-plan.dto';
+import { CreatePpaPlanDto, UpdatePpaPlanDto } from './ppa-plan.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
-import { UserInfo } from 'src/user/user.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('ppa-plan')
@@ -27,6 +26,7 @@ export class PpaPlanController {
     return this.ppaPlanService.create(dto);
   }
 
+  @Public()
   @Get()
   findAll(
     @Query('page') page = 1,

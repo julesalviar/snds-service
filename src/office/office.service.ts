@@ -1,6 +1,7 @@
 import { OfficeDto, UpdateOfficeDto } from './office.dto';
 import { Model, Types } from 'mongoose';
 import { Office, OfficeDocument } from './office.schema';
+import { PpaPlan } from 'src/ppa-plan/ppa-plan.schema';
 import { PROVIDER } from '../common/constants/providers';
 import {
   NotFoundException,
@@ -17,6 +18,8 @@ export class OfficeService {
   constructor(
     @Inject(PROVIDER.OFFICE_MODEL)
     private readonly officeModel: Model<Office>,
+    @Inject(PROVIDER.PPA_PLAN_MODEL)
+    private readonly ppaPlanModel: Model<PpaPlan>,
   ) {}
 
   async create(officeCreateDto: OfficeDto): Promise<OfficeDocument> {
@@ -126,10 +129,11 @@ export class OfficeService {
     limit: number,
     search?: string,
     division?: string,
+    includePpaPlanCount = false,
   ) {
     try {
       this.logger.log(
-        `Attempting to retrieve all paginated offices: page = ${page}, limit = ${limit}, search = ${search || 'none'}, division = ${division || 'none'}`,
+        `Attempting to retrieve all paginated offices: page = ${page}, limit = ${limit}, search = ${search || 'none'}, division = ${division || 'none'}, includePpaPlanCount = ${includePpaPlanCount}`,
       );
 
       const skip = (page - 1) * limit;
@@ -157,9 +161,29 @@ export class OfficeService {
         this.officeModel.countDocuments(filter),
       ]);
 
+      let data: any[] = offices;
+
+      if (includePpaPlanCount && offices.length > 0) {
+        const officeIds = offices.map((o) => o._id);
+
+        const ppaPlanCounts = await this.ppaPlanModel.aggregate([
+          { $match: { officeId: { $in: officeIds } } },
+          { $group: { _id: '$officeId', ppaPlanCount: { $sum: 1 } } },
+        ]);
+
+        const countMap = new Map(
+          ppaPlanCounts.map((item) => [item._id.toString(), item.ppaPlanCount]),
+        );
+
+        data = offices.map((office) => ({
+          ...office.toObject(),
+          ppaPlanCount: countMap.get(office._id.toString()) ?? 0,
+        }));
+      }
+
       return {
         success: true,
-        data: offices,
+        data,
         meta: {
           count: offices.length,
           totalItems: total,

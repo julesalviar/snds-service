@@ -51,12 +51,14 @@ export class OfficeController {
     @Query('limit') limit = 10,
     @Query('search') search?: string,
     @Query('division') division?: string,
+    @Query('includePpaPlanCount') includePpaPlanCount?: string,
   ) {
     return this.officeService.getAll(
       Number(page),
       Number(limit),
       search,
       division,
+      includePpaPlanCount === 'true',
     );
   }
 

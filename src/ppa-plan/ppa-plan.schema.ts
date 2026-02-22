@@ -6,6 +6,9 @@ import { PlanParticipant } from 'src/ppa-plan/plan-participant.enum';
 
 @Schema({ timestamps: true, collection: 'ppa_plans' })
 export class PpaPlan {
+  @Prop({ required: true, unique: true })
+  ppn: number;
+
   @Prop({ required: true })
   kra: string;
 

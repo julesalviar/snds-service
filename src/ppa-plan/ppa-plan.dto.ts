@@ -7,7 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 import mongoose from 'mongoose';
 import { PlanClassification } from './plan-classification.enum';
 import { PlanImplementationStatus } from './plan-implementation-status.enum';
@@ -15,6 +15,10 @@ import { PlanParticipant } from './plan-participant.enum';
 import { Transform } from 'class-transformer';
 
 export class CreatePpaPlanDto {
+  @IsOptional()
+  @IsNumber()
+  ppn?: number;
+
   @IsNotEmpty()
   @IsString()
   kra: string;
@@ -119,4 +123,6 @@ export class CreatePpaPlanDto {
   allowedRoles?: string[];
 }
 
-export class UpdatePpaPlanDto extends PartialType(CreatePpaPlanDto) {}
+export class UpdatePpaPlanDto extends PartialType(
+  OmitType(CreatePpaPlanDto, ['ppn'] as const),
+) {}

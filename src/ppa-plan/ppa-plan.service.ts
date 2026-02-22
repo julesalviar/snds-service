@@ -11,6 +11,7 @@ import { PpaPlanDocument } from './ppa-plan.schema';
 import { CreatePpaPlanDto, UpdatePpaPlanDto } from './ppa-plan.dto';
 import { User } from 'src/user/schemas/user.schema';
 import { Office } from 'src/office/office.schema';
+import { CounterService } from 'src/common/counter/counter.services';
 
 @Injectable()
 export class PpaPlanService {
@@ -21,6 +22,7 @@ export class PpaPlanService {
     private readonly ppaPlanModel: Model<PpaPlanDocument>,
     @Inject(PROVIDER.USER_MODEL) private readonly userModel: Model<User>,
     @Inject(PROVIDER.OFFICE_MODEL) private readonly officeModel: Model<Office>,
+    private readonly counterService: CounterService,
   ) {}
 
   async create(dto: CreatePpaPlanDto) {
@@ -39,8 +41,10 @@ export class PpaPlanService {
     if (dto.officeId && !Types.ObjectId.isValid(dto.officeId as string)) {
       throw new BadRequestException('Invalid officeId');
     }
+    const ppn = await this.counterService.getNextSequenceValue('ppa_plan');
     const created = await this.ppaPlanModel.create({
       ...dto,
+      ppn,
       stakeholderUserId: new Types.ObjectId(dto.stakeholderUserId as string),
       assignedUserId: dto.assignedUserId
         ? new Types.ObjectId(dto.assignedUserId as string)

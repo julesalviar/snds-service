@@ -186,7 +186,7 @@ export class EngagementService {
           .populate({
             path: 'schoolNeedId',
             select:
-              'code description schoolId schoolYear specificContribution images',
+              'code description schoolId schoolYear contributionType specificContribution images',
           })
           .populate({
             path: 'schoolId',
@@ -195,7 +195,7 @@ export class EngagementService {
           .populate({
             path: 'stakeholderUserId',
             select:
-              'name firstName lastName email userName role activeRole sector',
+              'name firstName lastName email userName role activeRole sector contactNumber',
           })
           .sort({ startDate: -1 })
           .skip(skip)

@@ -3,7 +3,7 @@ import { Model, Types } from 'mongoose';
 import { School, SchoolDocument } from './school.schema';
 import { SchoolNeed } from '../school-need/school-need.schema';
 import { Aip } from '../aip/aip.schema';
-import { Engagement, EngagementDocument } from '../engagement/engagement.schema';
+import { EngagementDocument } from '../engagement/engagement.schema';
 import { PROVIDER } from '../common/constants/providers';
 import { getCurrentSchoolYear } from '../common/utils/school-year.util';
 import {

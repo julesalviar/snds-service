@@ -19,6 +19,7 @@ import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { UserInfo } from 'src/user/user.decorator';
+import { UserRole } from 'src/user/enums/user-role.enum';
 
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('school-needs')
@@ -46,6 +47,7 @@ export class SchoolNeedController {
   @Public()
   @Get()
   async getAll(
+    @UserInfo('activeRole') activeRole: string,
     @UserInfo('schoolId') schoolId: string,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
@@ -54,7 +56,9 @@ export class SchoolNeedController {
     @Query('schoolId') querySchoolId?: string,
     @Query('withEngagements') withEngagements?: string,
   ) {
-    const effectiveSchoolId = querySchoolId || schoolId || undefined;
+    const effectiveSchoolId =
+      querySchoolId ||
+      (activeRole === UserRole.SCHOOL_ADMIN ? schoolId : undefined);
 
     const isValidFormat = /^\d{4}-\d{4}$/.test(schoolYear || '');
     const finalSchoolYear = isValidFormat ? schoolYear : undefined;

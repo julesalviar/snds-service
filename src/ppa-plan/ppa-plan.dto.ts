@@ -78,6 +78,10 @@ export class CreatePpaPlanDto {
   supportNeed?: string;
 
   @IsOptional()
+  @IsString()
+  venue?: string;
+
+  @IsOptional()
   @IsNumber()
   supportReceivedValue?: number;
 

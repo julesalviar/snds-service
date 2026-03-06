@@ -57,6 +57,9 @@ export class PpaPlan {
   supportNeed: string;
 
   @Prop()
+  venue: string;
+
+  @Prop()
   supportReceivedValue: number;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })

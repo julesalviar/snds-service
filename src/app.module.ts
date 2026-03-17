@@ -28,6 +28,7 @@ import { UserInviteModule } from './user-invite/user-invite.module';
 import { ReportModule } from 'src/report/report.module';
 import { PpaPlanModule } from './ppa-plan/ppa-plan.module';
 import { OfficeModule } from './office/office.module';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { OfficeModule } from './office/office.module';
     ReportModule,
     PpaPlanModule,
     OfficeModule,
+    ActivityModule,
   ],
   controllers: [AppController, ShsImmersionController],
   providers: [AppService, ShsImmersionService],

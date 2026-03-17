@@ -9,8 +9,10 @@ export const RolePermissions = {
     PermissionsEnum.SCHOOL_PROFILE_VIEW,
     PermissionsEnum.USER_MANAGE,
     PermissionsEnum.USER_ASSIGN_ROLE,
+    PermissionsEnum.ACTIVITY_MANAGE,
   ],
   [UserRole.SYSTEM_ADMIN]: [
+    PermissionsEnum.ACTIVITY_VIEW,
     PermissionsEnum.CLUSTER_VIEW,
     PermissionsEnum.OFFICE_PROFILE_VIEW,
     PermissionsEnum.PPA_PLAN_VIEW,
@@ -21,8 +23,10 @@ export const RolePermissions = {
     PermissionsEnum.USER_ASSIGN_ROLE,
     PermissionsEnum.USER_MANAGE,
     PermissionsEnum.USER_VIEW,
+    PermissionsEnum.ACTIVITY_VIEW,
   ],
   [UserRole.STAKEHOLDER]: [
+    PermissionsEnum.ACTIVITY_VIEW,
     PermissionsEnum.CLUSTER_VIEW,
     PermissionsEnum.OFFICE_PROFILE_VIEW,
     PermissionsEnum.PPA_PLAN_VIEW,
@@ -30,6 +34,7 @@ export const RolePermissions = {
     PermissionsEnum.SCHOOL_NEED_VIEW,
     PermissionsEnum.SCHOOL_PROFILE_VIEW,
     PermissionsEnum.SHS_IMMERSION_VIEW,
+    PermissionsEnum.ACTIVITY_VIEW,
   ],
 
   // School level
@@ -39,14 +44,17 @@ export const RolePermissions = {
     PermissionsEnum.SCHOOL_PROFILE_MANAGE,
     PermissionsEnum.SCHOOL_PROFILE_VIEW,
     PermissionsEnum.SHS_IMMERSION_MANAGE,
+    PermissionsEnum.ACTIVITY_MANAGE,
   ],
   [UserRole.SCHOOL_STAFF]: [
     PermissionsEnum.PROJECT_MANAGE,
     PermissionsEnum.SCHOOL_NEED_MANAGE,
+    PermissionsEnum.ACTIVITY_VIEW,
   ],
   [UserRole.SCHOOL_GUEST]: [
     PermissionsEnum.PROJECT_VIEW,
     PermissionsEnum.SCHOOL_NEED_VIEW,
+    PermissionsEnum.ACTIVITY_VIEW,
   ],
 
   // Division level
@@ -56,15 +64,18 @@ export const RolePermissions = {
     PermissionsEnum.SCHOOL_NEED_VIEW,
     PermissionsEnum.USER_ASSIGN_ROLE,
     PermissionsEnum.USER_VIEW,
+    PermissionsEnum.ACTIVITY_VIEW,
   ],
   [UserRole.DIVISION_STAFF]: [
     PermissionsEnum.PROJECT_MANAGE,
     PermissionsEnum.SCHOOL_PROFILE_MANAGE,
     PermissionsEnum.SCHOOL_NEED_VIEW,
+    PermissionsEnum.ACTIVITY_VIEW,
   ],
   [UserRole.DIVISION_GUEST]: [
     PermissionsEnum.PROJECT_VIEW,
     PermissionsEnum.SCHOOL_NEED_VIEW,
+    PermissionsEnum.ACTIVITY_VIEW,
   ],
 
   // Program holder level

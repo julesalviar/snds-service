@@ -41,6 +41,7 @@ import {
 } from 'src/user-invite/registration-token.schema';
 import { PpaPlan, PpaPlanSchema } from 'src/ppa-plan/ppa-plan.schema';
 import { Office, OfficeSchema } from 'src/office/office.schema';
+import { Activity, ActivitySchema } from 'src/activity/activity.schema';
 
 export const TenantModels = {
   userModel: {
@@ -209,6 +210,16 @@ export const TenantModels = {
       tenantConnection: Connection,
     ): Promise<Model<Office>> => {
       return tenantConnection.model(Office.name, OfficeSchema);
+    },
+    inject: [PROVIDER.TENANT_CONNECTION],
+  },
+
+  activityModel: {
+    provide: PROVIDER.ACTIVITY_MODEL,
+    useFactory: async (
+      tenantConnection: Connection,
+    ): Promise<Model<Activity>> => {
+      return tenantConnection.model(Activity.name, ActivitySchema);
     },
     inject: [PROVIDER.TENANT_CONNECTION],
   },

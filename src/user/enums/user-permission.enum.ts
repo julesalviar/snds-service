@@ -31,4 +31,8 @@ export enum PermissionsEnum {
   // Ppa Plan
   PPA_PLAN_VIEW = 'ppaPlan.view',
   PPA_PLAN_MANAGE = 'ppaPlan.manage',
+
+  // Activity
+  ACTIVITY_VIEW = 'activity.view',
+  ACTIVITY_MANAGE = 'activity.manage',
 }

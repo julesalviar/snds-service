@@ -15,6 +15,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Public } from 'src/common/decorators/public.decorator';
+import { FundSourceRefDataValidationPipe } from './fund-source-ref-data.validation.pipe';
 
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('ppa-plan')
@@ -22,7 +23,9 @@ export class PpaPlanController {
   constructor(private readonly ppaPlanService: PpaPlanService) {}
 
   @Post()
-  create(@Body() dto: CreatePpaPlanDto) {
+  create(
+    @Body(FundSourceRefDataValidationPipe) dto: CreatePpaPlanDto,
+  ) {
     return this.ppaPlanService.create(dto);
   }
 
@@ -60,7 +63,10 @@ export class PpaPlanController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdatePpaPlanDto) {
+  update(
+    @Param('id') id: string,
+    @Body(FundSourceRefDataValidationPipe) dto: UpdatePpaPlanDto,
+  ) {
     return this.ppaPlanService.update(id, dto);
   }
 

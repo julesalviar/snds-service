@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateBy,
 } from 'class-validator';
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import mongoose from 'mongoose';
@@ -13,6 +14,7 @@ import { PlanClassification } from './plan-classification.enum';
 import { PlanImplementationStatus } from './plan-implementation-status.enum';
 import { PlanParticipant } from './plan-participant.enum';
 import { Transform } from 'class-transformer';
+import { isValidFundSourceInput } from './fund-source.util';
 
 export class CreatePpaPlanDto {
   @IsOptional()
@@ -62,8 +64,18 @@ export class CreatePpaPlanDto {
   materialsAndSupplies?: string;
 
   @IsOptional()
-  @IsString()
-  fundSource?: string;
+  @ValidateBy({
+    name: 'isFundSourceType',
+    validator: {
+      validate(value: unknown) {
+        return value === undefined || value === null || isValidFundSourceInput(value);
+      },
+      defaultMessage() {
+        return 'fundSource must be a string or an array of strings';
+      },
+    },
+  })
+  fundSource?: string | string[]; // string is temporary; see fund-source.util.ts
 
   @IsOptional()
   @IsArray()

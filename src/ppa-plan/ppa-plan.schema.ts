@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { PlanClassification } from 'src/ppa-plan/plan-classification.enum';
 import { PlanImplementationStatus } from 'src/ppa-plan/plan-implementation-status.enum';
 import { PlanParticipant } from 'src/ppa-plan/plan-participant.enum';
@@ -43,8 +43,8 @@ export class PpaPlan {
   @Prop()
   materialsAndSupplies: string;
 
-  @Prop()
-  fundSource: string;
+  @Prop({ type: MongooseSchema.Types.Mixed })
+  fundSource: string[]; // pipe normalizes writes to string[]; legacy string in DB handled in toResponse
 
   @Prop({
     required: true,

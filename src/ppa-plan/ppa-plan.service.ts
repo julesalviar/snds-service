@@ -9,6 +9,7 @@ import {
 import { PROVIDER } from 'src/common/constants/providers';
 import { PpaPlanDocument } from './ppa-plan.schema';
 import { CreatePpaPlanDto, UpdatePpaPlanDto } from './ppa-plan.dto';
+import { normalizeFundSourceForResponse } from './fund-source.util';
 import { User } from 'src/user/schemas/user.schema';
 import { Office } from 'src/office/office.schema';
 import { CounterService } from 'src/common/counter/counter.services';
@@ -247,6 +248,9 @@ export class PpaPlanService {
           ).toObject({ versionKey: false })
         : { ...(doc as Record<string, unknown>) };
     const id = obj._id;
+    const fundSource = normalizeFundSourceForResponse(
+      obj.fundSource as string | string[] | undefined,
+    );
     return {
       ...obj,
       _id:
@@ -255,6 +259,7 @@ export class PpaPlanService {
             ? id
             : (id as Types.ObjectId).toString()
           : undefined,
+      ...(fundSource !== undefined && { fundSource }),
     };
   }
 }

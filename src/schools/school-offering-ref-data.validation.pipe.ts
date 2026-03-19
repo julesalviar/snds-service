@@ -1,27 +1,8 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 import { ReferenceDataService } from 'src/reference-data/reference-data.service';
+import { allowedValuesFromRefData } from 'src/common/utils/reference-data.util';
 
 export const SCHOOL_OFFERING_REF_DATA_KEY = 'schoolOffering';
-
-function allowedValuesFromRefData(value: unknown): string[] {
-  if (value == null) return [];
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => {
-        if (typeof item === 'string') return item;
-        if (item && typeof item === 'object') {
-          const obj = item as Record<string, unknown>;
-          if (typeof obj.value === 'string') return obj.value;
-          if (typeof obj.code === 'string') return obj.code;
-          if (typeof obj.id === 'string') return obj.id;
-        }
-        return null;
-      })
-      .filter((s): s is string => s != null);
-  }
-  if (typeof value === 'string') return [value];
-  return [];
-}
 
 @Injectable()
 export class SchoolOfferingRefDataValidationPipe implements PipeTransform {

@@ -87,6 +87,12 @@ export class ActivityService {
     active?: string,
     activityNumber?: string,
     schoolId?: string,
+    dateFilters?: {
+      startDatetimeFrom?: string;
+      startDatetimeTo?: string;
+      endDatetimeFrom?: string;
+      endDatetimeTo?: string;
+    },
   ) {
     try {
       this.logger.log(
@@ -103,6 +109,43 @@ export class ActivityService {
       if (activityNumber) filter.activityNumber = Number(activityNumber);
       if (schoolId && Types.ObjectId.isValid(schoolId)) {
         filter.schoolId = schoolId;
+      }
+
+      const exprParts: Record<string, unknown>[] = [];
+      const dateOnly = (s?: string) =>
+        s?.trim() ? s.trim().slice(0, 10) : undefined;
+      if (dateFilters?.startDatetimeFrom || dateFilters?.startDatetimeTo) {
+        const from = dateOnly(dateFilters.startDatetimeFrom);
+        const to = dateOnly(dateFilters.startDatetimeTo);
+        if (from) {
+          exprParts.push({
+            $gte: [{ $substr: ['$startDatetime', 0, 10] }, from],
+          });
+        }
+        if (to) {
+          exprParts.push({
+            $lte: [{ $substr: ['$startDatetime', 0, 10] }, to],
+          });
+        }
+      }
+      if (dateFilters?.endDatetimeFrom || dateFilters?.endDatetimeTo) {
+        const from = dateOnly(dateFilters.endDatetimeFrom);
+        const to = dateOnly(dateFilters.endDatetimeTo);
+        if (from) {
+          exprParts.push({
+            $gte: [{ $substr: ['$endDatetime', 0, 10] }, from],
+          });
+        }
+        if (to) {
+          exprParts.push({
+            $lte: [{ $substr: ['$endDatetime', 0, 10] }, to],
+          });
+        }
+      }
+      if (exprParts.length === 1) {
+        filter.$expr = exprParts[0];
+      } else if (exprParts.length > 1) {
+        filter.$expr = { $and: exprParts };
       }
 
       if (search) {

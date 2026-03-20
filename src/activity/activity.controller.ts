@@ -44,6 +44,10 @@ export class ActivityController {
     @Query('active') active?: string,
     @Query('activityNumber') activityNumber?: string,
     @Query('schoolId') schoolId?: string,
+    @Query('startDatetimeFrom') startDatetimeFrom?: string,
+    @Query('startDatetimeTo') startDatetimeTo?: string,
+    @Query('endDatetimeFrom') endDatetimeFrom?: string,
+    @Query('endDatetimeTo') endDatetimeTo?: string,
   ) {
     return this.activityService.findAll(
       Number(page),
@@ -53,6 +57,12 @@ export class ActivityController {
       active,
       activityNumber,
       schoolId,
+      {
+        startDatetimeFrom,
+        startDatetimeTo,
+        endDatetimeFrom,
+        endDatetimeTo,
+      },
     );
   }
 

@@ -1,7 +1,7 @@
 import { ActivityDto, UpdateActivityDto } from './activity.dto';
 import { UserRole } from 'src/user/enums/user-role.enum';
 import { Model, Types } from 'mongoose';
-import { Activity, ActivityDocument } from './activity.schema';
+import { ActivityDocument } from './activity.schema';
 import { PROVIDER } from '../common/constants/providers';
 import { COUNTER } from '../common/constants/counters';
 import { CounterService } from '../common/counter/counter.services';
@@ -14,6 +14,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { SchoolDocument } from 'src/schools/school.schema';
+import { UserDocument } from 'src/user/schemas/user.schema';
 
 @Injectable()
 export class ActivityService {
@@ -21,10 +22,13 @@ export class ActivityService {
 
   constructor(
     @Inject(PROVIDER.ACTIVITY_MODEL)
-    private readonly activityModel: Model<Activity>,
+    private readonly activityModel: Model<ActivityDocument>,
 
     @Inject(PROVIDER.SCHOOL_MODEL)
     private readonly schoolModel: Model<SchoolDocument>,
+
+    @Inject(PROVIDER.USER_MODEL)
+    private readonly userModel: Model<UserDocument>,
 
     private readonly counterService: CounterService,
   ) {}
@@ -125,6 +129,11 @@ export class ActivityService {
           .populate({
             path: 'schoolId',
             select: 'schoolName division schoolName districtOrCluster logoUrl',
+          })
+          .populate({
+            path: 'stakeholderId',
+            select:
+              'name firstName lastName email userName role activeRole sector contactNumber',
           })
           .sort({ createdAt: -1 })
           .skip(skip)

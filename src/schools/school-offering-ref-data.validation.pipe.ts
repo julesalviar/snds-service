@@ -6,9 +6,7 @@ export const SCHOOL_OFFERING_REF_DATA_KEY = 'schoolOffering';
 
 @Injectable()
 export class SchoolOfferingRefDataValidationPipe implements PipeTransform {
-  constructor(
-    private readonly referenceDataService: ReferenceDataService,
-  ) {}
+  constructor(private readonly referenceDataService: ReferenceDataService) {}
 
   async transform(
     value: Record<string, unknown>,
@@ -20,7 +18,8 @@ export class SchoolOfferingRefDataValidationPipe implements PipeTransform {
       SCHOOL_OFFERING_REF_DATA_KEY,
     );
     const allowed = allowedValuesFromRefData(ref);
-    const normalized = typeof offering === 'string' ? offering : String(offering);
+    const normalized =
+      typeof offering === 'string' ? offering : String(offering);
 
     if (allowed.length && !allowed.includes(normalized)) {
       throw new BadRequestException(

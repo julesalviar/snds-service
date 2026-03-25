@@ -29,6 +29,7 @@ import { ReportModule } from 'src/report/report.module';
 import { PpaPlanModule } from './ppa-plan/ppa-plan.module';
 import { OfficeModule } from './office/office.module';
 import { ActivityModule } from './activity/activity.module';
+import { WidgetModule } from './widget/widget.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { ActivityModule } from './activity/activity.module';
     PpaPlanModule,
     OfficeModule,
     ActivityModule,
+    WidgetModule,
   ],
   controllers: [AppController, ShsImmersionController],
   providers: [AppService, ShsImmersionService],

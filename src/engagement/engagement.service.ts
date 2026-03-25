@@ -242,6 +242,108 @@ export class EngagementService {
     }
   }
 
+  async getResourceGenerations(schoolYear: string): Promise<any> {
+    this.logger.log('Attempting to retrieve resource generations');
+    const queryFilter: any = {};
+    queryFilter.schoolYear = /^\d{4}-\d{4}$/.test(schoolYear || '')
+      ? schoolYear
+      : getCurrentSchoolYear();
+
+    const bySector = await this.engagementModel
+      .aggregate([
+        { $match: queryFilter },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'stakeholderUserId',
+            foreignField: '_id',
+            as: 'stakeholderUser',
+          },
+        },
+        {
+          $unwind: {
+            path: '$stakeholderUser',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: '$stakeholderUser.sector',
+            totalAmount: { $sum: '$amount' },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            sector: '$_id',
+            totalAmount: 1,
+          },
+        },
+        { $sort: { sector: 1 } },
+      ])
+      .exec();
+
+    return {
+      success: true,
+      data: bySector,
+      meta: {
+        count: bySector.length,
+        timestamp: new Date(),
+      },
+    };
+  }
+
+  async getPartnerCountsBySector(schoolYear: string): Promise<any> {
+    this.logger.log('Attempting to retrieve partner counts by sector');
+    const queryFilter: any = {};
+    queryFilter.schoolYear = /^\d{4}-\d{4}$/.test(schoolYear || '')
+      ? schoolYear
+      : getCurrentSchoolYear();
+
+    const bySector = await this.engagementModel
+      .aggregate([
+        { $match: queryFilter },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'stakeholderUserId',
+            foreignField: '_id',
+            as: 'stakeholderUser',
+          },
+        },
+        {
+          $unwind: {
+            path: '$stakeholderUser',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: '$stakeholderUser.sector',
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            sector: '$_id',
+            count: 1,
+          },
+        },
+        { $sort: { sector: 1 } },
+      ])
+      .exec();
+
+    return {
+      success: true,
+      data: bySector,
+      meta: {
+        count: bySector.length,
+        timestamp: new Date(),
+      },
+    };
+  }
+
   async createEngagement(engagementDto: CreateEngagementDto): Promise<any> {
     const { stakeholderUserId, schoolNeedId, schoolNeedCode } = engagementDto;
 

@@ -265,13 +265,24 @@ export class ActivityService {
         }
       }
 
+      const elevatedAdmin =
+        activeRole === UserRole.DIVISION_ADMIN ||
+        activeRole === UserRole.SYSTEM_ADMIN ||
+        activeRole === UserRole.SUPER_ADMIN;
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { activityNumber, schoolId, ...updateData } = updateActivityDto;
+
+      const setPayload: Record<string, unknown> = { ...updateData };
+
+      if (elevatedAdmin && existingActivity.schoolId != null) {
+        setPayload.schoolId = existingActivity.schoolId;
+      }
 
       const updatedActivity = await this.activityModel
         .findByIdAndUpdate(
           objectId,
-          { $set: updateData },
+          { $set: setPayload },
           { new: true, runValidators: true },
         )
         .exec();

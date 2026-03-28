@@ -3,9 +3,10 @@ import { WidgetController } from './widget.controller';
 import { WidgetService } from './widget.service';
 import { TenantValidationMiddleware } from 'src/common/middlewares/tenant-validation/tenant-validation.middleware';
 import { EngagementModule } from 'src/engagement/engagement.module';
+import { SchoolNeedModule } from 'src/school-need/school-need.module';
 
 @Module({
-  imports: [EngagementModule],
+  imports: [EngagementModule, SchoolNeedModule],
   controllers: [WidgetController],
   providers: [WidgetService],
   exports: [WidgetService],

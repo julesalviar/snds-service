@@ -1,15 +1,11 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { WidgetService } from './widget.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { EngagementService } from 'src/engagement/engagement.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('widgets')
 export class WidgetController {
-  constructor(
-    private readonly widgetService: WidgetService,
-    private readonly engamentService: EngagementService,
-  ) {}
+  constructor(private readonly widgetService: WidgetService) {}
 
   @Get('health')
   health() {
@@ -18,12 +14,12 @@ export class WidgetController {
 
   @Get('resource-generations')
   resourceGenerations(@Query('schoolYear') schoolYear: string) {
-    return this.engamentService.getResourceGenerations(schoolYear);
+    return this.widgetService.getResourceGenerationsBySector(schoolYear);
   }
 
   @Get('partners')
   partners(@Query('schoolYear') schoolYear: string) {
-    return this.engamentService.getPartnerCountsBySector(schoolYear);
+    return this.widgetService.getPartnersBySector(schoolYear);
   }
 
   @Get(':widgetType')

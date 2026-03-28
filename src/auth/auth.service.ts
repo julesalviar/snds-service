@@ -60,23 +60,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const { role, activeRole, roles, schoolId, officeIds } = user;
-    const perms = RolePermissions[activeRole ?? role] ?? [];
-
-    const payload = {
-      sub: user._id,
-      username: user.userName,
-      name: user.name,
-      role,
-      activeRole,
-      roles,
-      perms,
-      sid: schoolId ?? '',
-      oids: officeIds ?? '',
-    };
-    const accessToken = await this.jwtService.signAsync(payload);
-
-    return { access_token: accessToken };
+    return { access_token: await this.issueAccessToken(user) };
   }
 
   async assignRoles(
@@ -109,10 +93,15 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    const { role, activeRole, roles, schoolId, officeIds } = user;
-    const perms = RolePermissions[activeRole ?? role] ?? [];
+    return { access_token: await this.issueAccessToken(user) };
+  }
 
-    const payload = {
+  private buildAccessTokenPayload(user: User): Record<string, unknown> {
+    const { role, activeRole, roles, schoolId, officeIds } = user;
+    const effectiveRole = activeRole ?? role;
+    const perms = RolePermissions[effectiveRole] ?? [];
+
+    const payload: Record<string, unknown> = {
       sub: user._id,
       username: user.userName,
       name: user.name,
@@ -120,11 +109,17 @@ export class AuthService {
       activeRole,
       roles,
       perms,
-      sid: schoolId ?? '',
-      oids: officeIds ?? '',
     };
-    const accessToken = await this.jwtService.signAsync(payload);
+    if (effectiveRole === UserRole.SCHOOL_ADMIN) {
+      payload.sid = schoolId ?? '';
+    }
+    if (effectiveRole === UserRole.PROGRAM_HOLDER) {
+      payload.oids = officeIds ?? '';
+    }
+    return payload;
+  }
 
-    return { access_token: accessToken };
+  private async issueAccessToken(user: User): Promise<string> {
+    return this.jwtService.signAsync(this.buildAccessTokenPayload(user));
   }
 }

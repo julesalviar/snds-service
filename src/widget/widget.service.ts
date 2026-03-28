@@ -13,14 +13,8 @@ export class WidgetService {
     };
   }
 
-  getResourceGenerationsPlaceholder() {
-    return {
-      success: true,
-      data: {
-        message: 'Resource generations widget placeholder',
-      },
-      meta: { timestamp: new Date() },
-    };
+  getResourceGenerationsBySector(schoolYear: string) {
+    return this.engagementService.getResourceGenerationsBySector(schoolYear);
   }
 
   getPlaceholder(widgetType: string) {

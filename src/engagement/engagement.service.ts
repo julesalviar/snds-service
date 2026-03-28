@@ -242,7 +242,7 @@ export class EngagementService {
     }
   }
 
-  async getResourceGenerations(schoolYear: string): Promise<any> {
+  async getResourceGenerationsBySector(schoolYear: string): Promise<any> {
     this.logger.log('Attempting to retrieve resource generations');
     const queryFilter: any = {};
     queryFilter.schoolYear = /^\d{4}-\d{4}$/.test(schoolYear || '')

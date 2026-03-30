@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "useUnknownInCatchVariables": false,
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -21,6 +23,7 @@
       "src/*": ["./src/*"]
     },
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["node", "jest"]
   }
 }

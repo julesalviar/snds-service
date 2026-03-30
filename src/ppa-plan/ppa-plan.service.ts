@@ -9,7 +9,10 @@ import {
 import { PROVIDER } from 'src/common/constants/providers';
 import { PpaPlanDocument } from './ppa-plan.schema';
 import { CreatePpaPlanDto, UpdatePpaPlanDto } from './ppa-plan.dto';
-import { normalizeFundSourceForResponse } from './fund-source.util';
+import {
+  normalizeFundSourceForResponse,
+  toFundSourceArray,
+} from './fund-source.util';
 import { User } from 'src/user/schemas/user.schema';
 import { Office } from 'src/office/office.schema';
 import { CounterService } from 'src/common/counter/counter.services';
@@ -43,8 +46,11 @@ export class PpaPlanService {
       throw new BadRequestException('Invalid officeId');
     }
     const ppn = await this.counterService.getNextSequenceValue('ppa_plan');
+    const { fundSource, ...createFields } = dto;
+    const fundSourceArr = toFundSourceArray(fundSource);
     const created = await this.ppaPlanModel.create({
-      ...dto,
+      ...createFields,
+      ...(fundSourceArr !== undefined ? { fundSource: fundSourceArr } : {}),
       ppn,
       stakeholderUserId: new Types.ObjectId(dto.stakeholderUserId as string),
       assignedUserId: dto.assignedUserId

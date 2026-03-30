@@ -131,7 +131,7 @@ export class SchoolNeedService {
       const isObjectId = Types.ObjectId.isValid(param);
       const query = isObjectId
         ? { _id: new Types.ObjectId(param) }
-        : { code: param };
+        : { code: Number(param) };
       const identifierType = isObjectId ? 'ID' : 'code';
 
       this.logger.log(
@@ -410,7 +410,7 @@ export class SchoolNeedService {
       const isObjectId = Types.ObjectId.isValid(param);
       const query = isObjectId
         ? { _id: new Types.ObjectId(param) }
-        : { code: param };
+        : { code: Number(param) };
       const identifierType = isObjectId ? 'ID' : 'code';
 
       this.logger.log(
@@ -654,7 +654,9 @@ export class SchoolNeedService {
   ): Promise<any> {
     try {
       const isObjectId = Types.ObjectId.isValid(id);
-      const query = isObjectId ? { _id: new Types.ObjectId(id) } : { code: id };
+      const query = isObjectId
+        ? { _id: new Types.ObjectId(id) }
+        : { code: Number(id) };
       const identifierType = isObjectId ? 'ID' : 'code';
       this.logger.log(
         `Attempting to update School Need status with ${identifierType}: ${id}`,
@@ -713,7 +715,7 @@ export class SchoolNeedService {
       if (!updatedSchoolNeed) {
         this.logger.warn(`No School Need found with ${identifierType}: ${id}`);
         throw new NotFoundException(
-          `School Need with ${identifierType}:  ? 'ID' : 'code' : ${id} not found`,
+          `School Need with ${identifierType} ${id} not found`,
         );
       }
 

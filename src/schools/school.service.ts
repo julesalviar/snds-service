@@ -408,7 +408,7 @@ export class SchoolService {
         `Attempting to retrieve School with School ID: ${schoolId}`,
       );
       const retrievedSchool = await this.schoolModel
-        .findOne({ schoolId })
+        .findOne({ schoolId: Number(schoolId) })
         .exec();
 
       if (!retrievedSchool) {

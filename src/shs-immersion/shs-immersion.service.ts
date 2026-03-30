@@ -112,7 +112,7 @@ export class ShsImmersionService {
       const isObjectId = Types.ObjectId.isValid(param);
       const query = isObjectId
         ? { _id: new Types.ObjectId(param) }
-        : { immersionCode: param };
+        : { immersionCode: Number(param) };
 
       const identifierType = isObjectId ? 'ID' : 'code';
       const retrievedImmersion = await this.immersionInfoModel

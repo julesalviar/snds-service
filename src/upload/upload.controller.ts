@@ -16,7 +16,7 @@ import * as fs from 'node:fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import {
-  multerOptions,
+  multerImageOptions,
   multerDocumentOptions,
 } from 'src/config/multer-options';
 import { PROVIDER } from 'src/common/constants/providers';
@@ -35,7 +35,7 @@ export class UploadController {
   ) {}
 
   @Post('image')
-  @UseInterceptors(FileInterceptor('file', multerOptions))
+  @UseInterceptors(FileInterceptor('file', multerImageOptions))
   async uploadImage(
     @UploadedFile() file: Express.Multer.File,
     @Body('category') category: string,
@@ -58,12 +58,13 @@ export class UploadController {
         throw new BadRequestException('File is required');
       }
 
-      if (!file.buffer) {
+      // Disk storage: file.path; memory storage fallback: file.buffer
+      if (!file.path && !file.buffer) {
         this.logger.warn(
-          'Upload failed: File buffer is missing',
+          'Upload failed: File path or buffer is missing',
           requestContext,
         );
-        throw new BadRequestException('File buffer is missing');
+        throw new BadRequestException('File is required');
       }
 
       this.logger.log('Starting image upload process', requestContext);
@@ -111,8 +112,8 @@ export class UploadController {
         ...errorContext,
         additionalInfo: {
           fileProvided: !!file,
+          pathExists: !!file?.path,
           bufferExists: !!file?.buffer,
-          bufferLength: file?.buffer?.length || 0,
           categoryProvided: !!category,
         },
       });
@@ -121,7 +122,16 @@ export class UploadController {
         `Upload failed: ${error.message ?? 'Unknown error'}`,
       );
     } finally {
-      // Release file buffer on success or error to avoid memory retention
+      // Clean up temp file (disk storage) to free disk and avoid accumulation
+      if (file?.path) {
+        fs.promises.unlink(file.path).catch((err) => {
+          this.logger.warn('Failed to unlink image temp file', {
+            path: file.path,
+            error: err?.message,
+          });
+        });
+      }
+      // Release buffer if memory storage was used (fallback)
       if (file?.buffer) {
         (file as { buffer?: Buffer }).buffer = undefined;
       }

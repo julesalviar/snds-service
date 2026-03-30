@@ -3,12 +3,20 @@ import sharp from 'sharp';
 import { Injectable, Logger } from '@nestjs/common';
 import { R2Service } from 'src/storage/r2.service';
 
+// Reduce Sharp's memory footprint: disable cache, limit concurrency
+sharp.cache(false);
+sharp.concurrency(1);
+
 @Injectable()
 export class ImageService {
   private readonly logger = new Logger(ImageService.name);
 
   constructor(private readonly r2Service: R2Service) {}
 
+  /**
+   * Process and upload image. Prefers file.path (disk) over file.buffer (memory)
+   * to avoid loading large images into RAM. Sharp reads from path when available.
+   */
   async processAndUploadImage(file: Express.Multer.File, category: string) {
     try {
       const ext = file.mimetype.split('/')[1];
@@ -20,20 +28,27 @@ export class ImageService {
         category,
         size: file.size,
         mimetype: file.mimetype,
+        fromDisk: !!file.path,
       });
 
-      if (!file.buffer || file.buffer.length === 0) {
+      // Prefer disk path to avoid loading entire image into memory
+      const input = file.path ?? file.buffer;
+      if (!input) {
+        throw new Error('File path or buffer is required');
+      }
+      if (typeof input === 'object' && (input as Buffer).length === 0) {
         throw new Error('File buffer is empty');
       }
 
       this.logger.log('Creating compressed image');
-      let compressed = await sharp(file.buffer)
+      const sharpOptions = { limitInputPixels: 50_000_000 }; // ~7k×7k max, prevents huge images
+      let compressed = await sharp(input as string | Buffer, sharpOptions)
         .resize(1024)
         .jpeg({ quality: 80 })
         .toBuffer();
 
       this.logger.log('Creating thumbnail');
-      let thumbnail = await sharp(file.buffer)
+      let thumbnail = await sharp(input as string | Buffer, sharpOptions)
         .resize(300)
         .jpeg({ quality: 60 })
         .toBuffer();
@@ -47,7 +62,6 @@ export class ImageService {
         originalKey,
         file.mimetype,
       );
-      // Release compressed buffer after upload to reduce peak memory
       compressed = null;
 
       this.logger.log('Uploading thumbnail', { key: thumbnailKey });

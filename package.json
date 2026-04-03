@@ -100,6 +100,7 @@
   },
   "keywords": [],
   "overrides": {
+    "lodash": "4.18.1",
     "@nestjs/mapped-types": {
       "class-validator": "$class-validator"
     },

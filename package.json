@@ -1,7 +1,7 @@
 {
   "name": "snds-service",
-  "version": "0.0.1",
-  "description": "<p align=\"center\">   <a href=\"http://nestjs.com/\" target=\"blank\"><img src=\"https://nestjs.com/img/logo-small.svg\" width=\"120\" alt=\"Nest Logo\" /></a> </p>",
+  "version": "1.0.0",
+  "description": "NestJS backend API for the SNDS platform — multi-tenant school planning, annual improvement plans (AIP), PPA, reporting, and related workflows.",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
